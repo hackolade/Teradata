@@ -1,0 +1,410 @@
+/*
+* Copyright © 2016-2019 by IntegrIT S.A. dba Hackolade.  All rights reserved.
+*
+* The copyright to the computer software herein is the property of IntegrIT S.A.
+* The software may be used and/or copied only with the written permission of 
+* IntegrIT S.A. or in accordance with the terms and conditions stipulated in 
+* the agreement/contract under which the software has been supplied. 
+
+In order to define custom properties for any object's properties pane, you may copy/paste from the following,
+making sure that you maintain a proper JSON format.
+
+			{
+				"propertyName": "Simple text",
+				"propertyKeyword": "simpletextProp",
+				"propertyType": "text",
+				"sampleGen": "&containerName|&entityName|&random|<value>"
+			},
+			{
+				"propertyName": "Text area",
+				"propertyKeyword": "textareaProp",
+				"propertyTooltip": "Popup for multi-line text entry",
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "Dropdown selection",
+				"propertyKeyword": "dropdownProp",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"Option 1",
+					"Option 2",
+					"Option 3",
+					"Option 4"
+				]
+			},
+			{
+				"propertyName": "Numeric",
+				"propertyKeyword": "numericProp",
+				"propertyValidate": true,
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"sampleGen": "&containerName|&entityName|&random|<value>"
+			},
+			{
+				"propertyName": "Checkbox",
+				"propertyKeyword": "checkboxProp",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Group",
+				"propertyType": "group",
+				"propertyKeyword": "grpProp",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Simple Grp Text",
+						"propertyKeyword": "simpleGrpText",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Group Number",
+						"propertyKeyword": "grpNumber",
+						"propertyType": "numeric",
+						"valueType": "number",
+						"allowNegative": false
+					}
+				]
+			},
+// “groupInput” can have the following states - 0 items, 1 item, and many items.
+// “blockInput” has only 2 states - 0 items or 1 item. 
+// This gives us an easy way to represent it as an object and not as an array internally which is beneficial for processing 
+// and forward-engineering in particular.
+			{
+				"propertyName": "Block",
+				"propertyType": "block",
+				"propertyKeyword": "grpProp",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Simple Grp Text",
+						"propertyKeyword": "simpleGrpText",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Group Number",
+						"propertyKeyword": "grpNumber",
+						"propertyType": "numeric",
+						"valueType": "number",
+						"allowNegative": false
+					}
+				]
+			},
+			{
+				"propertyName": "Field List",
+				"propertyKeyword": "keyList",
+				"propertyType": "fieldList",
+				"template": "orderedList"
+			}, 
+			{
+				"propertyName": "List with attribute",
+				"propertyKeyword": "keyListOrder",
+				"propertyType": "fieldList",
+				"template": "orderedList",
+				"attributeList": [
+					"ascending",
+					"descending"
+				]
+			}
+
+*/
+
+[
+	{
+		"lowerTab": "Details",
+		"structure": [
+			{
+				"propertyName": "Comments",
+				"propertyKeyword": "description",
+				"shouldValidate": false,
+				"propertyTooltip": "comments",
+				"addTimestampButton": false,
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			
+			{
+				"propertyName": "SET/MULTISET",
+				"propertyKeyword": "table_is_set",
+				"propertyType": "select",
+				"options": [
+					"SET",
+					"MULTISET"
+				]
+			},
+			{
+				"propertyName": "Temporary",
+				"propertyKeyword": "temporary",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Global",
+				"propertyKeyword": "table_is_global",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Fallback",
+				"propertyKeyword": "table_fallback",
+				"propertyType": "checkbox",
+				"defaultValue": "true"
+			},
+			{
+				"propertyName": "Journal",
+				"propertyKeyword": "db_journaling_strategy",
+				"propertyType": "select",
+				"options": [
+					"NO",
+					"BEFORE",
+					"DUAL"
+				]
+			},
+			{
+				"propertyName": "AFTER Journal",
+				"propertyKeyword": "db_after_journaling_strategy",
+				"propertyType": "select",
+				"propertyTooltip": "Type of journal to be maintained by default for data tables created in the new database. The JOURNAL keyword without AFTER implies BEFORE and AFTER images.",
+				"defaultValue": "NO",
+				"options": [
+					"DUAL",
+					"LOCAL",
+					"NOT LOCAL",
+					"NO"
+				]
+			},
+			{
+				"propertyName": "Checksum",
+				"propertyKeyword": "table_fallback",
+				"propertyType": "checkbox",
+				"defaultValue": "DEFAULT",
+				"propertyTooltip": "A table-specific disk I/O integrity checksum for detection of hardware read errors. The checksum level setting applies to primary data rows, fallback data rows, and all secondary index rows for the table.",
+				"options": [
+					"ON",
+					"OFF",
+					"DEFAULT"
+				]
+			},
+			{
+				"propertyName": "Log",
+				"propertyKeyword": "table_fallback",
+				"propertyType": "checkbox",
+				"defaultValue": "false"
+			},
+			{
+				"propertyName": "Partition by",
+				"propertyKeyword": "partitioningKey",
+				"propertyType": "primaryKeySetter",
+				"abbr": "PK",
+				"dependency": {
+					"key": "external",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "With location",
+				"propertyType": "block",
+				"propertyKeyword": "location",
+				"propertyTooltip": "",
+				"dependency": {
+					"key": "external",
+					"value": true
+				},
+				"structure": [
+					{
+						"propertyName": "Namespace",
+						"propertyKeyword": "namespace",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Path",
+						"propertyKeyword": "path",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					}
+				]
+			},
+			{
+				"propertyName": "Stage file format",
+				"propertyKeyword": "fileFormat",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"CSV",
+					"JSON",
+					"AVRO",
+					"ORC",
+					"PARQUET",
+					"XML",
+					"custom"
+				],
+				"dependency": {
+					"type": "not",
+					"values": {
+						"key": "external",
+						"value": true
+					}
+				}
+			},
+			{
+				"propertyName": "Like",
+				"propertyKeyword": "like",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "selecthashed",
+				"template": "entities",
+				"withEmptyOption": true,
+				"excludeCurrent": true,
+				"dependency": {
+					"type": "not",
+					"values": {
+						"key": "external",
+						"value": true
+					}
+				}
+			},
+			{
+				"propertyName": "As Select Statement",
+				"propertyKeyword": "selectStatement",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false
+			},
+			{
+				"propertyName": "Remarks",
+				"propertyKeyword": "comments",
+				"shouldValidate": false,
+				"propertyTooltip": "remarks",
+				"addTimestampButton": true,
+				"propertyType": "details",
+				"template": "textarea",
+				"valueType": "string"
+			}
+		],
+		"columnsRatio": [3.7, 5]
+	},
+	{
+		"lowerTab": "Composite keys",
+		"structure": [{
+			"propertyName": "Primary key",
+			"propertyType": "group",
+			"groupItemLimit": 1,
+			"propertyKeyword": "primaryKey",
+			"propertyTooltip": {
+				"disabled": [
+					{
+						"tooltip": "Remove the existing single column primary key definition prior to unlock the possibility to create a composite primary key definition for this table",
+						"dependency": {
+							"type": "and",
+							"values": [
+								{
+									"level": "children",
+									"key": "primaryKey",
+									"value": true
+								},
+								{
+									"type": "not",
+									"values": {
+										"level": "children",
+										"key": "compositePrimaryKey",
+										"value": true
+									}
+								}
+							]
+						}
+					}, 
+					{
+						"tooltip": "Remove or update the existing composite primary key definition prior to unlock the possibility to create a new composite primary key definition for this table",
+						"dependency": {
+							"key": "primaryKey",
+							"minLength": 1
+						}
+					}
+				]
+			},
+			"disabledOnCondition": [
+				{
+					"level": "children",
+					"value": {
+						"type": "and",
+						"values": [
+							{
+								"key": "primaryKey",
+								"value": true
+							},
+							{
+								"type": "or",
+								"values": [
+									{
+										"key": "compositePrimaryKey",
+										"value": false
+									},
+									{
+										"key": "compositePrimaryKey",
+										"exist": false
+									}
+								]
+							},
+							{
+								"type": "or",
+								"values": [
+									{
+										"key": "compositeUniqueKey",
+										"value": false
+									},
+									{
+										"key": "compositeUniqueKey",
+										"exist": false
+									}
+								]
+							}
+						]
+					}
+				}
+			],
+			"structure": [{
+				"propertyName": "Constraint name",
+				"propertyKeyword": "constraintName",
+				"propertyTooltip": "",
+				"propertyType": "text"
+			}, {
+				"propertyName": "Key",
+				"propertyKeyword": "compositePrimaryKey",
+				"propertyType": "primaryKeySetter",
+				"abbr": "pk",
+				"attributeList": []
+			}]
+		}, {
+			"propertyName": "Unique key",
+			"propertyType": "group",
+			"propertyKeyword": "uniqueKey",
+			"propertyTooltip": "",
+			"structure": [{
+				"propertyName": "Constraint name",
+				"propertyKeyword": "constraintName",
+				"propertyTooltip": "",
+				"propertyType": "text"
+			}, {
+				"propertyName": "Key",
+				"propertyKeyword": "compositeUniqueKey",
+				"propertyType": "compositeKeySetter",
+				"disabledItemStrategy": "default",
+				"setPrimaryKey": false,
+				"abbr": " ",
+				"attributeList": [],
+				"template": "collectiontree",
+				"isCompositeKey": true
+			},
+			{
+				"propertyName": "Alternate key",
+				"propertyKeyword": "alternateKey",
+				"propertyTooltip": "",
+				"propertyType": "checkbox",
+				"setFieldPropertyBy": "compositeUniqueKey"
+			}]
+		}]
+	}
+]

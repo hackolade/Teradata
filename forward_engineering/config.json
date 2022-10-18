@@ -1,0 +1,33 @@
+{
+	"extension": "sql",
+	"filterName": "SQL",
+	"type": "ddl",
+	"mode": "pgsql",
+	"ddlType": "plugin",
+	"namePrefix": "Teradata",
+	"resolvedDefinitions": true,
+	"combinedContainers": true,
+	"level": {
+		"container": true,
+		"entity": true,
+		"view": true
+	},
+	"feLevelSelector": {
+		"container": true,
+		"model": true
+	},
+	"compMode": {
+		"entity": true,
+		"container": true
+	},
+	"applyScriptToInstance": true,
+	"additionalOptions": [
+		{
+			"id": "applyDropStatements",
+			"value": false,
+			"forUpdate": true,
+			"name": "Apply Drop Statements",
+			"isDropInStatements": true
+		}
+	]
+}

@@ -1,0 +1,50 @@
+{
+    "name": "Teradata",
+    "version": "0.0.1",
+    "versionDate": "2022-10-07",
+    "author": "hackolade",
+    "engines": {
+        "hackolade": "6.5.4",
+        "hackoladePlugin": "1.2.0"
+    },
+    "contributes": {
+        "target": {
+            "applicationTarget": "Teradata",
+            "title": "Teradata",
+            "versions": []
+        },
+        "features": {
+            "views": {
+                "enabled": true,
+                "viewLevel": "model",
+                "disablePipelines": true
+            },
+            "nestedCollections": false,
+            "disablePatternField": false,
+            "enableForwardEngineering": {
+                "jsonDocument": true,
+                "jsonSchema": true,
+                "excel": false,
+                "plugin": true
+			},
+            "enableReverseEngineering": true,
+            "disableChoices": true,
+            "enableJsonType": true,
+            "reverseSchemaIntoOneColumn": true,
+            "disableDenormalization": true,
+            "enableComplexTypesNormalization": true,
+            "relationships": {
+                "compositeRelationships": true
+            },
+            "FEScriptCommentsSupported": true,
+            "disableJsonDataMaxLength": true,
+            "discoverRelationships": true
+        }
+    },
+    "scripts": {
+        "sync": "echo $PWD; rsync -ar ./ $HOME/.hackolade/plugins/Teradata",
+        "hck": "Hackolade"
+    },
+    "description": "Hackolade plugin for Teradata",
+    "disabled": false
+}
