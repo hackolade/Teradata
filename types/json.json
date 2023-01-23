@@ -1,0 +1,41 @@
+{
+	"name": "json",
+	"erdAbbreviation": "<json>",
+	"dtdAbbreviation": "{...}",
+	"parentType": "jsonObject",
+	"default": true,
+	"jsonType": {
+		"order": 1,
+		"jsonRoot": true,
+		"source": true
+	},
+	"defaultValues": {
+		"primaryKey": false,
+		"relationshipType": "",
+		"parentRelationship": "",
+		"childRelationships": [],
+		"foreignCollection": "",
+		"foreignField": [],
+		"enabled": true,
+		"properties": [],
+		"dependencies": [],
+		"minProperties": "",
+		"maxProperties": "",
+		"additionalProperties": false,
+		"enum": [],
+		"subtype": "json"
+	},
+	"subtypes": {
+		"json": {
+			"parentType": "jsonObject",
+			"childValueType": [
+				"jsonString",
+				"jsonNumber",
+				"jsonObject",
+				"jsonArray",
+				"jsonBoolean",
+				"jsonNull"
+			]
+		}
+	}
+}

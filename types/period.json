@@ -1,0 +1,22 @@
+{
+	"name": "period",
+	"erdAbbreviation": "<period>",
+	"dtdAbbreviation": "{period}",
+	"parentType": "string",
+	"useSample": true,
+	"hiddenOnEntity": "view",
+	"sample": "89h4m48s",
+	"defaultValues": {
+		"subtype": "period(date)",
+		"primaryKey": false,
+		"default": "",
+		"enum": [],
+		"sample":"",
+		"pattern": "",
+		"comments":"",
+		"format": ""
+	},
+	"descriptor": {
+		"format": "PnYnMnDTnHnMnS"
+	}
+}

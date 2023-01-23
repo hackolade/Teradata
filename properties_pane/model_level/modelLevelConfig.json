@@ -138,6 +138,7 @@ making sure that you maintain a proper JSON format.
 				"options": [
 					"v17.20"
 				],
+				"defaultValue": "v17.20",
 				"disabledOption": true
 			},
 			{

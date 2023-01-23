@@ -1,7 +1,7 @@
 {
-	"name": "binary",
-	"erdAbbreviation": "<bin>",
-	"dtdAbbreviation": "{BIN}",
+	"name": "byte",
+	"erdAbbreviation": "<byte>",
+	"dtdAbbreviation": "{BYTE}",
 	"parentType": "binary",
 	"hiddenOnEntity": "view",
 	"useSample": false,
@@ -14,7 +14,8 @@
 		"foreignField": [],
 		"default": "",
 		"enum": [],
-		"sample": ""
+		"sample": "",
+		"mode": "byte"
 	},
 	"descriptor": {
 		"mode": "binary"

@@ -286,125 +286,248 @@ making sure that you maintain a proper JSON format.
 		],
 		"columnsRatio": [3.7, 5]
 	},
+//	{
+//		"lowerTab": "Composite keys",
+//		"structure": [{
+//			"propertyName": "Primary key",
+//			"propertyType": "group",
+//			"groupItemLimit": 1,
+//			"propertyKeyword": "primaryKey",
+//			"propertyTooltip": {
+//				"disabled": [
+//					{
+//						"tooltip": "Remove the existing single column primary key definition prior to unlock the possibility to create a composite primary key definition for this table",
+//						"dependency": {
+//							"type": "and",
+//							"values": [
+//								{
+//									"level": "children",
+//									"key": "primaryKey",
+//									"value": true
+//								},
+//								{
+//									"type": "not",
+//									"values": {
+//										"level": "children",
+//										"key": "compositePrimaryKey",
+//										"value": true
+//									}
+//								}
+//							]
+//						}
+//					},
+//					{
+//						"tooltip": "Remove or update the existing composite primary key definition prior to unlock the possibility to create a new composite primary key definition for this table",
+//						"dependency": {
+//							"key": "primaryKey",
+//							"minLength": 1
+//						}
+//					}
+//				]
+//			},
+//			"disabledOnCondition": [
+//				{
+//					"level": "children",
+//					"value": {
+//						"type": "and",
+//						"values": [
+//							{
+//								"key": "primaryKey",
+//								"value": true
+//							},
+//							{
+//								"type": "or",
+//								"values": [
+//									{
+//										"key": "compositePrimaryKey",
+//										"value": false
+//									},
+//									{
+//										"key": "compositePrimaryKey",
+//										"exist": false
+//									}
+//								]
+//							},
+//							{
+//								"type": "or",
+//								"values": [
+//									{
+//										"key": "compositeUniqueKey",
+//										"value": false
+//									},
+//									{
+//										"key": "compositeUniqueKey",
+//										"exist": false
+//									}
+//								]
+//							}
+//						]
+//					}
+//				}
+//			],
+//			"structure": [{
+//				"propertyName": "Constraint name",
+//				"propertyKeyword": "constraintName",
+//				"propertyTooltip": "",
+//				"propertyType": "text"
+//			}, {
+//				"propertyName": "Key",
+//				"propertyKeyword": "compositePrimaryKey",
+//				"propertyType": "primaryKeySetter",
+//				"abbr": "pk",
+//				"attributeList": []
+//			}]
+//		}, {
+//			"propertyName": "Unique key",
+//			"propertyType": "group",
+//			"propertyKeyword": "uniqueKey",
+//			"propertyTooltip": "",
+//			"structure": [{
+//				"propertyName": "Constraint name",
+//				"propertyKeyword": "constraintName",
+//				"propertyTooltip": "",
+//				"propertyType": "text"
+//			}, {
+//				"propertyName": "Key",
+//				"propertyKeyword": "compositeUniqueKey",
+//				"propertyType": "compositeKeySetter",
+//				"disabledItemStrategy": "default",
+//				"setPrimaryKey": false,
+//				"abbr": " ",
+//				"attributeList": [],
+//				"template": "collectiontree",
+//				"isCompositeKey": true
+//			},
+//			{
+//				"propertyName": "Alternate key",
+//				"propertyKeyword": "alternateKey",
+//				"propertyTooltip": "",
+//				"propertyType": "checkbox",
+//				"setFieldPropertyBy": "compositeUniqueKey"
+//			}]
+//		}]
+//	},
 	{
-		"lowerTab": "Composite keys",
+		"lowerTab": "Indexes",
 		"structure": [{
-			"propertyName": "Primary key",
+			"propertyName": "Index",
 			"propertyType": "group",
-			"groupItemLimit": 1,
-			"propertyKeyword": "primaryKey",
-			"propertyTooltip": {
-				"disabled": [
-					{
-						"tooltip": "Remove the existing single column primary key definition prior to unlock the possibility to create a composite primary key definition for this table",
-						"dependency": {
-							"type": "and",
-							"values": [
-								{
-									"level": "children",
-									"key": "primaryKey",
-									"value": true
-								},
-								{
-									"type": "not",
-									"values": {
-										"level": "children",
-										"key": "compositePrimaryKey",
-										"value": true
-									}
-								}
-							]
-						}
-					}, 
-					{
-						"tooltip": "Remove or update the existing composite primary key definition prior to unlock the possibility to create a new composite primary key definition for this table",
-						"dependency": {
-							"key": "primaryKey",
-							"minLength": 1
-						}
-					}
-				]
-			},
-			"disabledOnCondition": [
+			"propertyKeyword": "Indxs",
+			"propertyTooltip": "In general you should only add indexes to match the queries your application uses. Any extra will waste resources.",
+			"structure": [
 				{
-					"level": "children",
-					"value": {
-						"type": "and",
-						"values": [
-							{
-								"key": "primaryKey",
-								"value": true
-							},
-							{
-								"type": "or",
-								"values": [
-									{
-										"key": "compositePrimaryKey",
-										"value": false
-									},
-									{
-										"key": "compositePrimaryKey",
-										"exist": false
-									}
-								]
-							},
-							{
-								"type": "or",
-								"values": [
-									{
-										"key": "compositeUniqueKey",
-										"value": false
-									},
-									{
-										"key": "compositeUniqueKey",
-										"exist": false
-									}
-								]
-							}
-						]
-					}
+					"propertyName": "Name",
+					"propertyKeyword": "indxName",
+					"propertyTooltip": "Optional, if not specified an automatic name will be assigned. Index name are needed to drop indexes and appear in error messages when a constraint is violated.",
+					"propertyType": "text"
+				},
+				{
+					"propertyName": "Activated",
+					"propertyKeyword": "isActivated",
+					"propertyTooltip": "Deactivated item will be not included in FE script",
+					"propertyType": "checkbox",
+					"defaultValue": true
+				},
+				{
+					"propertyName": "Type",
+					"propertyKeyword": "indexType",
+					"propertyTooltip": "",
+					"propertyType": "select",
+					"defaultValue": "",
+					"options": [
+						"",
+						"PRIMARY",
+						"SECONDARY",
+						"HASH",
+						"JOIN"
+					]
+				},
+				{
+					"propertyName": "Unique",
+					"propertyKeyword": "unique",
+					"propertyTooltip": "Causes the system to check for duplicate values in the table when the index is created (if data already exist) and each time data is added. Attempts to insert or update data which would result in duplicate entries will generate an error.",
+					"defaultValue": false,
+					"propertyType": "checkbox"
+				},
+				{
+					"propertyName": "All",
+					"propertyKeyword": "all",
+					"propertyTooltip": "If set TRUE, a NUSI should maintain row ID pointers for each logical row of a join index, not just the compressed physical rows.",
+					"defaultValue": false,
+					"propertyType": "checkbox"
+				},
+				{
+					"propertyName": "Keys",
+					"propertyKeyword": "indxKey",
+					"propertyType": "fieldList",
+					"template": "orderedList"
+				},
+
+				{
+					"propertyName": "ORDER BY",
+					"propertyKeyword": "orderBy",
+					"propertyType": "fieldList",
+					"propertyTooltip": "Row ordering on each AMP by a single NUSI column: either value-ordered or hash-ordered.",
+					"template": "orderedList",
+					"defaultValue": "",
+					"templateOptions": {
+						"maxFields": 1
+					},
+					"attributeList": [
+						"",
+						"HASH",
+						"VALUE"
+					]
+				},
+				{
+					"propertyName": "Comment",
+					"propertyKeyword": "indexComment",
+					"propertyTooltip": "comment",
+					"addTimestampButton": false,
+					"propertyType": "details",
+					"template": "textarea"
 				}
-			],
-			"structure": [{
-				"propertyName": "Constraint name",
-				"propertyKeyword": "constraintName",
-				"propertyTooltip": "",
-				"propertyType": "text"
-			}, {
-				"propertyName": "Key",
-				"propertyKeyword": "compositePrimaryKey",
-				"propertyType": "primaryKeySetter",
-				"abbr": "pk",
-				"attributeList": []
-			}]
-		}, {
-			"propertyName": "Unique key",
+			]
+		}]
+	},
+	{
+		"lowerTab": "Check Constraints",
+		"structure": [{
+			"propertyName": "Check Constraint",
 			"propertyType": "group",
-			"propertyKeyword": "uniqueKey",
+			"propertyKeyword": "chkConstr",
 			"propertyTooltip": "",
-			"structure": [{
-				"propertyName": "Constraint name",
-				"propertyKeyword": "constraintName",
-				"propertyTooltip": "",
-				"propertyType": "text"
-			}, {
-				"propertyName": "Key",
-				"propertyKeyword": "compositeUniqueKey",
-				"propertyType": "compositeKeySetter",
-				"disabledItemStrategy": "default",
-				"setPrimaryKey": false,
-				"abbr": " ",
-				"attributeList": [],
-				"template": "collectiontree",
-				"isCompositeKey": true
-			},
-			{
-				"propertyName": "Alternate key",
-				"propertyKeyword": "alternateKey",
-				"propertyTooltip": "",
-				"propertyType": "checkbox",
-				"setFieldPropertyBy": "compositeUniqueKey"
-			}]
+			"structure": [
+				{
+					"propertyName": "Name",
+					"propertyKeyword": "chkConstrName",
+					"propertyTooltip": "",
+					"propertyType": "text"
+				},
+				{
+					"propertyName": "Description",
+					"propertyKeyword": "constrDescription",
+					"propertyTooltip": "description",
+					"propertyType": "details",
+					"template": "textarea"
+				},
+				{
+					"propertyName": "Expression",
+					"propertyKeyword": "constrExpression",
+					"propertyTooltip": "Expression",
+					"propertyType": "details",
+					"template": "textarea",
+					"markdown": false
+				},
+				{
+					"propertyName": "Comments",
+					"propertyKeyword": "constrComments",
+					"propertyTooltip": "comments",
+					"addTimestampButton": false,
+					"propertyType": "details",
+					"template": "textarea"
+				}
+			]
 		}]
 	}
 ]

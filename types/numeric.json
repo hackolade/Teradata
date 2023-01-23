@@ -1,11 +1,12 @@
 {
-	"name": "integer",
-	"erdAbbreviation": "<int>",
+	"name": "numeric",
+	"erdAbbreviation": "<num>",
 	"dtdAbbreviation": "{123}",
 	"parentType": "numeric",
 	"hiddenOnEntity": "view",
 	"sample": 15,
 	"useSample": true,
+	"default": true,
 	"defaultValues": {
 		"index": true,
 		"unit": "",
@@ -16,6 +17,7 @@
 		"multipleOf": "",
 		"divisibleBy": "",
 		"default": "",
+		"scale": 0,
 		"primaryKey": false,
 		"relationshipType": "",
 		"parentRelationship": "",
@@ -23,11 +25,21 @@
 		"foreignCollection": "",
 		"foreignField": [],
 		"enum": [],
+		"mode": "int",
 		"sample": ""
 	},
 	"descriptor": [
 		{
-			"capacity": 4
+			"schema": {
+				"mode": "byteint"
+			},
+			"capacity": 1
+		},
+		{
+			"schema": {
+				"mode": "smallint"
+			},
+			"capacity": 2
 		},
 		{
 			"schema": {
@@ -42,22 +54,39 @@
 			"capacity": 8
 		},
 		{
-			"schema": {
-				"mode": "smallint"
+			"schema":{
+				"mode": "decimal"
 			},
-			"capacity": 2
+			"capacity": 2,
+			"mode": "decimal"
+		},
+		{
+			"schema":{
+				"mode": "decimal"
+			},
+			"capacity": 4,
+			"mode": "decimal"
+		},
+		{
+			"schema":{
+				"mode": "decimal"
+			},
+			"capacity": 8,
+			"mode": "decimal"
 		},
 		{
 			"schema": {
-				"mode": "tinyint"
+				"mode": "decimal"
 			},
-			"capacity": 1
+			"capacity": 16,
+			"mode": "decimal"
 		},
 		{
 			"schema": {
-				"mode": "byteint"
+				"mode": "double precision"
 			},
-			"capacity": 1
+			"capacity": 8,
+			"mode": "floating"
 		}
 	]
 }

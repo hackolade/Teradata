@@ -1,0 +1,95 @@
+{
+	"name": "datetime",
+	"erdAbbreviation": "<date>",
+	"dtdAbbreviation": "{dt}",
+	"parentType": "string",
+	"hiddenOnEntity": "view",
+	"sample": "2022-02-03",
+	"useSample": true,
+	"defaultValues": {
+		"index": true,
+		"relationshipType": "",
+		"parentRelationship": "",
+		"childRelationships": [],
+		"foreignCollection": "",
+		"foreignField": [],
+		"default": "",
+		"format": "",
+		"sample": "",
+		"mode": "date"
+	},
+	"descriptor": [
+		{
+			"schema": {
+				"mode": "date"
+			},
+			"format": "YYYY-MM-DD"
+		},
+		{
+			"schema": {
+				"mode": "time"
+			},
+			"format": "hh:mm:ss"
+		},
+		{
+			"schema": {
+				"mode": "time",
+				"fractSecPrecision": 3
+			},
+			"format": "hh:mm:ss.nnn"
+		},
+		{
+			"schema": {
+				"mode": "time",
+				"fractSecPrecision": 6
+			},
+			"format": "hh:mm:ss.nnnnnn"
+		},
+		{
+			"schema": {
+				"mode": "time"
+			},
+			"format": "hh:mm:ssZ"
+		},
+		{
+			"schema": {
+				"mode": "time",
+				"fractSecPrecision": 6
+			},
+			"format": "hh:mm:ss.nnnnnnZ"
+		},
+		{
+			"schema": {
+				"mode": "timestamp"
+			},
+			"format": "YYYY-MM-DD hh:mm:ss"
+		},
+		{
+			"schema": {
+				"mode": "timestamp",
+				"fractSecPrecision": 3
+			},
+			"format": "YYYY-MM-DD hh:mm:ss.nnn"
+		},
+		{
+			"schema": {
+				"mode": "timestamp",
+				"fractSecPrecision": 6
+			},
+			"format": "YYYY-MM-DD hh:mm:ssssss"
+		},
+		{
+			"schema": {
+				"mode": "timestamp"
+			},
+			"format": "YYYY-MM-DD hh:mm:ssZ"
+		},
+		{
+			"schema": {
+				"mode": "timestamp",
+				"fractSecPrecision": 6
+			},
+			"format": "YYYY-MM-DD hh:mm:ss.nnnnnnZ"
+		}
+	]
+}

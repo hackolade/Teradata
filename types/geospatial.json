@@ -1,0 +1,24 @@
+{
+	"name": "geospatial",
+	"erdAbbreviation": "<geo>",
+	"dtdAbbreviation": "{geo}",
+	"parentType": "document",
+	"useSample": false,
+	"hiddenOnEntity": "view",
+	"defaultValues": {
+		"required": false,
+		"primaryKey": false,
+		"comments": "",
+		"properties": [],
+		"relationshipType": "",
+		"parentRelationship": "",
+		"childRelationships": [],
+		"foreignCollection": "",
+		"foreignField": [],
+		"minProperties": "",
+		"maxProperties": "",
+		"additionalProperties": false,
+		"mode": "ST_Geometry"
+	}
+}
+

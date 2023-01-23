@@ -142,6 +142,16 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text"
 			},
 			{
+				"propertyName": "Spool",
+				"propertyKeyword": "spool_files_size",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Temporary",
+				"propertyKeyword": "temporary_tables_size",
+				"propertyType": "text"
+			},
+			{
 				"propertyName": "Fallback",
 				"propertyKeyword": "has_fallback",
 				"propertyType": "checkbox",
@@ -149,13 +159,14 @@ making sure that you maintain a proper JSON format.
 				"defaultValue": false
 			},
 			{
-				"propertyName": "Journal",
-				"propertyKeyword": "db_journaling_strategy",
+				"propertyName": "BEFORE Journal",
+				"propertyKeyword": "db_before_journaling_strategy",
 				"propertyType": "select",
 				"options": [
 					"NO",
-					"BEFORE",
-					"DUAL"
+					"SINGLE",
+					"DUAL",
+					"LOCAL"
 				]
 			},
 			{
@@ -165,10 +176,10 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Type of journal to be maintained by default for data tables created in the new database. The JOURNAL keyword without AFTER implies BEFORE and AFTER images.",
 				"defaultValue": "NO",
 				"options": [
+					"NO",
+					"SINGLE",
 					"DUAL",
-					"LOCAL",
-					"NOT LOCAL",
-					"NO"
+					"LOCAL"
 				]
 			},
 			{

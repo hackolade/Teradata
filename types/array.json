@@ -17,13 +17,18 @@
     "additionalItems": true,
     "minItems": "",
     "maxItems": "",
-    "subtype": "json",
-    "uniqueItems": false
+    "uniqueItems": false,
+    "arrayDataType": "One-Dimensional (1-D)"
   },
   "subtypes": {
-    "json": {
+    "allTypes": {
       "childValueType": [
-        "variant"
+        "char",
+        "byte",
+        "numeric",
+        "datetime",
+        "json",
+        "xml"
       ]
     }
   }
