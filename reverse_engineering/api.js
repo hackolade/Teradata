@@ -1,205 +1,224 @@
 'use strict';
 
+const connectionHelper = require('./helpers/connectionHelper');
 const teradataHelper = require('./helpers/teradataHelper');
-const ssoHelper = require('./helpers/ssoHelper');
-const { setDependencies, dependencies } = require('./helpers/appDependencies');
-let _;
 
-const connect = async (connectionInfo, logger, cb, app) => {
-	initDependencies(app);
-	logger.clear();
-	logger.log('info', connectionInfo, 'connectionInfo', connectionInfo.hiddenKeys);
-	try {
-		await teradataHelper.connect(logger, connectionInfo);
-		cb();
-	} catch (err) {
-		handleError(logger, err, cb);
+const connect = async (connectionInfo, sshService) => {
+    return await connectionHelper.connect(connectionInfo, sshService);
+};
+
+const disconnect = async (connectionInfo, logger, callback, app) => {
+	if (connectionInfo.useSshTunnel) {
+        const sshService = app.require('@hackolade/ssh-service');
+		await sshService.closeConsumer();
 	}
+	connectionHelper.close();
+	callback();
 };
 
-const disconnect = async (connectionInfo, logger, cb) => {
-	try {
-		await teradataHelper.disconnect();
-		cb();
-	} catch (err) {
-		handleError(logger, err, cb);
-	}
-};
+const testConnection = async (connectionInfo, logger, callback, app) => {
+	const sshService = app.require('@hackolade/ssh-service');
+	const log = createLogger({
+		title: 'Test connection',
+		hiddenKeys: connectionInfo.hiddenKeys,
+		logger,
+	});
 
-const testConnection = async (connectionInfo, logger, cb, app) => {
-	initDependencies(app);
-	logger.clear();
-	logger.log('info', connectionInfo, 'connectionInfo', connectionInfo.hiddenKeys);
-	try {
-		if (connectionInfo.authType === 'externalbrowser') {
-			await getExternalBrowserUrl(connectionInfo, logger, cb, app);
-		} else {
-			await teradataHelper.testConnection(logger, connectionInfo);
-		}
-		cb();
-	} catch (err) {
-		handleError(logger, err, cb);
-	}
-};
-
-const getExternalBrowserUrl = async (connectionInfo, logger, cb, app) => {
-	try {
-		initDependencies(app);
-		const ssoData = await ssoHelper.getSsoUrlData(logger, _, connectionInfo);
-		cb(null, ssoData);
-	} catch (err) {
-		handleError(logger, err, cb);
-	}
-}
-
-const getDatabases = (connectionInfo, logger, cb) => {
-	cb();
-};
-
-const getDocumentKinds = (connectionInfo, logger, cb) => {
-	cb();
-};
-
-const getDbCollectionsNames = async (connectionInfo, logger, cb, app) => {
 	try {
 		logger.clear();
-		initDependencies(app);
-		await teradataHelper.connect(logger, connectionInfo);
-		const namesBySchemas = await teradataHelper.getEntitiesNames();
+		logger.log('info', connectionInfo, 'connectionInfo', connectionInfo.hiddenKeys);
 
-		logger.log('info', { entities: namesBySchemas }, 'Found entities');
+		debugger
+		const connection = await connect(connectionInfo, sshService);
+		const instance = connectionHelper.createInstance(connection, logger);
 
-		cb(null, namesBySchemas);
-	} catch (err) {
-		handleError(logger, err, cb);
+		instance.getVersion();
+		log.info('Connected successfully');
+
+		callback(null);
+	} catch (error) {
+		log.error(error);
+		callback({ message: error.message, stack: error.stack });
 	}
 };
 
-const getDbCollectionsData = async (data, logger, cb, app) => {
+const getDbCollectionsNames = async (connectionInfo, logger, callback, app) => {
+	const log = createLogger({
+		title: 'Retrieving databases and tables information',
+		hiddenKeys: connectionInfo.hiddenKeys,
+		logger,
+	});
+
 	try {
-		initDependencies(app);
-		logger.log('info', data, 'Retrieving schema', data.hiddenKeys);
+		logger.clear();
+		logger.log('info', connectionInfo, 'connectionInfo', connectionInfo.hiddenKeys);
+
+		const connection = await connect(connectionInfo);
+		const instance = connectionHelper.createInstance(connection, logger);
+
+		const tableNames = instance.getDatabasesWithTableNames('T');
+		const viewNames  = getViewNames(instance.getDatabasesWithTableNames('V'));
+
+		const allDatabaseNames = [
+			...Object.keys(tableNames),
+			...Object.keys(viewNames),
+		];
+
+        const collections = allDatabaseNames.map(dbName => {
+			const dbCollections = [
+				...(tableNames[dbName] || []),
+				...(viewNames[dbName] || [])
+			];
+
+			return {
+                dbName,
+                dbCollections,
+                isEmpty: dbCollections.length,
+            };
+		});
+		log.info('Names retrieved successfully');
+
+		callback(null, collections);
+	} catch(error) {
+		log.error(error);
+		callback({ message: error.message, stack: error.stack });
+	}
+};
+
+const getDbCollectionsData = async (data, logger, callback, app) => {
+	const _ = app.require('lodash');
+	const async = app.require('async');
+	const log = createLogger({
+		title: 'Reverse-engineering process',
+		hiddenKeys: data.hiddenKeys,
+		logger,
+	});
+
+	try {
+		logger.log('info', data, 'data', data.hiddenKeys);
+
 		const collections = data.collectionData.collections;
 		const dataBaseNames = data.collectionData.dataBaseNames;
-		const entitiesPromises = await dataBaseNames.reduce(async (packagesPromise, schema) => {
-			const packages = await packagesPromise;
-			const entities = teradataHelper.splitEntityNames(collections[schema]);
+		const connection = await connect(data);
+		const instance = connectionHelper.createInstance(connection, logger);
 
-			const containerData = await teradataHelper.getContainerData(schema);
-			const [ database, schemaName ] = schema.split('.');
+		log.info('Teradata version: ' + instance.getVersion());
+		log.progress('Start reverse engineering ...');
 
-			const tablesPackages = entities.tables.map(async table => {
-				const fullTableName = teradataHelper.getFullEntityName(schema, table);
-				logger.progress({ message: `Start getting data from table`, containerName: schema, entityName: table });
-				logger.log('info', { message: `Start getting data from table`, containerName: schema, entityName: table }, 'Getting schema');
-				const ddl = await teradataHelper.getDDL(fullTableName, logger);
-				const quantity = await teradataHelper.getRowsCount(fullTableName);
+		const result = await async.mapSeries(dataBaseNames, async (dbName) => {
+			const tables = (collections[dbName] || []).filter(name => !isViewName(name));
+			const views = (collections[dbName] || []).filter(isViewName).map(getViewName);
 
-				logger.progress({ message: `Fetching record for JSON schema inference`, containerName: schema, entityName: table });
-				logger.log('info', { message: `Fetching record for JSON schema inference`, containerName: schema, entityName: table }, 'Getting schema');
+			log.info(`Parsing database "${dbName}"`);
+			log.progress(`Parsing database "${dbName}"`, dbName);
 
-				const { documents, jsonSchema } = await teradataHelper.getJsonSchema(logger, getCount(quantity, data.recordSamplingSettings), fullTableName);
-				const entityData = await teradataHelper.getEntityData(fullTableName, logger);
+			const containerData = await instance.describeDatabase(dbName);
 
-				logger.progress({ message: `Schema inference`, containerName: schema, entityName: table });
-				logger.log('info', { message: `Schema inference`, containerName: schema, entityName: table }, 'Getting schema');
+			log.info(`Get indexes "${dbName}"`);
+			log.progress(`Get indexes "${dbName}"`, dbName);
 
-				const handledDocuments = teradataHelper.handleComplexTypesDocuments(jsonSchema, documents);
+			const indexes = await instance.getIndexes(dbName);
 
-				logger.progress({ message: `Data retrieved successfully`, containerName: schema, entityName: table });
-				logger.log('info', { message: `Data retrieved successfully`, containerName: schema, entityName: table }, 'Getting schema');
+			const result = await async.mapSeries(tables, async (tableName) => {
+				log.info(`Get columns "${tableName}"`);
+				log.progress(`Get columns`, dbName, tableName);
+
+				const columns = await instance.getColumns(dbName, tableName);
+
+				let records = [];
+
+				if (containsJson(columns)) {
+					log.info(`Sampling table "${tableName}"`);
+					log.progress(`Sampling table`, dbName, tableName);
+
+					const count = await instance.getCount(dbName, tableName);
+					records = await instance.getRecords(dbName, tableName, columns, getLimit(count, data.recordSamplingSettings));
+				}
+
+				log.info(`Get create table statement "${tableName}"`);
+				log.progress(`Get create table statement`, dbName, tableName);
+
+				const ddl = await instance.showCreateEntity(dbName, tableName);
+
+				log.info(`Parse indexes "${tableName}"`);
+				log.progress(`Parse indexes`, dbName, tableName);
+
+				const Indxs = teradataHelper.parseTableIndexes(tableName, indexes);
 
 				return {
-					dbName: schemaName,
-					collectionName: table,
-					entityLevel: entityData,
-					documents: handledDocuments,
+					dbName: dbName,
+					collectionName: tableName,
+					entityLevel: {
+						Indxs,
+					},
+					documents: records,
 					views: [],
+					standardDoc: records[0],
 					ddl: {
 						script: ddl,
-						type: 'plugin',
-						takeAllDdlProperties: true,
+						type: 'teradata'
 					},
 					emptyBucket: false,
-					validation: {
-						jsonSchema: filterMetaProperties(entityData, jsonSchema, logger)
-					},
 					bucketInfo: {
-						indexes: [],
-						database,
-						...containerData
-					}
+						...containerData,
+					},
 				};
 			});
 
-			const views = await Promise.all(entities.views.map(async view => {
-				const fullViewName = teradataHelper.getFullEntityName(schema, view);
-				logger.progress({ message: `Start getting data from view`, containerName: schema, entityName: view });
-				logger.log('info', { message: `Start getting data from view`, containerName: schema, entityName: view }, 'Getting schema');
-				
-				const ddl = await teradataHelper.getViewDDL(fullViewName, logger);
-				const viewData = await teradataHelper.getViewData(fullViewName, logger);
+			const viewData = await async.mapSeries(views, async (viewName) => {
+				log.info(`Getting data from view "${viewName}"`);
+				log.progress(`Getting data from view`, dbName, viewName);
 
-				logger.progress({ message: `Data retrieved successfully`, containerName: schema, entityName: view });
-				logger.log('info', { message: `Data retrieved successfully`, containerName: schema, entityName: view }, 'Getting schema');
+				const ddl = await instance.showCreateEntity(dbName, viewName, 'VIEW');
 
 				return {
-					name: view,
-					data: viewData,
+					name: viewName,
 					ddl: {
 						script: ddl,
-						type: 'plugin'
+						type: 'teradata'
 					}
 				};
-			}));
-
-			if (_.isEmpty(views)) {
-				return [ ...packages, ...tablesPackages ];
-			}
-
-			const viewPackage = Promise.resolve({
-				dbName: schemaName,
-				entityLevel: {},
-				views,
-				emptyBucket: false,
-				bucketInfo: {
-					indexes: [],
-					database,
-					...containerData
-				}
 			});
 
-			return [ ...packages, ...tablesPackages, viewPackage ];
-		}, Promise.resolve([]));
+			if (viewData.length) {
+				return [
+					...result,
+					{
+						dbName: dbName,
+						views: viewData,
+						emptyBucket: false,
+					}
+				];
+			}
 
-		const packages = await Promise.all(entitiesPromises);
+			return result;
+		});
 
-		cb(null, packages.filter(Boolean));
-	} catch (err) {
-		handleError(logger, err, cb);
+		callback(null, result.flat());
+	} catch(error) {
+		log.error(error);
+		callback({ message: error.message, stack: error.stack });
 	}
 };
 
-const filterMetaProperties = (entityData, jsonSchema, logger) => {
-	if (!entityData.external) {
-		const valueMetaColumn = jsonSchema?.properties?.VALUE;
-		if (valueMetaColumn && valueMetaColumn.type === 'variant') {
-			logger.log('info', { message: `The VALUE meta property was found`, containerName: entityData.containerName, entityName: entityData.entityName }, 'Filtering meta properties');
-
-			return _.omit(jsonSchema.properties, 'VALUE');
-		}
-		return jsonSchema;
-	}
-	const columnList = Object.keys(jsonSchema.properties || {}).join();
-	logger.log('info', { message: `External table columns from DESC TABLE: ${columnList}`, containerName: entityData.containerName, entityName: entityData.entityName }, 'Filtering meta properties');
-
-	return {
-		...jsonSchema,
-		properties: _.omit(jsonSchema.properties, ['VALUE', 'METADATA$FILENAME', 'METADATA$FILE_ROW_NUMBER']),
-	};
+const getViewNames = (viewNames) => {
+	return Object.keys(viewNames).reduce((updatedViewNames, databaseName) => ({
+		...updatedViewNames,
+		[databaseName]: viewNames[databaseName].map(viewName => `${viewName} (v)`)
+	}), {});
 };
 
-const getCount = (count, recordSamplingSettings) => {
+const isViewName = (name) => {
+	return / \(v\)$/i.test(name);
+};
+
+const getViewName = (name) => name.replace(/ \(v\)$/i, '');
+
+const containsJson = (columns) => {
+	return columns.some(column => column.dataType === 'JN');
+}
+
+const getLimit = (count, recordSamplingSettings) => {
 	const per = recordSamplingSettings.relative.value;
 	const size = (recordSamplingSettings.active === 'absolute')
 		? recordSamplingSettings.absolute.value
@@ -207,26 +226,29 @@ const getCount = (count, recordSamplingSettings) => {
 	return size;
 };
 
-const handleError = (logger, error, cb) => {
-	const message = _.isString(error) ? error : _.get(error, 'message', 'Reverse Engineering error')
-	logger.log('error', { error }, 'Reverse Engineering error');
+const createLogger = ({ title, logger, hiddenKeys }) => {
+	return {
+		info(message) {
+			logger.log('info', { message }, title, hiddenKeys);
+		},
 
-	return cb({ message });
-};
+		progress(message, dbName = '', tableName = '') {
+			logger.progress({ message, containerName: dbName, entityName: tableName });
+		},
 
-const initDependencies = app => {
-	setDependencies(app);
-	_ = dependencies.lodash;
-	teradataHelper.setDependencies(dependencies);
+		error(error) {
+			logger.log('error', {
+				message: error.message,
+				stack: error.stack,
+			}, title);
+		}
+	};
 };
 
 module.exports = {
 	connect,
 	disconnect,
 	testConnection,
-	getDatabases,
-	getDocumentKinds,
 	getDbCollectionsNames,
 	getDbCollectionsData,
-	getExternalBrowserUrl
 }
