@@ -2,11 +2,10 @@
 	"extension": "sql",
 	"filterName": "SQL",
 	"type": "ddl",
-	"mode": "pgsql",
+	"mode": "sql",
 	"ddlType": "plugin",
 	"namePrefix": "Teradata",
-	"resolvedDefinitions": true,
-	"combinedContainers": true,
+	"resolvedDefinitions": false,
 	"level": {
 		"container": true,
 		"entity": true,
@@ -20,14 +19,5 @@
 		"entity": true,
 		"container": true
 	},
-	"applyScriptToInstance": true,
-	"additionalOptions": [
-		{
-			"id": "applyDropStatements",
-			"value": false,
-			"forUpdate": true,
-			"name": "Apply Drop Statements",
-			"isDropInStatements": true
-		}
-	]
+	"applyScriptToInstance": false
 }

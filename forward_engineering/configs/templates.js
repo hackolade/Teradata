@@ -1,40 +1,47 @@
 module.exports = {
-	createSchema:
-		'CREATE${transient} DATABASE IF NOT EXISTS ${name}${managed_access}${data_retention}${comment};',
-	createUDF:
-		"CREATE OR REPLACE FUNCTION ${name}(${arguments})\n\tRETURNS ${return_type}\n\tLANGUAGE ${language}\n\tAS '\n${function}\n'${comment};\n",
-	createSequence: 'CREATE SEQUENCE IF NOT EXISTS ${name} START ${start} INCREMENT ${increment}${comment};\n',
-	createFileFormat: 'CREATE FILE FORMAT IF NOT EXISTS ${name}${options}${comment};\n',
-	createStage:
-		'CREATE${temporary} STAGE IF NOT EXISTS ${name} ${url}${storageIntegration}${credentials}${encryption};\n',
-
-	columnDefinition: '${name} ${type}${collation}${default}${autoincrement}${not_nul}${inline_constraint}${comment}',
-	externalColumnDefinition: '${name} ${type} as ${expression}',
+	createDatabase:
+		'CREATE DATABASE "${name}" AS ${databaseOptions};',
+	createSession: 'SET SESSION DATABASE "${name}";',
+	columnDefinition: '"${name}" ${type}${inlineLength}${not_null}${uppercase}${caseSpecific}${format}${default}${storageFormat}${characterSet}${withSchema}${autoColumn}${compress}${compressUsing}${decompressUsing}${inlineCheckConstraint}${inlineUniqueConstraint}${inlinePKConstraint}',
 	createTable:
-		'CREATE${temporary}${transient} TABLE IF NOT EXISTS\n' +
-		'\t${name} (\n' +
-		'\t\t${column_definitions}' +
-		'${out_of_line_constraints}\n' +
-		'\t)${tableOptions};\n',
-	createExternalTable:
-		'CREATE EXTERNAL TABLE IF NOT EXISTS \n' +
-		'\t${name} (\n' +
-		'\t\t${column_definitions}${out_of_line_constraints}\n' +
-		'\t)${tableOptions};\n',
-	createAsSelect: 'CREATE TABLE IF NOT EXISTS ${name} AS ${selectStatement}${tableOptions};\n',
-	createCloneTable: 'CREATE TABLE IF NOT EXISTS ${name} CLONE ${source_table}${tableOptions};\n',
-	createLikeTable: 'CREATE TABLE IF NOT EXISTS ${name} LIKE ${source_table}${tableOptions};\n',
+		'CREATE${tableSet}${temporary}${traceTable} TABLE ${name}${tableOptions} (\n' +
+		'\t\t${column_definitions}${keyConstraints}${checkConstraints}${foreignKeyConstraints}\n' +
+		'\t)${tableIndexes}${tablePreservation};\n',
+	createAsSelectTable: 'CREATE${tableSet}${temporary} TABLE ${name}${tableOptions} (\n' +
+		'\t\t${column_definitions}${keyConstraints}${checkConstraints}${foreignKeyConstraints}\n' +
+		'\t)' +
+		'\n\tAS (\n' +
+		'\t${selectStatement} ' +
+		'\n\t)${tableIndexes}${tablePreservation};\n',
+	createErrorTable: 'CREATE ERROR TABLE ${tableName} FOR ${targetDataTable};\n',
+	createForeignTable:
+		'CREATE FOREIGN TABLE ${name}${tableOptions} (\n' +
+		'\t\t${column_definitions}${keyConstraints}${checkConstraints}${foreignKeyConstraints}\n' +
+		'\t)\n' +
+		'\tUSING (\n' +
+		'\t${usingOptions}\n' +
+		'\t)${tableIndexes}${tablePreservation};\n',
+	createHashIndex:
+		'CREATE HASH INDEX ${indexName}${indexOptions} (\n' +
+		'\t\t${indexKeys}' +
+		'\n\t)' +
+		'\n\tON ${tableName}${orderBy};\n',
+	createJoinIndex:
+		'CREATE JOIN INDEX ${indexName}${indexOptions}' +
+		'\n\tAS ${selectStatement};\n',
+	createKeyConstraint: 'CONSTRAINT ${constraintName}${constraintType}${columns}',
+	checkConstraint: '${name}${expression}',
+	createForeignKeyConstraint:
+		'FOREIGN KEY (${foreignKey}) REFERENCES ${checkOption} ${primaryTable} (${primaryKey})',
 	createView:
-		'CREATE${secure}${materialized} VIEW IF NOT EXISTS ${name} (\n' +
-		'\t${column_list}\n' +
-		')\n${copy_grants}${comment}AS ${select_statement}',
-	alterSchemaScript: 'ALTER DATABASE IF EXISTS ${name} ',
-	alterTableScript: 'ALTER TABLE IF EXISTS ${name} ',
-	alterEntityRename: 'RENAME TO ${name};\n',
-	setPropertySchema: 'SET ${property};\n',
-	unsetPropertySchema: 'UNSET ${property};\n',
-	manageAccessSchema: '${access} MANAGED ACCESS;\n',
-	setPropertyTable: 'SET ${property};\n',
-	alterViewScript: 'ALTER VIEW IF EXISTS ${name} ',
-	alterMaterializedViewScript: 'ALTER MATERIALIZED VIEW ${name} ',
+		'CREATE${recursive} VIEW ${name} (\n' +
+		'\t${columnList}\n' +
+		')\nAS ${selectStatement};\n',
+	viewSelectStatement: 'SELECT ${keys}\n\tFROM ${tableName}',
+	createStructuredType: 'CREATE TYPE ${typeName} AS (\n' +
+		'\t${columnDefinitions}' +
+		'\n)\n' +
+		'NOT FINAL${methodSpecification};\n',
+	createDistinctType: 'CREATE TYPE ${typeName} AS ${baseType} FINAL${methodSpecification};\n',
+	createArrayType: 'CREATE TYPE ${typeName} AS ${baseType}${default};\n',
 };
