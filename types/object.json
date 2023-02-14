@@ -1,25 +1,13 @@
 {
 	"name": "object",
 	"parentType": "document",
-	"structureType": true,
 	"defaultValues": {
 		"subtype": "object",
 		"properties": []
 	},
-	"subtypes": {
-		"object": {
-			"childValueType": [
-				"char",
-				"object",
-				"array",
-				"byte",
-				"numeric",
-				"datetime",
-				"period",
-				"geospatial",
-				"json",
-				"xml"
-			]
-		}
+	"dependency": {
+		"level": "parent",
+		"key": "type",
+		"value": "definitions"
 	}
 }

@@ -2,7 +2,7 @@
 	"name": "geospatial",
 	"erdAbbreviation": "<geo>",
 	"dtdAbbreviation": "{geo}",
-	"parentType": "document",
+	"parentType": "string",
 	"useSample": false,
 	"hiddenOnEntity": "view",
 	"defaultValues": {
@@ -18,7 +18,8 @@
 		"minProperties": "",
 		"maxProperties": "",
 		"additionalProperties": false,
-		"mode": "ST_Geometry"
+		"mode": "ST_Geometry",
+		"length": 100
 	}
 }
 

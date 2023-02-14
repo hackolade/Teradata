@@ -19,7 +19,28 @@
 		"foreignField": [],
 		"enum": [],
 		"sample": "",
-		"mode": "varchar",
-		"subtype": "string"
-	}
+		"mode": "char",
+		"synonym": ""
+	},
+	"descriptor": [
+		{
+			"schema": {
+				"mode": "long varchar"
+			},
+			"length": 64000
+		},
+		{
+			"schema": {
+				"mode": "vargraphic"
+			},
+			"characterSet": "GRAPHIC"
+		},
+		{
+			"schema": {
+				"mode": "long vargraphic"
+			},
+			"characterSet": "GRAPHIC",
+			"length": 32000
+		}
+	]
 }

@@ -23,7 +23,7 @@
 		"maxProperties": "",
 		"additionalProperties": false,
 		"enum": [],
-		"subtype": "json"
+		"subtype": "json",
 	},
 	"subtypes": {
 		"json": {

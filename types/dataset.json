@@ -1,12 +1,13 @@
 {
-	"name": "xml",
-	"erdAbbreviation": "<xml>",
-	"dtdAbbreviation": "{xml}",
+	"name": "dataset",
+	"erdAbbreviation": "<dataset>",
+	"dtdAbbreviation": "{dataset}",
 	"parentType": "binary",
 	"useSample": false,
 	"hiddenOnEntity": "view",
 	"defaultValues": {
 		"primaryKey": false,
+		"storageFormat": "AVRO",
 		"length": 100
 	}
 }

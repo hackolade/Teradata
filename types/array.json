@@ -18,7 +18,12 @@
     "minItems": "",
     "maxItems": "",
     "uniqueItems": false,
-    "arrayDataType": "One-Dimensional (1-D)"
+    "length": 1
+  },
+  "dependency": {
+    "level": "parent",
+    "key": "type",
+    "value": "definitions"
   },
   "subtypes": {
     "allTypes": {
@@ -27,8 +32,8 @@
         "byte",
         "numeric",
         "datetime",
-        "json",
-        "xml"
+        "period",
+        "interval"
       ]
     }
   }
