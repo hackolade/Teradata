@@ -1,10 +1,10 @@
-const teradataRegexConfig = require("./teradataRegexConfig");
+const regexConfig = require("./teradataRegexConfig");
 
 const cleanKeyName = (name = '') => {
     return name.replace(/^("|,|\s+)+|("|,|\s+)+$/gmi, '')
 };
 const parseIndexKeys = (statement) => {
-    const mathResult = statement.match(teradataRegexConfig.indexKeyName);
+    const mathResult = statement.match(regexConfig.indexKeyName);
     if (!mathResult || !mathResult.length) {
         return [];
     }
@@ -13,7 +13,7 @@ const parseIndexKeys = (statement) => {
 };
 
 const parseHashIndexStatement = (statement) => {
-    const matchResult = teradataRegexConfig.createHashIndex.exec(statement);
+    const matchResult = regexConfig.createHashIndex.exec(statement);
     if (!matchResult || !matchResult.groups) {
         return {};
     }
@@ -31,7 +31,7 @@ const parseHashIndexStatement = (statement) => {
 };
 
 const parseJoinIndexStatement = (statement) => {
-    const matchResult = teradataRegexConfig.createJoinIndex.exec(statement);
+    const matchResult = regexConfig.createJoinIndex.exec(statement);
     if (!matchResult || !matchResult.groups) {
         return {};
     }

@@ -6,12 +6,5 @@
 	"excludeDocKind": ["id"],
 	"defaultDdlType": "plugin",
 	"connectionList": ["name", "host", "userName"],
-	"scenario": [{
-		"dependency": {
-			"key": "authType",
-			"value": "externalbrowser"
-		},
-		"value": "connectByExternalBrowser"
-	}],
 	"helpUrl": "https://hackolade.com/help/ConnecttoaTeradatainstance.html"
 }

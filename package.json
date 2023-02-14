@@ -30,7 +30,6 @@
             "enableReverseEngineering": true,
             "disableChoices": true,
             "enableJsonType": true,
-            "reverseSchemaIntoOneColumn": true,
             "disableDenormalization": true,
             "enableComplexTypesNormalization": true,
             "relationships": {
