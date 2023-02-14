@@ -130,10 +130,56 @@ making sure that you maintain a proper JSON format.
 				"options": [
 					"char",
 					"varchar",
+					"long varchar",
+					"vargraphic",
+					"long vargraphic",
 					"clob"
 				],
 				"data": "options",
 				"valueType": "string"
+			},
+			{
+				"propertyName": "Synonym",
+				"propertyKeyword": "synonym",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"character"
+				],
+				"dependency": {
+					"key": "mode",
+					"value": "char"
+				}
+			},
+			{
+				"propertyName": "Synonym",
+				"propertyKeyword": "synonym",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"character varying",
+					"char varying"
+				],
+				"dependency": {
+					"key": "mode",
+					"value": "varchar"
+				}
+			},
+			{
+				"propertyName": "Synonym",
+				"propertyKeyword": "synonym",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"character large object"
+				],
+				"dependency": {
+					"key": "mode",
+					"value": "clob"
+				}
 			},
 			{
 				"propertyName": "Length",
@@ -141,7 +187,60 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "numeric",
 				"valueType": "number",
 				"allowNegative": false,
-				"typeDecorator": true
+				"typeDecorator": true,
+				"dependency": {
+					"type": "or",
+					"values": [
+						{
+							"key": "mode",
+							"value": "char"
+						},
+						{
+							"key": "mode",
+							"value": "varchar"
+						},
+						{
+							"key": "mode",
+							"value": "vargraphic"
+						},
+						{
+							"key": "mode",
+							"value": "clob"
+						}
+					]
+				}
+			},
+			{
+				"propertyName": "Format",
+				"propertyKeyword": "format",
+				"propertyType": "text",
+				"propertyTooltip": "A variable length string enclosed in apostrophes containing formatting characters that define the display format for the data type."
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"LATIN",
+					"UNICODE",
+					"KANJISJIS",
+					"GRAPHIC"
+				]
 			},
 			{
 				"propertyName": "Comments",
@@ -360,30 +459,6 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
-				"propertyName": "Alternate Key",
-				"propertyKeyword": "alternateKey",
-				"defaultValue": false,
-				"enableForReference": true,
-				"propertyType": "checkbox",
-				"dependency": {
-					"type": "or",
-					"values": [
-						{
-							"key": "unique",
-							"value": true
-						},
-						{
-							"key": "compositeUniqueKey",
-							"value": true
-						}
-					]
-				},
-				"disabledOnCondition": [{
-					"key": "compositeUniqueKey",
-					"value": true
-				}]
-			},
-			{
 				"propertyName": "Unique key constraint name",
 				"propertyKeyword": "uniqueKeyConstraintName",
 				"propertyType": "text",
@@ -399,105 +474,35 @@ making sure that you maintain a proper JSON format.
 			"minLength",
 			"maxLength",
 			"pattern",
-			"format",
 			"enum",
 			{
-				"propertyName": "Collate",
-				"propertyKeyword": "collate",
-				"propertyType": "checkbox"
-			},
-			{
-				"propertyName": "Locale",
-				"propertyKeyword": "locale",
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
 				"propertyType": "text",
-				"dependency": {
-					"key": "collate",
-					"value": true
-				}
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
 			},
 			{
-				"propertyName": "Case-sensitivity",
-				"propertyKeyword": "caseSensitivity",
-				"propertyType": "select",
-				"options": [
-					"",
-					"cs",
-					"ci"
-				],
-				"dependency": {
-					"key": "collate",
-					"value": true
-				}
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
 			},
 			{
-				"propertyName": "Accent-sensitivity",
-				"propertyKeyword": "accentSensitivity",
-				"propertyType": "select",
-				"options": [
-					"",
-					"as",
-					"ai"
-				],
-				"dependency": {
-					"key": "collate",
-					"value": true
-				}
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
 			},
 			{
-				"propertyName": "Punctuation-sensitivity",
-				"propertyKeyword": "punctuationSensitivity",
-				"propertyType": "select",
-				"options": [
-					"",
-					"ps",
-					"pi"
-				],
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
 				"dependency": {
-					"key": "collate",
-					"value": true
-				}
-			},
-			{
-				"propertyName": "First-letter preference",
-				"propertyKeyword": "firstLetterPreference",
-				"propertyType": "select",
-				"options": [
-					"",
-					"fl",
-					"fu"
-				],
-				"dependency": {
-					"key": "collate",
-					"value": true
-				}
-			},
-			{
-				"propertyName": "Case-conversion",
-				"propertyKeyword": "caseConversion",
-				"propertyType": "select",
-				"options": [
-					"",
-					"lower",
-					"upper"
-				],
-				"dependency": {
-					"key": "collate",
-					"value": true
-				}
-			},
-			{
-				"propertyName": "Space-trimming",
-				"propertyKeyword": "spaceTrimming",
-				"propertyType": "select",
-				"options": [
-					"",
-					"trim",
-					"ltrim",
-					"rtrim"
-				],
-				"dependency": {
-					"key": "collate",
-					"value": true
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
 				}
 			},
 			"sample",
@@ -539,6 +544,21 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "select",
 				"options": [
 					"",
+					"integer"
+				],
+				"dependency": {
+					"key": "mode",
+					"value": "int"
+				}
+			},
+			{
+				"propertyName": "Synonym",
+				"propertyKeyword": "synonym",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"dec",
 					"numeric"
 				],
 				"dependency": {
@@ -566,8 +586,23 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "precision",
 				"propertyType": "numeric",
 				"valueType": "number",
-				"allowNegative": false,
-				"typeDecorator": true
+				"minValue": 0,
+				"maxValue": 38,
+				"step": 1,
+				"typeDecorator": true,
+				"dependency": {
+					"type": "or",
+					"values": [
+						{
+							"key": "mode",
+							"value": "number"
+						},
+						{
+							"key": "mode",
+							"value": "decimal"
+						}
+					]
+				}
 			},
 			{
 				"propertyName": "Scale",
@@ -581,7 +616,7 @@ making sure that you maintain a proper JSON format.
 					"values": [
 						{
 							"key": "mode",
-							"value": "float"
+							"value": "number"
 						},
 						{
 							"key": "mode",
@@ -591,14 +626,36 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
-				"propertyName": "Column expression",
-				"propertyKeyword": "expression",
+				"propertyName": "Format",
+				"propertyKeyword": "format",
 				"propertyType": "text",
-				"dependency": {
-					"level": "parent",
-					"key": "external",
-					"value": true
-				}
+				"propertyTooltip": "A variable length string enclosed in apostrophes containing formatting characters that define the display format for the data type."
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"LATIN",
+					"UNICODE",
+					"KANJISJIS",
+					"GRAPHIC"
+				]
 			},
 			{
 				"propertyName": "Comments",
@@ -817,30 +874,6 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
-				"propertyName": "Alternate Key",
-				"propertyKeyword": "alternateKey",
-				"defaultValue": false,
-				"enableForReference": true,
-				"propertyType": "checkbox",
-				"dependency": {
-					"type": "or",
-					"values": [
-						{
-							"key": "unique",
-							"value": true
-						},
-						{
-							"key": "compositeUniqueKey",
-							"value": true
-						}
-					]
-				},
-				"disabledOnCondition": [{
-					"key": "compositeUniqueKey",
-					"value": true
-				}]
-			},
-			{
 				"propertyName": "Unique key constraint name",
 				"propertyKeyword": "uniqueKeyConstraintName",
 				"propertyType": "text",
@@ -852,96 +885,39 @@ making sure that you maintain a proper JSON format.
 			"foreignCollection",
 			"foreignField",
 			"relationshipType",
+
 			{
-				"propertyName": "Default option",
-				"propertyKeyword": "defaultOption",
-				"propertyTooltip": "Select from list of options",
-				"propertyType": "select",
-				"options": [
-					"",
-					"Default",
-					"Identity",
-					"Autoincrement",
-					"Sequence"
-				]
-			},
-			{
-				"propertyName": "Default",
-				"propertyKeyword": "default",
-				"propertyType": "numeric",
-				"dependency": {
-					"key": "defaultOption",
-					"value": "Default"
-				}
-			},
-			{
-				"propertyName": "Sequence",
-				"propertyKeyword": "sequence",
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
 				"propertyType": "text",
-				"dependency": {
-					"key": "defaultOption",
-					"value": "Sequence"
-				}
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
 			},
 			{
-				"propertyName": "Autoincrement",
-				"propertyType": "block",
-				"propertyKeyword": "autoincrement",
-				"propertyTooltip": "",
-				"structure": [
-					{
-						"propertyName": "Start num",
-						"propertyKeyword": "start_num",
-						"propertyType": "text",
-						"valueType": "number",
-						"allowNegative": false
-					},
-					{
-						"propertyName": "Step num",
-						"propertyKeyword": "step_num",
-						"propertyType": "text",
-						"valueType": "number",
-						"allowNegative": false
-					}
-				],
-				"dependency": {
-					"key": "defaultOption",
-					"value": "Autoincrement"
-				}
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
 			},
 			{
-				"propertyName": "Identity",
-				"propertyType": "block",
-				"propertyKeyword": "identity",
-				"propertyTooltip": "",
-				"structure": [
-					{
-						"propertyName": "Start num",
-						"propertyKeyword": "start_num",
-						"propertyType": "text",
-						"valueType": "number",
-						"allowNegative": false
-					},
-					{
-						"propertyName": "Step num",
-						"propertyKeyword": "step_num",
-						"propertyType": "text",
-						"valueType": "number",
-						"allowNegative": false
-					}
-				],
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
 				"dependency": {
-					"key": "defaultOption",
-					"value": "Identity"
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
 				}
 			},
-			"unit",
 			"minimum",
-			"exclusiveMinimum",
 			"maximum",
-			"exclusiveMaximum",
-			"multipleOf",
-			"divisibleBy",
 			"pattern",
 			"enum",
 			"sample",
@@ -973,21 +949,45 @@ making sure that you maintain a proper JSON format.
 				"valueType": "string"
 			},
 			{
-				"propertyName": "Number of characters",
-				"propertyKeyword": "numChar",
+				"propertyName": "Length",
+				"propertyKeyword": "length",
+				"propertyTooltip": "Number of characters.",
 				"propertyType": "numeric",
 				"valueType": "number",
-				"allowNegative": false
+				"allowNegative": false,
+				"typeDecorator": true
 			},
 			{
-				"propertyName": "Column expression",
-				"propertyKeyword": "expression",
+				"propertyName": "Format",
+				"propertyKeyword": "format",
 				"propertyType": "text",
-				"dependency": {
-					"level": "parent",
-					"key": "external",
-					"value": true
-				}
+				"propertyTooltip": "A variable length string enclosed in apostrophes containing formatting characters that define the display format for the data type."
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"LATIN",
+					"UNICODE",
+					"KANJISJIS",
+					"GRAPHIC"
+				]
 			},
 			{
 				"propertyName": "Comments",
@@ -1206,36 +1206,42 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
-				"propertyName": "Alternate Key",
-				"propertyKeyword": "alternateKey",
-				"defaultValue": false,
-				"enableForReference": true,
-				"propertyType": "checkbox",
-				"dependency": {
-					"type": "or",
-					"values": [
-						{
-							"key": "unique",
-							"value": true
-						},
-						{
-							"key": "compositeUniqueKey",
-							"value": true
-						}
-					]
-				},
-				"disabledOnCondition": [{
-					"key": "compositeUniqueKey",
-					"value": true
-				}]
-			},
-			{
 				"propertyName": "Unique key constraint name",
 				"propertyKeyword": "uniqueKeyConstraintName",
 				"propertyType": "text",
 				"dependency": {
 					"key": "unique",
 					"value": true
+				}
+			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
 				}
 			},
 			{
@@ -1310,6 +1316,38 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
+				"propertyName": "Format",
+				"propertyKeyword": "format",
+				"propertyType": "text",
+				"propertyTooltip": "A variable length string enclosed in apostrophes containing formatting characters that define the display format for the data type."
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"LATIN",
+					"UNICODE",
+					"KANJISJIS",
+					"GRAPHIC"
+				]
+			},
+			{
 				"propertyName": "Comments",
 				"propertyKeyword": "description",
 				"propertyTooltip": "comments",
@@ -1526,36 +1564,42 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
-				"propertyName": "Alternate Key",
-				"propertyKeyword": "alternateKey",
-				"defaultValue": false,
-				"enableForReference": true,
-				"propertyType": "checkbox",
-				"dependency": {
-					"type": "or",
-					"values": [
-						{
-							"key": "unique",
-							"value": true
-						},
-						{
-							"key": "compositeUniqueKey",
-							"value": true
-						}
-					]
-				},
-				"disabledOnCondition": [{
-					"key": "compositeUniqueKey",
-					"value": true
-				}]
-			},
-			{
 				"propertyName": "Unique key constraint name",
 				"propertyKeyword": "uniqueKeyConstraintName",
 				"propertyType": "text",
 				"dependency": {
 					"key": "unique",
 					"value": true
+				}
+			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
 				}
 			},
 			"pattern",
@@ -1632,6 +1676,38 @@ making sure that you maintain a proper JSON format.
 						"timestamp"
 					]
 				}
+			},
+			{
+				"propertyName": "Format",
+				"propertyKeyword": "format",
+				"propertyType": "text",
+				"propertyTooltip": "A variable length string enclosed in apostrophes containing formatting characters that define the display format for the data type."
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"LATIN",
+					"UNICODE",
+					"KANJISJIS",
+					"GRAPHIC"
+				]
 			},
 			"dependencies",
 			{
@@ -1842,28 +1918,416 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
-				"propertyName": "Alternate Key",
-				"propertyKeyword": "alternateKey",
+				"propertyName": "Unique key constraint name",
+				"propertyKeyword": "uniqueKeyConstraintName",
+				"propertyType": "text",
+				"dependency": {
+					"key": "unique",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
+				}
+			},
+			"pattern",
+			"default",
+			"enum",
+			"sample",
+			{
+				"propertyName": "Remarks",
+				"propertyKeyword": "comments",
+				"propertyTooltip": "remarks",
+				"addTimestampButton": true,
+				"propertyType": "details",
+				"template": "textarea"
+			}
+		],
+		"interval": [
+			"name",
+			"code",
+			"sampleName",
+			"schemaId",
+			"refPath",
+			"description",
+			"type",
+			{
+				"propertyName": "Subtype",
+				"propertyKeyword": "subtype",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"interval year",
+					"interval month",
+					"interval day",
+					"interval hour",
+					"interval minute",
+					"interval second"
+				],
+				"data": "options"
+			},
+			{
+				"propertyName": "Precision",
+				"propertyKeyword": "precision",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"typeDecorator": true,
+				"minValue": 0,
+				"step": 1
+			},
+			{
+				"propertyName": "To",
+				"propertyKeyword": "toPrecision",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"MONTH"
+				],
+				"dependency": {
+					"key": "subtype",
+					"value": "interval year"
+				}
+			},
+			{
+				"propertyName": "To",
+				"propertyKeyword": "toPrecision",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"HOUR",
+					"MINUTE",
+					"SECOND"
+				],
+				"dependency": {
+					"key": "subtype",
+					"value": "interval day"
+				}
+			},
+			{
+				"propertyName": "To",
+				"propertyKeyword": "toPrecision",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"MINUTE",
+					"SECOND"
+				],
+				"dependency": {
+					"key": "subtype",
+					"value": "interval hour"
+				}
+			},
+			{
+				"propertyName": "To",
+				"propertyKeyword": "toPrecision",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"SECOND"
+				],
+				"dependency": {
+					"key": "subtype",
+					"value": "interval minute"
+				}
+			},
+			{
+				"propertyName": "Seconds precision",
+				"propertyKeyword": "fractSecPrecision",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"propertyTooltip": "Setting for precision must be between 0 and 6",
+				"minValue": 0,
+				"maxValue": 6,
+				"step": 1,
+				"dependency": {
+					"key": "toPrecision",
+					"value": "SECOND"
+				}
+			},
+			{
+				"propertyName": "Seconds precision",
+				"propertyKeyword": "fractSecPrecision",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"propertyTooltip": "Setting for precision must be between 0 and 6",
+				"minValue": 0,
+				"maxValue": 6,
+				"step": 1,
+				"typeDecorator": true,
+				"dependency": {
+					"key": "subtype",
+					"value": "interval second"
+				}
+			},
+			{
+				"propertyName": "Format",
+				"propertyKeyword": "format",
+				"propertyType": "text",
+				"propertyTooltip": "A variable length string enclosed in apostrophes containing formatting characters that define the display format for the data type."
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
 				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"LATIN",
+					"UNICODE",
+					"KANJISJIS",
+					"GRAPHIC"
+				]
+			},
+			"dependencies",
+			{
+				"propertyName": "Primary key",
+				"propertyNameFull":"Composite Primary Key",
+				"propertyKeyword": "compositePrimaryKey",
 				"enableForReference": true,
 				"propertyType": "checkbox",
+				"propertyTooltip": {
+					"disabled": [
+						{
+							"tooltip": "This column is part of the table composite primary key definition. Please refer to this definition if you want more information or to update the Primary Key definition",
+							"dependency": {
+								"key": "compositePrimaryKey",
+								"value": true
+							}
+						},
+						{
+							"tooltip": "Remove the existing composite primary key definition prior to unlock the possibility to mark this single column as the new primary key for this table",
+							"dependency": {
+								"level": "siblings",
+								"key": "compositePrimaryKey",
+								"value": true
+							}
+						},
+						{
+							"tooltip": "Another column has already been selected as primary key.  You must unselect it prior to either selecting this column, or creating a compound primary key.",
+							"dependency": {
+								"level": "siblings",
+								"key": "primaryKey",
+								"value": true
+							}
+						}
+					]
+				},
 				"dependency": {
 					"type": "or",
 					"values": [
 						{
-							"key": "unique",
+							"key": "compositePrimaryKey",
 							"value": true
 						},
 						{
-							"key": "compositeUniqueKey",
+							"level": "siblings",
+							"key": "compositePrimaryKey",
 							"value": true
+						},
+						{
+							"level": "siblings",
+							"value": {
+								"type": "and",
+								"values": [
+									{
+										"key": "primaryKey",
+										"value": true
+									},
+									{
+										"type": "or",
+										"values": [
+											{
+												"key": "compositeUniqueKey",
+												"value": false
+											},
+											{
+												"key": "compositeUniqueKey",
+												"exist": false
+											}
+										]
+									}
+								]
+							}
 						}
 					]
 				},
-				"disabledOnCondition": [{
+				"disabled": true
+			},
+			{
+				"propertyName": "Primary key",
+				"propertyKeyword": "primaryKey",
+				"enableForReference": true,
+				"propertyType": "checkbox",
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"type": "not",
+							"values": {
+								"level": "siblings",
+								"key": "compositePrimaryKey",
+								"value": true
+							}
+						},
+						{
+							"type": "not",
+							"values": [{
+								"level": "siblings",
+								"value": {
+									"type": "and",
+									"values": [{
+										"key": "primaryKey",
+										"value": true
+									},
+										{
+											"type": "or",
+											"values": [
+												{
+													"key": "compositeUniqueKey",
+													"value": false
+												},
+												{
+													"key": "compositeUniqueKey",
+													"exist": false
+												}
+											]
+										}]
+								}
+							}]
+						},
+						{
+							"type": "and",
+							"values": [
+								{
+									"type": "or",
+									"values": [
+										{
+											"key": "compositePrimaryKey",
+											"value": false
+										},
+										{
+											"key": "compositePrimaryKey",
+											"exist": false
+										}
+									]
+								},
+								{
+									"type": "or",
+									"values": [
+										{
+											"key": "compositeUniqueKey",
+											"value": false
+										},
+										{
+											"key": "compositeUniqueKey",
+											"exist": false
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"propertyName": "Primary key constraint name",
+				"propertyKeyword": "primaryKeyConstraintName",
+				"propertyType": "text",
+				"dependency": {
+					"key": "primaryKey",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "Not null",
+				"propertyKeyword": "required",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Unique",
+				"propertyNameFull":"Composite Unique Key",
+				"propertyKeyword": "compositeUniqueKey",
+				"propertyType": "checkbox",
+				"dependency": {
 					"key": "compositeUniqueKey",
 					"value": true
-				}]
+				},
+				"disabled": true
+			},
+			{
+				"propertyName": "Unique",
+				"propertyKeyword": "unique",
+				"cleanDependency": true,
+				"enableForReference": true,
+				"propertyType": "checkbox",
+				"dependency": {
+					"type": "and",
+					"values": [
+						{
+							"type": "or",
+							"values": [{
+								"key": "compositePrimaryKey",
+								"value": false
+							}, {
+								"key": "compositePrimaryKey",
+								"exist": false
+							}]
+						},
+						{
+							"type": "or",
+							"values": [{
+								"key": "compositeUniqueKey",
+								"value": false
+							}, {
+								"key": "compositeUniqueKey",
+								"exist": false
+							}]
+						}
+					]
+				}
 			},
 			{
 				"propertyName": "Unique key constraint name",
@@ -1872,6 +2336,36 @@ making sure that you maintain a proper JSON format.
 				"dependency": {
 					"key": "unique",
 					"value": true
+				}
+			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
 				}
 			},
 			"pattern",
@@ -1888,6 +2382,543 @@ making sure that you maintain a proper JSON format.
 			}
 		],
 		"___1": [],
+		"geospatial": [
+			"name",
+			"code",
+			"schemaId",
+			"type",
+			{
+				"propertyName": "Subtype",
+				"propertyKeyword": "mode",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"ST_Geometry",
+					"MBR",
+					"MBB"
+				],
+				"data": "options",
+				"valueType": "string"
+			},
+			{
+				"propertyName": "Geometry type",
+				"propertyKeyword": "subtype",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"ST_Point",
+					"ST_LineString",
+					"ST_Polygon",
+					"ST_GeomCollection",
+					"ST_MultiPoint",
+					"ST_MultiLineString",
+					"ST_MultiLineString",
+					"GeoSequence"
+				],
+				"data": "options",
+				"valueType": "string",
+				"dependency": {
+					"key": "mode",
+					"value": "ST_Geometry"
+				}
+			},
+			{
+				"propertyName": "Length",
+				"propertyKeyword": "length",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"typeDecorator": true,
+				"defaultValue": 100,
+				"minValue": 100,
+				"step": 1
+			},
+			{
+				"propertyName": "Inline length",
+				"propertyKeyword": "inlineLength",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"minValue": 100,
+				"step": 1
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"LATIN",
+					"UNICODE",
+					"KANJISJIS",
+					"GRAPHIC"
+				]
+			},
+			{
+				"propertyName": "Primary key",
+				"propertyKeyword": "primaryKey",
+				"shouldValidate": false,
+				"propertyType": "checkbox",
+				"valueType": "boolean",
+				"hidden": true
+			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
+				}
+			},
+			"foreignCollection",
+			"foreignField",
+			"relationshipType",
+			"comments"
+		],
+		"json": [
+			"name",
+			"sampleName",
+			"schemaId",
+			"refPath",
+			"type",
+			{
+				"propertyName": "Length",
+				"propertyKeyword": "length",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"typeDecorator": true
+			},
+			{
+				"propertyName": "Inline length",
+				"propertyKeyword": "inlineLength",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"minValue": 100,
+				"step": 1
+			},
+			{
+				"propertyName": "Comments",
+				"propertyKeyword": "description",
+				"propertyTooltip": "comments",
+				"addTimestampButton": false,
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "Not null",
+				"propertyKeyword": "required",
+				"enableForReference": true,
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "JSON Types",
+				"propertyKeyword": "subtype",
+				"propertyTooltip": "needs for configuration of json types",
+				"propertyType": "select",
+				"options": ["json"],
+				"hidden": true
+			},
+			{
+				"propertyName": "JSON Type",
+				"propertyKeyword": "physicalType",
+				"propertyType": "select",
+				"hidden": true
+			},
+			"required",
+			"sample",
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"LATIN",
+					"UNICODE"
+				]
+			},
+			{
+				"propertyName": "Storage format",
+				"propertyKeyword": "storageFormat",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"BSON",
+					"UBJSON"
+				]
+			},
+			{
+				"propertyName": "Auto column",
+				"propertyKeyword": "autoColumn",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
+				}
+			},
+			{
+				"propertyName": "Remarks",
+				"propertyKeyword": "comments",
+				"shouldValidate": false,
+				"propertyTooltip": "remarks",
+				"addTimestampButton": true,
+				"propertyType": "details",
+				"template": "textarea"
+			}
+		],
+		"xml": [
+			"name",
+			"code",
+			"sampleName",
+			"schemaId",
+			"refPath",
+			"type",
+			{
+				"propertyName": "Synonym",
+				"propertyKeyword": "synonym",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"xmltype"
+				]
+			},
+			{
+				"propertyName": "Length",
+				"propertyKeyword": "length",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"typeDecorator": true,
+				"defaultValue": 100,
+				"minValue": 100,
+				"step": 1
+			},
+			{
+				"propertyName": "Inline length",
+				"propertyKeyword": "inlineLength",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"minValue": 100,
+				"step": 1
+			},
+			{
+				"propertyName": "Comments",
+				"propertyKeyword": "description",
+				"propertyTooltip": "comments",
+				"addTimestampButton": false,
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Not null",
+				"propertyKeyword": "required",
+				"enableForReference": true,
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
+				}
+			},
+			{
+				"propertyName": "Remarks",
+				"propertyKeyword": "comments",
+				"shouldValidate": false,
+				"propertyTooltip": "remarks",
+				"addTimestampButton": true,
+				"propertyType": "details",
+				"template": "textarea"
+			}
+		],
+		"dataset": [
+			"name",
+			"code",
+			"sampleName",
+			"schemaId",
+			"refPath",
+			"type",
+			{
+				"propertyName": "Length",
+				"propertyKeyword": "length",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"typeDecorator": true,
+				"defaultValue": 100
+			},
+			{
+				"propertyName": "Inline length",
+				"propertyKeyword": "inlineLength",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"minValue": 100,
+				"step": 1
+			},
+			{
+				"propertyName": "Storage format",
+				"propertyKeyword": "storageFormat",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"defaultValue": "AVRO",
+				"options": [
+					"AVRO",
+					"CSV"
+				]
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"",
+					"LATIN",
+					"UNICODE"
+				],
+				"dependency": {
+					"key": "storageFormat",
+					"value": "CSV"
+				}
+			},
+			{
+				"propertyName": "With schema",
+				"propertyKeyword": "withSchema",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Comments",
+				"propertyKeyword": "description",
+				"propertyTooltip": "comments",
+				"addTimestampButton": false,
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Not null",
+				"propertyKeyword": "required",
+				"enableForReference": true,
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
+				}
+			},
+			{
+				"propertyName": "Remarks",
+				"propertyKeyword": "comments",
+				"shouldValidate": false,
+				"propertyTooltip": "remarks",
+				"addTimestampButton": true,
+				"propertyType": "details",
+				"template": "textarea"
+			}
+		],
+		"___2": [],
+		"object": [
+			"name",
+			"code",
+			"sampleName",
+			"schemaId",
+			"description",
+			"type",
+			"dependencies",
+			{
+				"propertyName": "Required",
+				"propertyKeyword": "required",
+				"shouldValidate": false,
+				"propertyType": "checkbox",
+				"valueType": "boolean",
+				"disabledOnCondition": [{
+					"key": "primaryKey",
+					"value": true
+				}]
+			},
+			{
+				"propertyName": "Primary key",
+				"propertyKeyword": "primaryKey",
+				"shouldValidate": false,
+				"propertyType": "checkbox",
+				"valueType": "boolean",
+				"hidden": true
+			},
+			{
+				"propertyName": "Method specification",
+				"propertyKeyword": "methodSpecification",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false,
+				"dependency": {
+					"level": "parent",
+					"key": "type",
+					"value": "definitions"
+				}
+			},
+			"minProperties",
+			"maxProperties",
+			"additionalProperties",
+			"comments"
+		],
 		"array": [
 			"name",
 			"code",
@@ -1919,7 +2950,7 @@ making sure that you maintain a proper JSON format.
 			},
 			{
 				"propertyName": "Size",
-				"propertyKeyword": "size",
+				"propertyKeyword": "length",
 				"propertyType": "numeric",
 				"valueType": "number",
 				"propertyTooltip": "Array size",
@@ -1929,16 +2960,35 @@ making sure that you maintain a proper JSON format.
 				"typeDecorator": true
 			},
 			{
-				"propertyName": "Array Data Type",
-				"propertyKeyword": "arrayDataType",
+				"propertyName": "Default",
+				"propertyKeyword": "default",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Uppercase",
+				"propertyKeyword": "uppercase",
+				"propertyTooltip": "The column data is in uppercase format.",
+				"propertyType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"propertyName": "Case-specific",
+				"propertyKeyword": "caseSpecific",
+				"propertyType": "checkbox",
+				"defaultValue": false,
+				"propertyTooltip": "The column data is in case-specific format."
+			},
+			{
+				"propertyName": "Character set",
+				"propertyKeyword": "characterSet",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": [
-					"One-Dimensional (1-D)",
-					"Multidimensional (n-D)"
-				],
-				"data": "options",
-				"valueType": "string"
+					"LATIN",
+					"UNICODE",
+					"KANJISJIS",
+					"GRAPHIC"
+				]
 			},
 			{
 				"propertyName": "Primary key",
@@ -2040,19 +3090,19 @@ making sure that you maintain a proper JSON format.
 										"key": "primaryKey",
 										"value": true
 									},
-									{
-										"type": "or",
-										"values": [
-											{
-												"key": "compositeUniqueKey",
-												"value": false
-											},
-											{
-												"key": "compositeUniqueKey",
-												"exist": false
-											}
-										]
-									}]
+										{
+											"type": "or",
+											"values": [
+												{
+													"key": "compositeUniqueKey",
+													"value": false
+												},
+												{
+													"key": "compositeUniqueKey",
+													"exist": false
+												}
+											]
+										}]
 								}
 							}]
 						},
@@ -2148,30 +3198,6 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
-				"propertyName": "Alternate Key",
-				"propertyKeyword": "alternateKey",
-				"defaultValue": false,
-				"enableForReference": true,
-				"propertyType": "checkbox",
-				"dependency": {
-					"type": "or",
-					"values": [
-						{
-							"key": "unique",
-							"value": true
-						},
-						{
-							"key": "compositeUniqueKey",
-							"value": true
-						}
-					]
-				},
-				"disabledOnCondition": [{
-					"key": "compositeUniqueKey",
-					"value": true
-				}]
-			},
-			{
 				"propertyName": "Unique key constraint name",
 				"propertyKeyword": "uniqueKeyConstraintName",
 				"propertyType": "text",
@@ -2180,170 +3206,28 @@ making sure that you maintain a proper JSON format.
 					"value": true
 				}
 			},
+			{
+				"propertyName": "Multivalue compression",
+				"propertyKeyword": "compress",
+				"propertyType": "text",
+				"propertyTooltip": "Multivalue compression for a set of distinct values in a column."
+			},
+			{
+				"propertyName": "Algorithmic compression",
+				"propertyKeyword": "compressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmic compression (ALC) for the column."
+			},
+			{
+				"propertyName": "Algorithmic decompression",
+				"propertyKeyword": "decompressUsing",
+				"propertyType": "text",
+				"propertyTooltip": "Algorithmically decompress data in this column."
+			},
 			"dependencies",
-			"additionalProperties",
 			{
 				"propertyName": "Remarks",
 				"propertyKeyword": "comments",
-				"propertyTooltip": "remarks",
-				"addTimestampButton": true,
-				"propertyType": "details",
-				"template": "textarea"
-			},
-			{
-				"propertyKeyword": "foreignCollection",
-				"hidden": true
-			},
-			{
-				"propertyKeyword": "foreignField",
-				"hidden": true
-			},
-			{
-				"propertyKeyword": "relationshipType",
-				"hidden": true
-			}
-		],
-		"geospatial": [
-			"name",
-			"code",
-			"schemaId",
-			"type",
-			{
-				"propertyName": "Subtype",
-				"propertyKeyword": "mode",
-				"propertyTooltip": "Select from list of options",
-				"propertyType": "select",
-				"options": [
-					"ST_Geometry",
-					"MBR",
-					"MBB"
-				],
-				"data": "options",
-				"valueType": "string"
-			},
-			{
-				"propertyName": "Geometry type",
-				"propertyKeyword": "subtype",
-				"propertyTooltip": "Select from list of options",
-				"propertyType": "select",
-				"options": [
-					"ST_Point",
-					"ST_LineString",
-					"ST_Polygon",
-					"ST_GeomCollection",
-					"ST_MultiPoint",
-					"ST_MultiLineString",
-					"ST_MultiLineString",
-					"GeoSequence"
-				],
-				"data": "options",
-				"valueType": "string",
-				"dependency": {
-					"key": "mode",
-					"value": "ST_Geometry"
-				}
-			},
-			{
-				"propertyName": "Primary key",
-				"propertyKeyword": "primaryKey",
-				"shouldValidate": false,
-				"propertyType": "checkbox",
-				"valueType": "boolean",
-				"hidden": true
-			},
-			"foreignCollection",
-			"foreignField",
-			"relationshipType",
-			"comments"
-		],
-		"json": [
-			"name",
-			"sampleName",
-			"schemaId",
-			"refPath",
-			"type",
-			{
-				"propertyName": "Comments",
-				"propertyKeyword": "description",
-				"propertyTooltip": "comments",
-				"addTimestampButton": false,
-				"propertyType": "details",
-				"template": "textarea"
-			},
-			{
-				"propertyName": "Not null",
-				"propertyKeyword": "required",
-				"enableForReference": true,
-				"propertyType": "checkbox"
-			},
-			{
-				"propertyName": "JSON Types",
-				"propertyKeyword": "subtype",
-				"propertyTooltip": "needs for configuration of json types",
-				"propertyType": "select",
-				"options": ["json"],
-				"hidden": true
-			},
-			{
-				"propertyName": "JSON Type",
-				"propertyKeyword": "physicalType",
-				"propertyType": "select",
-				"hidden": true
-			},
-			"required",
-			"sample",
-			{
-				"propertyName": "Remarks",
-				"propertyKeyword": "comments",
-				"shouldValidate": false,
-				"propertyTooltip": "remarks",
-				"addTimestampButton": true,
-				"propertyType": "details",
-				"template": "textarea"
-			}
-		],
-		"xml": [
-			"name",
-			"code",
-			"sampleName",
-			"schemaId",
-			"refPath",
-			"type",
-			{
-				"propertyName": "Comments",
-				"propertyKeyword": "description",
-				"propertyTooltip": "comments",
-				"addTimestampButton": false,
-				"propertyType": "details",
-				"template": "textarea"
-			},
-			{
-				"propertyName": "Default",
-				"propertyKeyword": "default",
-				"propertyType": "details",
-				"template": "textarea",
-				"markdown": false
-			},
-			{
-				"propertyName": "Default constraint name",
-				"propertyKeyword": "defaultConstraintName",
-				"propertyType": "text"
-			},
-			{
-				"propertyName": "Not null",
-				"propertyKeyword": "required",
-				"enableForReference": true,
-				"propertyType": "checkbox"
-			},
-			{
-				"propertyName": "XML schema collection",
-				"propertyKeyword": "xml_schema_collection",
-				"propertyType": "text"
-			},
-			{
-				"propertyName": "Remarks",
-				"propertyKeyword": "comments",
-				"shouldValidate": false,
 				"propertyTooltip": "remarks",
 				"addTimestampButton": true,
 				"propertyType": "details",

@@ -119,12 +119,6 @@ making sure that you maintain a proper JSON format.
 		"lowerTab": "Details",
 		"structure": [
 			{
-				"propertyName": "Owner",
-				"propertyKeyword": "db_owner",
-				"propertyType": "text",
-				"propertyTooltip": "Name of the immediate owning user or database. The default is the user name associated with the session."
-			},
-			{
 				"propertyName": "Account",
 				"propertyKeyword": "db_account",
 				"propertyType": "text",
@@ -162,11 +156,11 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "BEFORE Journal",
 				"propertyKeyword": "db_before_journaling_strategy",
 				"propertyType": "select",
+				"defaultValue": "NO",
 				"options": [
 					"NO",
-					"SINGLE",
-					"DUAL",
-					"LOCAL"
+					"BEFORE",
+					"DUAL"
 				]
 			},
 			{
@@ -177,9 +171,10 @@ making sure that you maintain a proper JSON format.
 				"defaultValue": "NO",
 				"options": [
 					"NO",
-					"SINGLE",
+					"AFTER",
 					"DUAL",
-					"LOCAL"
+					"LOCAL",
+					"NO LOCAL"
 				]
 			},
 			{

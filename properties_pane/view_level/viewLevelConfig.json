@@ -20,11 +20,6 @@
 				"markdown": false
 			},
 			{
-				"propertyName": "Case sensitive",
-				"propertyKeyword": "isCaseSensitive",
-				"propertyType": "checkbox"
-			},
-			{
 				"propertyName": "Comments",
 				"propertyKeyword": "description",
 				"propertyTooltip": "comments",
@@ -42,27 +37,17 @@
 				"template": "textarea"
 			},
 			{
+				"propertyName": "Recursive",
+				"propertyKeyword": "recursive",
+				"propertyType": "checkbox"
+			},
+			{
 				"propertyKeyword": "pipeline",
 				"hidden": true
 			},
 			{
-				"propertyName": "Materialized",
-				"propertyKeyword": "materialized",
-				"shouldValidate": false,
-				"propertyTooltip": "is Materialized View",
-				"propertyType": "checkbox"
-			},
-			{
-				"propertyName": "Secure",
-				"propertyKeyword": "secure",
-				"shouldValidate": false,
-				"propertyType": "checkbox"
-			},
-			{
-				"propertyName": "Copy grants",
-				"propertyKeyword": "copyGrants",
-				"shouldValidate": false,
-				"propertyType": "checkbox"
+				"propertyKeyword": "viewOn",
+				"hidden": true
 			}
 		]
 	}
