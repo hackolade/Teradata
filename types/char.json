@@ -1,0 +1,46 @@
+{
+	"name": "char",
+	"erdAbbreviation": "<chr>",
+	"dtdAbbreviation": "{ABC}",
+	"parentType": "string",
+	"hiddenOnEntity": "view",
+	"useSample": true,
+	"default": true,
+	"defaultValues": {
+		"minLength": "",
+		"maxLength": "",
+		"pattern": "",
+		"default": "",
+		"primaryKey": false,
+		"relationshipType": "",
+		"parentRelationship": "",
+		"childRelationships": [],
+		"foreignCollection": "",
+		"foreignField": [],
+		"enum": [],
+		"sample": "",
+		"mode": "char",
+		"synonym": ""
+	},
+	"descriptor": [
+		{
+			"schema": {
+				"mode": "long varchar"
+			},
+			"length": 64000
+		},
+		{
+			"schema": {
+				"mode": "vargraphic"
+			},
+			"characterSet": "GRAPHIC"
+		},
+		{
+			"schema": {
+				"mode": "long vargraphic"
+			},
+			"characterSet": "GRAPHIC",
+			"length": 32000
+		}
+	]
+}

@@ -119,12 +119,6 @@ making sure that you maintain a proper JSON format.
 		"lowerTab": "Details",
 		"structure": [
 			{
-				"propertyName": "Owner",
-				"propertyKeyword": "db_owner",
-				"propertyType": "text",
-				"propertyTooltip": "Name of the immediate owning user or database. The default is the user name associated with the session."
-			},
-			{
 				"propertyName": "Account",
 				"propertyKeyword": "db_account",
 				"propertyType": "text",
@@ -142,6 +136,16 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text"
 			},
 			{
+				"propertyName": "Spool",
+				"propertyKeyword": "spool_files_size",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Temporary",
+				"propertyKeyword": "temporary_tables_size",
+				"propertyType": "text"
+			},
+			{
 				"propertyName": "Fallback",
 				"propertyKeyword": "has_fallback",
 				"propertyType": "checkbox",
@@ -149,9 +153,10 @@ making sure that you maintain a proper JSON format.
 				"defaultValue": false
 			},
 			{
-				"propertyName": "Journal",
-				"propertyKeyword": "db_journaling_strategy",
+				"propertyName": "BEFORE Journal",
+				"propertyKeyword": "db_before_journaling_strategy",
 				"propertyType": "select",
+				"defaultValue": "NO",
 				"options": [
 					"NO",
 					"BEFORE",
@@ -165,10 +170,11 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Type of journal to be maintained by default for data tables created in the new database. The JOURNAL keyword without AFTER implies BEFORE and AFTER images.",
 				"defaultValue": "NO",
 				"options": [
+					"NO",
+					"AFTER",
 					"DUAL",
 					"LOCAL",
-					"NOT LOCAL",
-					"NO"
+					"NO LOCAL"
 				]
 			},
 			{

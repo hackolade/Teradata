@@ -1,0 +1,23 @@
+{
+	"name": "byte",
+	"erdAbbreviation": "<byte>",
+	"dtdAbbreviation": "{BYTE}",
+	"parentType": "binary",
+	"hiddenOnEntity": "view",
+	"useSample": false,
+	"default": true,
+	"defaultValues": {
+		"relationshipType": "",
+		"parentRelationship": "",
+		"childRelationships": [],
+		"foreignEntity": "",
+		"foreignField": [],
+		"default": "",
+		"enum": [],
+		"sample": "",
+		"mode": "byte"
+	},
+	"descriptor": {
+		"mode": "binary"
+	}
+}

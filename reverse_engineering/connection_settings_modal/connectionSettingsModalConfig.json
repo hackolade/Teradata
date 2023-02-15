@@ -6,159 +6,228 @@
 				"inputLabel": "Name",
 				"inputKeyword": "name",
 				"inputType": "text",
-				"inputPlaceholder": "Name"
-				
+				"inputPlaceholder": "Name",
+				"description": "Choose a friendly connection name"
 			},
 			{
-				"inputLabel": "Cloud platform",
-				"inputKeyword": "cloudPlatform",
-				"inputType": "select",
-				"options": [
-					{ "value": "", "label": "" },
-					{ "value": "AWS", "label": "Amazon Web Services" },
-					{ "value": "GCP", "label": "Google Cloud" },
-					{ "value": "Azure", "label": "Microsoft Azure" }
-				]
-			},
-			{
-				"inputLabel": "Host prefix",
+				"inputLabel": "Host",
 				"inputKeyword": "host",
 				"inputType": "text",
-				"inputPlaceholder": "<account>.<region>",
-				"inputTooltip": "account name provided by Snowflake, or <account> for US West region, or <account>.<region> for all others",
-				"dependency": {
-					"key": "cloudPlatform",
-					"value": "AWS"
-				}
+				"inputPlaceholder": "host",
+				"inputTooltip": "Specify host IP address or DNS name of Teradata server",
+				"regex": "([^\\s])"
 			},
 			{
-				"inputLabel": "Host prefix",
-				"inputKeyword": "host",
+				"inputLabel": "Port",
+				"inputKeyword": "port",
+				"description": "Specify port number of Teradata server",
 				"inputType": "text",
-				"inputPlaceholder": "<account>.<region>.<gcp>",
-				"inputTooltip": "account name provided by Snowflake, or <account>.<region>.<gcp>",
-				"dependency": {
-					"key": "cloudPlatform",
-					"value": "GCP"
-				}
-			},
-			{
-				"inputLabel": "Host prefix",
-				"inputKeyword": "host",
-				"inputType": "text",
-				"inputPlaceholder": "<account>.<region>.<azure>",
-				"inputTooltip": "account name provided by Snowflake, or <account>.<region>.<azure>",
-				"dependency": {
-					"key": "cloudPlatform",
-					"value": "Azure"
-				}
-			},
-			{
-				"inputLabel": "Warehouse",
-				"inputKeyword": "warehouse",
-				"inputType": "text",
-				"inputTooltip": "Optionally specify the active/current warehouse for the session",
-				"defaultValue": ""
+				"defaultValue": "1025"
 			}
 		]
 	},
 	{
 		"tab": "Authentication",
-		"helpUrl": [
-			{
-				"value": "https://hackolade.com/help/Snowflakeauthentication.html",
-				"dependency": {
-					"key": "authType",
-					"value": "credentials"
-				}
-			},
-			{
-				"value": "https://hackolade.com/help/NativeSSOOktaonly.html",
-				"dependency": {
-					"key": "authType",
-					"value": "okta"
-				}
-			},
-			{
-				"value": "https://hackolade.com/help/IdentityProviderSSOexternalbrows.html",
-				"dependency": {
-					"key": "authType",
-					"value": "externalbrowser"
-				}
-			}
-		],
 		"structure": [
 			{
-				"inputLabel": "Auth type",
-				"inputKeyword": "authType",
-				"inputType": "select",
-				"defaultValue": "credentials",
-				"options": [
-					{ "value": "credentials", "label": "Snowflake" },
-					{ "value": "okta", "label": "Native SSO (Okta only)" },
-					{ "value": "externalbrowser", "label": "Identity Provider SSO (via external browser)" }
-				]
-			},
-			{
-				"inputLabel": "Authenticator",
-				"inputKeyword": "authenticator",
+				"inputLabel": "User Name",
+				"inputKeyword": "userName",
 				"inputType": "text",
-				"inputPlaceholder": "https://<okta_account_name>.okta.com",
-				"inputTooltip": "Multi-Factor Auth is not available with this option. Use the \"Identity Provider SSO (via external browser)\" option instead",
-				"dependency": {
-					"key": "authType",
-					"value": "okta"
-				}
-			},
-			{
-				"inputLabel": "User name",
-				"inputKeyword": "username",
-				"inputType": "text",
-				"dependency": {
-					"key": "authType",
-					"value": "credentials"
-				}
-			},
-			{
-				"inputLabel": "User name",
-				"inputKeyword": "username",
-				"inputType": "text",
-				"inputPlaceholder": "<name@example.com>",
-				"inputTooltip": "Okta username in email format",
-				"dependency": {
-					"key": "authType",
-					"value": "okta"
-				}
-			},
-			{
-				"inputLabel": "User name",
-				"inputKeyword": "username",
-				"inputType": "text",
-				"inputPlaceholder": "<username>",
-				"inputTooltip": "Network or AzureAD username or Okta username in email format",
-				"dependency": {
-					"key": "authType",
-					"value": "externalbrowser"
+				"inputPlaceholder": "User Name",
+				"validation": {
+					"regex": "([^\\s])"
 				}
 			},
 			{
 				"inputLabel": "Password",
-				"inputKeyword": "password",
+				"inputKeyword": "userPassword",
 				"inputType": "password",
-				"inputTooltip": "Password",
+				"inputPlaceholder": "Password",
 				"isHiddenKey": true,
-				"defaultValue": "",
+				"validation": {
+					"regex": "([^\\s])"
+				}
+			}
+		]
+	},
+	{
+		"tab": "SSL",
+		"helpUrl": "https://hackolade.com/help/SSL2.html",
+		"structure": [
+			{
+				"inputLabel": "SSL",
+				"inputKeyword": "sslType",
+				"inputType": "select",
+				"options": [
+					{
+						"value": "DISABLE",
+						"label": "Disable"
+					},
+					{
+						"value": "ALLOW",
+						"label": "Allow"
+					},
+					{
+						"value": "PREFER",
+						"label": "Prefer"
+					},
+					{
+						"value": "REQUIRE",
+						"label": "Require"
+					},
+					{
+						"value": "VERIFY-CA",
+						"label": "Verify CA"
+					},
+					{
+						"value": "VERIFY-FULL",
+						"label": "Verify Full"
+					}
+				]
+			},
+			{
+				"inputLabel": "Certificate Authority",
+				"inputKeyword": "certAuthority",
+				"inputType": "file",
+				"inputPlaceholder": "Certificate Authority",
+				"extensions": ["pem", "crt", "key"],
 				"dependency": {
-					"key": "authType",
-					"value": ["", "okta", "credentials"]
+					"key": "sslType",
+					"value": ["PREFER", "REQUIRE", "VERIFY-CA", "VERIFY-FULL"]
 				}
 			},
 			{
-				"inputLabel": "Role name",
-				"inputKeyword": "role",
+				"inputLabel": "Client Certificate",
+				"inputKeyword": "clientCert",
+				"inputType": "file",
+				"inputPlaceholder": "Client Certificate",
+				"extensions": ["pem", "crt", "key"],
+				"dependency": {
+					"key": "sslType",
+					"value": ["PREFER", "REQUIRE", "VERIFY-CA", "VERIFY-FULL"]
+				}
+			},
+			{
+				"inputLabel": "Client Private Key",
+				"inputKeyword": "clientPrivateKey",
+				"inputType": "file",
+				"inputPlaceholder": "Client Private Key",
+				"extensions": ["pem", "crt", "key"],
+				"dependency": {
+					"key": "sslType",
+					"value": ["PREFER", "REQUIRE", "VERIFY-CA", "VERIFY-FULL"]
+				}
+			}
+		]
+	},
+	{
+		"tab": "SSH",
+		"helpUrl": "https://hackolade.com/help/SSH.html",
+		"structure": [
+			{
+				"inputLabel": "Use SSH tunnel",
+				"inputKeyword": "useSshTunnel",
+				"inputType": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"inputLabel": "SSH Address",
+				"inputKeyword": "sshTunnelHostname",
 				"inputType": "text",
-				"inputTooltip": "Required entry.  Or enter ALL to combine all your user roles",
-				"defaultValue": ""
+				"inputPlaceholder": "SSH Address",
+				"disable": {
+					"key": "useSshTunnel",
+					"value": false
+				}
+			},
+			{
+				"inputLabel": "Port",
+				"inputKeyword": "sshTunnelPort",
+				"inputType": "text",
+				"inputPlaceholder": "Port",
+				"default": 22,
+				"disable": {
+					"key": "useSshTunnel",
+					"value": false
+				}
+			},
+			{
+				"inputLabel": "SSH User Name",
+				"inputKeyword": "sshTunnelUsername",
+				"inputType": "text",
+				"inputPlaceholder": "SSH User Name",
+				"disable": {
+					"key": "useSshTunnel",
+					"value": false
+				},
+				"validation": {
+					"regex": "([^s])"
+				}
+			},
+			{
+				"inputLabel": "SSH Auth Method",
+				"inputKeyword": "sshAuthMethod",
+				"inputType": "select",
+				"options": [
+					{
+						"value": "IDENTITY_FILE",
+						"label": "Private Key"
+					},
+					{
+						"value": "USER_PASSWORD",
+						"label": "Password"
+					}
+				],
+				"disable": {
+					"key": "useSshTunnel",
+					"value": false
+				}
+			},
+			{
+				"inputLabel": "Private Key",
+				"inputKeyword": "sshTunnelIdentityFile",
+				"inputType": "file",
+				"inputPlaceholder": "Private Key",
+				"extensions": ["*"],
+				"dependency": {
+					"key": "sshAuthMethod",
+					"value": "IDENTITY_FILE"
+				},
+				"disable": {
+					"key": "useSshTunnel",
+					"value": false
+				}
+			},
+			{
+				"inputLabel": "Passphrase",
+				"inputKeyword": "sshTunnelPassphrase",
+				"inputType": "password",
+				"inputPlaceholder": "Passphrase",
+				"dependency": {
+					"key": "sshAuthMethod",
+					"value": "IDENTITY_FILE"
+				},
+				"disable": {
+					"key": "useSshTunnel",
+					"value": false
+				}
+			},
+			{
+				"inputLabel": "Client key password",
+				"inputKeyword": "sshTunnelPassword",
+				"inputType": "password",
+				"inputPlaceholder": "Client key password",
+				"dependency": {
+					"key": "sshAuthMethod",
+					"value": "USER_PASSWORD"
+				},
+				"disable": {
+					"key": "useSshTunnel",
+					"value": false
+				},
+				"validation": {
+					"regex": "([^s])"
+				}
 			}
 		]
 	}

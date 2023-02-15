@@ -17,13 +17,23 @@
     "additionalItems": true,
     "minItems": "",
     "maxItems": "",
-    "subtype": "json",
-    "uniqueItems": false
+    "uniqueItems": false,
+    "length": 1
+  },
+  "dependency": {
+    "level": "parent",
+    "key": "type",
+    "value": "definitions"
   },
   "subtypes": {
-    "json": {
+    "allTypes": {
       "childValueType": [
-        "variant"
+        "char",
+        "byte",
+        "numeric",
+        "datetime",
+        "period",
+        "interval"
       ]
     }
   }

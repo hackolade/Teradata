@@ -9,52 +9,10 @@
 		"indexes": []
 	},
 	"collection": {
-		"collectionName": "New table",
-		"external": false,
-		"formatTypeOptions": {
-			"NULL_IF": [{ "NULL_IF_item": "\\N" }]
-		}
+		"collectionName": "New table"
 	},
 	"field": {
-		"name": "New column",
-		"caseSensitivity": "",
-		"accentSensitivity": "",
-		"punctuationSensitivity": "",
-		"firstLetterPreference": "",
-		"caseConversion": "",
-		"spaceTrimming": ""	,
-		"defaultOption": {
-			"value": "",
-			"valueDependencies": [{
-				"value": "Default",
-				"dependency": {
-					"key": "default",
-					"exist": true
-				}
-			},{
-				"value": "Autoincrement",
-				"dependency": [{
-					"key": "start_num",
-					"exist": true
-				},{
-					"key": "step_num",
-					"exist": true
-				}]
-			}]	
-		},
-		"autoincrement": {
-			"step_num": 1
-		},
-		"tPrecision": 9,
-		"subtype": {
-			"valueDependencies": [{
-				"value": "json",
-				"dependency": {
-					"key": "childType",
-					"value": "object"
-				}
-			}]
-		}
+		"name": "New column"
 	},
 	"patternField": {
 		"name": "^[a-zA-Z0-9_.-]+$"

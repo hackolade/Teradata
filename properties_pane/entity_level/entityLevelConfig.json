@@ -126,144 +126,580 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "details",
 				"template": "textarea"
 			},
-			
 			{
-				"propertyName": "SET/MULTISET",
-				"propertyKeyword": "table_is_set",
-				"propertyType": "select",
-				"options": [
-					"SET",
-					"MULTISET"
-				]
-			},
-			{
-				"propertyName": "Temporary",
-				"propertyKeyword": "temporary",
-				"propertyType": "checkbox"
-			},
-			{
-				"propertyName": "Global",
-				"propertyKeyword": "table_is_global",
-				"propertyType": "checkbox"
-			},
-			{
-				"propertyName": "Fallback",
-				"propertyKeyword": "table_fallback",
-				"propertyType": "checkbox",
-				"defaultValue": "true"
-			},
-			{
-				"propertyName": "Journal",
-				"propertyKeyword": "db_journaling_strategy",
-				"propertyType": "select",
-				"options": [
-					"NO",
-					"BEFORE",
-					"DUAL"
-				]
-			},
-			{
-				"propertyName": "AFTER Journal",
-				"propertyKeyword": "db_after_journaling_strategy",
-				"propertyType": "select",
-				"propertyTooltip": "Type of journal to be maintained by default for data tables created in the new database. The JOURNAL keyword without AFTER implies BEFORE and AFTER images.",
-				"defaultValue": "NO",
-				"options": [
-					"DUAL",
-					"LOCAL",
-					"NOT LOCAL",
-					"NO"
-				]
-			},
-			{
-				"propertyName": "Checksum",
-				"propertyKeyword": "table_fallback",
-				"propertyType": "checkbox",
-				"defaultValue": "DEFAULT",
-				"propertyTooltip": "A table-specific disk I/O integrity checksum for detection of hardware read errors. The checksum level setting applies to primary data rows, fallback data rows, and all secondary index rows for the table.",
-				"options": [
-					"ON",
-					"OFF",
-					"DEFAULT"
-				]
-			},
-			{
-				"propertyName": "Log",
-				"propertyKeyword": "table_fallback",
-				"propertyType": "checkbox",
-				"defaultValue": "false"
-			},
-			{
-				"propertyName": "Partition by",
-				"propertyKeyword": "partitioningKey",
-				"propertyType": "primaryKeySetter",
-				"abbr": "PK",
-				"dependency": {
-					"key": "external",
-					"value": true
-				}
-			},
-			{
-				"propertyName": "With location",
+				"propertyName": "Table options",
+				"propertyKeyword": "tableOptions",
 				"propertyType": "block",
-				"propertyKeyword": "location",
-				"propertyTooltip": "",
-				"dependency": {
-					"key": "external",
-					"value": true
-				},
+				"propertyTooltip": "For each individual table you create, you can set some table options. ",
 				"structure": [
 					{
-						"propertyName": "Namespace",
-						"propertyKeyword": "namespace",
+						"propertyName": "Error table",
+						"propertyKeyword": "ERROR_TABLE",
+						"propertyType": "checkbox",
+						"defaultValue": false
+					},
+					{
+						"propertyName": "For",
+						"propertyKeyword": "FOR_TABLE",
+						"propertyType": "text",
+						"propertyTooltip": "Target data table name for error table",
+						"dependency": {
+							"key": "errorTable",
+							"value": true
+						}
+					},
+					{
+						"propertyName": "Foreign table",
+						"propertyKeyword": "FOREIGN_TABLE",
+						"propertyType": "checkbox",
+						"defaultValue": false
+					},
+					{
+						"propertyName": "SET/MULTISET",
+						"propertyKeyword": "SET_MULTISET",
+						"propertyType": "select",
+						"options": [
+							"",
+							"SET",
+							"MULTISET"
+						],
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "ERROR_TABLE",
+									"exist": false
+								},
+								{
+									"key": "ERROR_TABLE",
+									"value": false
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Temporary/Volatile",
+						"propertyKeyword": "TEMPORARY_VOLATILE",
+						"propertyType": "select",
+						"options": [
+							"",
+							"GLOBAL TEMPORARY",
+							"VOLATILE"
+						],
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "ERROR_TABLE",
+									"exist": false
+								},
+								{
+									"key": "ERROR_TABLE",
+									"value": false
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Queue Table Form",
+						"propertyKeyword": "QUEUE_TABLE",
+						"propertyType": "checkbox",
+						"defaultValue": false,
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "ERROR_TABLE",
+									"exist": false
+								},
+								{
+									"key": "ERROR_TABLE",
+									"value": false
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Trace table",
+						"propertyKeyword": "TRACE_TABLE",
+						"propertyType": "checkbox",
+						"defaultValue": false,
+						"dependency": {
+							"key": "TEMPORARY_VOLATILE",
+							"value": "GLOBAL TEMPORARY"
+						}
+					},
+					{
+						"propertyName": "External security",
+						"propertyKeyword": "EXTERNAL_SECURITY",
+						"propertyType": "select",
+						"propertyTooltip": "Specifies authorization for accessing remote storage.",
+						"options": [
+							"",
+							"INVOKER",
+							"DEFINER"
+						],
+						"dependency": {
+							"key": "FOREIGN_TABLE",
+							"value": true
+						}
+					},
+					{
+						"propertyName": "Authorization name",
+						"propertyKeyword": "AUTHORIZATION_NAME",
 						"propertyTooltip": "",
+						"propertyType": "text",
+						"dependency": {
+							"key": "FOREIGN_TABLE",
+							"value": true
+						}
+					},
+					{
+						"propertyName": "Map",
+						"propertyKeyword": "MAP",
+						"propertyType": "text",
+						"propertyTooltip": "Existing contiguous or sparse map for the table"
+					},
+					{
+						"propertyName": "Colocate using",
+						"propertyKeyword": "COLOCATE_USING",
 						"propertyType": "text"
 					},
 					{
-						"propertyName": "Path",
-						"propertyKeyword": "path",
+						"propertyName": "Fallback",
+						"propertyKeyword": "FALLBACK",
+						"propertyType": "checkbox",
+						"defaultValue": true
+					},
+					{
+						"propertyName": "Default Journal table",
+						"propertyKeyword": "DEFAULT_JOURNAL_TABLE",
+						"propertyType": "text",
+						"propertyTooltip": "Default table that is to receive the journal images of data tables created in the new database."
+					},
+					{
+						"propertyName": "Log",
+						"propertyKeyword": "LOG",
+						"propertyType": "checkbox",
+						"defaultValue": "false"
+					},
+					{
+						"propertyName": "BEFORE Journal",
+						"propertyKeyword": "BEFORE_JOURNAL",
+						"propertyType": "select",
+						"defaultValue": "NO",
+						"options": [
+							"NO",
+							"BEFORE",
+							"DUAL"
+						]
+					},
+					{
+						"propertyName": "AFTER Journal",
+						"propertyKeyword": "AFTER_JOURNAL",
+						"propertyType": "select",
+						"propertyTooltip": "Type of journal to be maintained by default for data tables created in the new database. The JOURNAL keyword without AFTER implies BEFORE and AFTER images.",
+						"defaultValue": "NO",
+						"options": [
+							"NO",
+							"AFTER",
+							"DUAL",
+							"LOCAL",
+							"NO LOCAL"
+						]
+					},
+					{
+						"propertyName": "Checksum",
+						"propertyKeyword": "TABLE_CHECKSUM",
+						"propertyType": "select",
+						"propertyTooltip": "A table-specific disk I/O integrity checksum for detection of hardware read errors. The checksum level setting applies to primary data rows, fallback data rows, and all secondary index rows for the table.",
+						"options": [
+							"ON",
+							"OFF",
+							"DEFAULT"
+						]
+					},
+					{
+						"propertyName": "Freespace",
+						"propertyKeyword": "FREESPACE",
+						"propertyType": "block",
+						"structure": [
+							{
+								"propertyName": "Ratio",
+								"propertyKeyword": "freeSpaceValue",
+								"propertyType": "numeric",
+								"valueType": "number",
+								"allowNegative": false
+							},
+							{
+								"propertyName": "Percent",
+								"propertyKeyword": "percentUnit",
+								"propertyType": "checkbox",
+								"defaultValue": false
+							}
+						]
+					},
+					{
+						"propertyName": "Merge block ratio",
+						"propertyType": "block",
+						"propertyKeyword": "MERGE_BLOCK_RATIO",
+						"propertyTooltip": "The merge block ratio to be used for this table when Vantage combines smaller data blocks into a single larger data block.",
+						"structure": [
+							{
+								"propertyName": "Ratio",
+								"propertyKeyword": "mergeRatio",
+								"propertyType": "select",
+								"options": [
+									"",
+									"NO",
+									"DEFAULT",
+									"SPECIFIC"
+								]
+							},
+							{
+								"propertyName": "Specific ratio",
+								"propertyKeyword": "specificRatio",
+								"propertyType": "numeric",
+								"valueType": "number",
+								"minValue": 0,
+								"maxValue": 100,
+								"step": 1,
+								"dependency": {
+									"key": "mergeRatio",
+									"value": "SPECIFIC"
+								}
+							},
+							{
+								"propertyName": "Percent",
+								"propertyKeyword": "percentUnit",
+								"propertyType": "checkbox",
+								"defaultValue": false,
+								"dependency": {
+									"key": "mergeRatio",
+									"value": "SPECIFIC"
+								}
+							}
+						]
+					},
+					{
+						"propertyName": "Data block size",
+						"propertyType": "block",
+						"propertyKeyword": "DATA_BLOCK_SIZE",
+						"propertyTooltip": "The maximum data block size for blocks that contain multiple rows.",
+						"structure": [
+							{
+								"propertyName": "Size",
+								"propertyKeyword": "blockSize",
+								"propertyType": "select",
+								"options": [
+									"",
+									"DEFAULT",
+									"MINIMUM",
+									"MAXIMUM",
+									"SPECIFIC"
+								]
+							},
+							{
+								"propertyName": "Specific size",
+								"propertyKeyword": "specificSize",
+								"propertyType": "text",
+								"dependency": {
+									"key": "blockSize",
+									"value": "SPECIFIC"
+								}
+							},
+							{
+								"propertyName": "Units",
+								"propertyKeyword": "units",
+								"propertyType": "select",
+								"options": [
+									"",
+									"BYTES",
+									"KBYTES",
+									"KILOBYTES"
+								],
+								"dependency": {
+									"key": "blockSize",
+									"value": "SPECIFIC"
+								}
+							}
+						]
+					},
+					{
+						"propertyName": "Block compression",
+						"propertyType": "block",
+						"propertyKeyword": "BLOCK_COMPRESSION",
+						"propertyTooltip": "Table data is compressed at the block level.",
+						"structure": [
+							{
+								"propertyName": "Type",
+								"propertyKeyword": "blockCompressionType",
+								"propertyType": "select",
+								"options": [
+									"",
+									"DEFAULT",
+									"AUTOTEMP",
+									"MANUAL",
+									"ALWAYS",
+									"NEVER"
+								]
+							},
+							{
+								"propertyName": "Algorithm",
+								"propertyKeyword": "blockCompressionAlgorithm",
+								"propertyTooltip": "Specifies the algorithm to use for block-level compression (BLC).",
+								"propertyType": "select",
+								"defaultValue": "DEFAULT",
+								"options": [
+									"DEFAULT",
+									"ZLIB",
+									"ELZS_H"
+								],
+								"dependency": {
+									"type": "or",
+									"values": [
+										{
+											"key": "blockCompressionType",
+											"value": "AUTOTEMP"
+										},
+										{
+											"key": "blockCompressionType",
+											"value": "MANUAL"
+										},
+										{
+											"key": "blockCompressionType",
+											"value": "ALWAYS"
+										}
+									]
+								}
+							},
+							{
+								"propertyName": "Level",
+								"propertyKeyword": "blockCompressionLevel",
+								"propertyTooltip": "Specifies a value to indicate a preference for compression speed or compression effectiveness.",
+								"propertyType": "select",
+								"defaultValue": "DEFAULT",
+								"options": [
+									"DEFAULT",
+									"SPECIFIC"
+								],
+								"dependency": {
+									"key": "blockCompressionAlgorithm",
+									"value": "ZLIB"
+								}
+							},
+							{
+								"propertyName": "Specific level",
+								"propertyKeyword": "specificBlockCompressionLevel",
+								"propertyTooltip": "",
+								"propertyType": "numeric",
+								"valueType": "number",
+								"minValue": 1,
+								"maxValue": 9,
+								"step": 1,
+								"dependency": {
+									"key": "blockCompressionLevel",
+									"value": "SPECIFIC"
+								}
+							}
+						]
+					},
+					{
+						"propertyName": "Isolated loading",
+						"propertyKeyword": "ISOLATED_LOADING",
+						"propertyType": "select",
+						"propertyTooltip": "Defines the table for load isolation (LDI). Load isolation enables concurrent read operations on committed rows while the table is being loaded.",
+						"options": [
+							"NO",
+							"CONCURRENT",
+							"FOR ALL",
+							"FOR INSERT",
+							"FOR NONE"
+						]
+					},
+					{
+						"propertyName": "Table Preservation",
+						"propertyKeyword": "TABLE_PRESERVATION",
+						"propertyType": "select",
+						"propertyTooltip": "Action to perform when a transaction completes.",
+						"options": [
+							"",
+							"DELETE ROWS",
+							"PRESERVE ROWS"
+						],
+						"dependency": {
+							"key": "temporary",
+							"exist": true
+						}
+					},
+					{
+						"propertyName": "Using",
+						"propertyType": "block",
+						"propertyKeyword": "USING",
 						"propertyTooltip": "",
-						"propertyType": "text"
+						"dependency": {
+							"key": "FOREIGN_TABLE",
+							"value": true
+						},
+						"structure": [
+							{
+								"propertyName": "Location",
+								"propertyKeyword": "location",
+								"propertyTooltip": "",
+								"propertyType": "text"
+							},
+							{
+								"propertyName": "Scan Percentage",
+								"propertyKeyword": "scanPercentage",
+								"propertyTooltip": "",
+								"propertyType": "numeric",
+								"valueType": "number",
+								"maxValue": 1,
+								"minValue": 0
+							},
+							{
+								"propertyName": "Path pattern",
+								"propertyKeyword": "pathPattern",
+								"propertyTooltip": "",
+								"propertyType": "text"
+							},
+							{
+								"propertyName": "Manifest",
+								"propertyKeyword": "manifest",
+								"propertyType": "checkbox",
+								"defaultValue": false
+							},
+							{
+								"propertyName": "Table format",
+								"propertyKeyword": "tableFormat",
+								"propertyTooltip": "",
+								"propertyType": "select",
+								"options": [
+									"",
+									"DELTALAKE"
+								]
+							},
+							{
+								"propertyName": "Row format",
+								"propertyKeyword": "rowFormat",
+								"propertyTooltip": "",
+								"propertyType": "text"
+							},
+							{
+								"propertyName": "Stored as",
+								"propertyKeyword": "storedAs",
+								"propertyTooltip": "",
+								"propertyType": "select",
+								"options": [
+									"",
+									"TEXTFILE",
+									"PARQUET"
+								]
+							},
+							{
+								"propertyName": "Header",
+								"propertyKeyword": "header",
+								"propertyType": "checkbox",
+								"defaultValue": false
+							},
+							{
+								"propertyName": "Strip exterior spaces",
+								"propertyKeyword": "stripSpaces",
+								"propertyTooltip": "Strip exterior (leading and trailing) spaces",
+								"propertyType": "checkbox",
+								"defaultValue": false
+							},
+							{
+								"propertyName": "Strip enclosing char",
+								"propertyKeyword": "stripEnclosingChar",
+								"propertyTooltip": "",
+								"propertyType": "select",
+								"options": [
+									"",
+									"NONE"
+								]
+							}
+
+						]
 					}
 				]
 			},
 			{
-				"propertyName": "Stage file format",
-				"propertyKeyword": "fileFormat",
-				"propertyTooltip": "Select from list of options",
-				"propertyType": "select",
-				"options": [
-					"",
-					"CSV",
-					"JSON",
-					"AVRO",
-					"ORC",
-					"PARQUET",
-					"XML",
-					"custom"
+				"propertyName": "Partitioning",
+				"propertyKeyword": "partitioning",
+				"propertyType": "block",
+				"propertyTooltip": "Determines how a partitioned table's rows are distributed across partitions",
+				"structure": [
+					{
+						"propertyName": "Partition by",
+						"propertyKeyword": "partitionBy",
+						"propertyTooltip": "",
+						"propertyType": "select",
+						"defaultValue": "column",
+						"options": [
+							"column",
+							"expression"
+						]
+					},
+					{
+						"propertyName": "Partition key",
+						"propertyKeyword": "compositePartitionKey",
+						"propertyType": "compositeKeySetter",
+						"disabledItemStrategy": "default",
+						"isCompositeKey": true,
+						"setPrimaryKey": false,
+						"template": "collectiontree",
+						"abbr": "PK",
+						"attributeList": {
+							"columnFormat": {
+								"propertyType": "select",
+								"options": [
+									"",
+									"COLUMN",
+									"ROW"
+								],
+								"propertyTooltip": "Select the column partition store format."
+							},
+							"autoCompression": {
+								"propertyType": "select",
+								"options": [
+									"",
+									"AUTO COMPRESS",
+									"NO AUTO COMPRESS"
+								],
+								"propertyTooltip": "Enable auto compression"
+							}
+						},
+						"dependency": {
+							"key": "partitionBy",
+							"value": "column"
+						}
+					},
+					{
+						"propertyName": "Expression",
+						"propertyKeyword": "partitioningExpression",
+						"propertyTooltip": "A SQL expression that returns a value from each row. In the simplest cases, it is a column name. This value is used to determine which partition should contain a row.",
+						"propertyType": "details",
+						"template": "textarea",
+						"markdown": false,
+						"dependency": {
+							"key": "partitionBy",
+							"value": "expression"
+						}
+					}
 				],
 				"dependency": {
-					"type": "not",
-					"values": {
-						"key": "external",
-						"value": true
-					}
-				}
-			},
-			{
-				"propertyName": "Like",
-				"propertyKeyword": "like",
-				"propertyTooltip": "Select from list of options",
-				"propertyType": "selecthashed",
-				"template": "entities",
-				"withEmptyOption": true,
-				"excludeCurrent": true,
-				"dependency": {
-					"type": "not",
-					"values": {
-						"key": "external",
-						"value": true
-					}
+					"type": "or",
+					"values": [
+						{
+							"key": "temporary",
+							"exist": false
+						},
+						{
+							"key": "temporary",
+							"value": ""
+						}
+					]
 				}
 			},
 			{
@@ -288,63 +724,228 @@ making sure that you maintain a proper JSON format.
 	},
 	{
 		"lowerTab": "Composite keys",
-		"structure": [{
-			"propertyName": "Primary key",
-			"propertyType": "group",
-			"groupItemLimit": 1,
-			"propertyKeyword": "primaryKey",
-			"propertyTooltip": {
-				"disabled": [
+		"structure": [
+			{
+				"propertyName": "Primary key",
+				"propertyType": "group",
+				"groupItemLimit": 1,
+				"propertyKeyword": "primaryKey",
+				"propertyTooltip": {
+					"disabled": [
+						{
+							"tooltip": "Remove the existing single column primary key definition prior to unlock the possibility to create a composite primary key definition for this table",
+							"dependency": {
+								"type": "and",
+								"values": [
+									{
+										"level": "children",
+										"key": "primaryKey",
+										"value": true
+									},
+									{
+										"type": "not",
+										"values": {
+											"level": "children",
+											"key": "compositePrimaryKey",
+											"value": true
+										}
+									}
+								]
+							}
+						},
+						{
+							"tooltip": "Remove or update the existing composite primary key definition prior to unlock the possibility to create a new composite primary key definition for this table",
+							"dependency": {
+								"key": "primaryKey",
+								"minLength": 1
+							}
+						}
+					]
+				},
+				"disabledOnCondition": [
 					{
-						"tooltip": "Remove the existing single column primary key definition prior to unlock the possibility to create a composite primary key definition for this table",
-						"dependency": {
+						"level": "children",
+						"value": {
 							"type": "and",
 							"values": [
 								{
-									"level": "children",
 									"key": "primaryKey",
 									"value": true
 								},
 								{
-									"type": "not",
-									"values": {
-										"level": "children",
-										"key": "compositePrimaryKey",
-										"value": true
-									}
+									"type": "or",
+									"values": [
+										{
+											"key": "compositePrimaryKey",
+											"value": false
+										},
+										{
+											"key": "compositePrimaryKey",
+											"exist": false
+										}
+									]
+								},
+								{
+									"type": "or",
+									"values": [
+										{
+											"key": "compositeUniqueKey",
+											"value": false
+										},
+										{
+											"key": "compositeUniqueKey",
+											"exist": false
+										}
+									]
 								}
 							]
 						}
-					}, 
+					}
+				],
+				"structure": [
 					{
-						"tooltip": "Remove or update the existing composite primary key definition prior to unlock the possibility to create a new composite primary key definition for this table",
-						"dependency": {
-							"key": "primaryKey",
-							"minLength": 1
-						}
+						"propertyName": "Constraint name",
+						"propertyKeyword": "constraintName",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Key",
+						"propertyKeyword": "compositePrimaryKey",
+						"propertyType": "primaryKeySetter",
+						"abbr": "pk",
+						"attributeList": [
+							"ascending",
+							"descending"
+						]
+					},
+					{
+						"propertyName": "Comment",
+						"propertyKeyword": "indexComment",
+						"propertyTooltip": "comment",
+						"addTimestampButton": false,
+						"propertyType": "details",
+						"template": "textarea"
 					}
 				]
 			},
-			"disabledOnCondition": [
+			{
+				"propertyName": "Unique key",
+				"propertyType": "group",
+				"propertyKeyword": "uniqueKey",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Constraint name",
+						"propertyKeyword": "constraintName",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Key",
+						"propertyKeyword": "compositeUniqueKey",
+						"propertyType": "compositeKeySetter",
+						"disabledItemStrategy": "default",
+						"setPrimaryKey": false,
+						"template": "collectiontree",
+						"isCompositeKey": true,
+						"abbr": " ",
+						"attributeList": [
+							"ascending",
+							"descending"
+						]
+					},
+					{
+						"propertyName": "Comment",
+						"propertyKeyword": "indexComment",
+						"propertyTooltip": "comment",
+						"addTimestampButton": false,
+						"propertyType": "details",
+						"template": "textarea"
+					}
+				]
+			}
+		]
+	},
+	{
+		"lowerTab": "Indexes",
+		"structure": [{
+			"propertyName": "Index",
+			"propertyType": "group",
+			"propertyKeyword": "Indxs",
+			"propertyTooltip": "In general you should only add indexes to match the queries your application uses. Any extra will waste resources.",
+			"structure": [
 				{
-					"level": "children",
-					"value": {
-						"type": "and",
+					"propertyName": "Name",
+					"propertyKeyword": "indxName",
+					"propertyTooltip": "Optional, if not specified an automatic name will be assigned. Index name are needed to drop indexes and appear in error messages when a constraint is violated.",
+					"propertyType": "text"
+				},
+				{
+					"propertyName": "Activated",
+					"propertyKeyword": "isActivated",
+					"propertyTooltip": "Deactivated item will be not included in FE script",
+					"propertyType": "checkbox",
+					"defaultValue": true
+				},
+				{
+					"propertyName": "Type",
+					"propertyKeyword": "indexType",
+					"propertyTooltip": "",
+					"propertyType": "select",
+					"defaultValue": "",
+					"options": [
+						"",
+						"PRIMARY",
+						"PRIMARY AMP",
+						"SECONDARY",
+						"HASH",
+						"JOIN"
+					]
+				},
+				{
+					"propertyName": "Unique",
+					"propertyKeyword": "unique",
+					"propertyTooltip": "Causes the system to check for duplicate values in the table when the index is created (if data already exist) and each time data is added. Attempts to insert or update data which would result in duplicate entries will generate an error.",
+					"defaultValue": false,
+					"propertyType": "checkbox",
+					"dependency": {
+						"type": "not",
 						"values": [
 							{
-								"key": "primaryKey",
-								"value": true
+								"key": "indexType",
+								"value": "HASH"
 							},
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "All",
+					"propertyKeyword": "all",
+					"propertyTooltip": "If set TRUE, a NUSI should maintain row ID pointers for each logical row of a join index, not just the compressed physical rows.",
+					"defaultValue": false,
+					"propertyType": "checkbox",
+					"dependency": {
+						"type": "and",
+						"values": [
 							{
 								"type": "or",
 								"values": [
 									{
-										"key": "compositePrimaryKey",
-										"value": false
+										"key": "indexType",
+										"exist": false
 									},
 									{
-										"key": "compositePrimaryKey",
-										"exist": false
+										"key": "indexType",
+										"value": ""
+									},
+									{
+										"key": "indexType",
+										"value": "SECONDARY"
 									}
 								]
 							},
@@ -352,59 +953,280 @@ making sure that you maintain a proper JSON format.
 								"type": "or",
 								"values": [
 									{
-										"key": "compositeUniqueKey",
-										"value": false
+										"key": "unique",
+										"exist": false
 									},
 									{
-										"key": "compositeUniqueKey",
-										"exist": false
+										"key": "unique",
+										"value": false
 									}
 								]
 							}
 						]
 					}
+				},
+				{
+					"propertyName": "Map",
+					"propertyKeyword": "indexMap",
+					"propertyType": "text",
+					"propertyTooltip": "Existing contiguous or sparse map for the table",
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "indexType",
+								"value": "HASH"
+							},
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "Colocate using",
+					"propertyKeyword": "colocateUsing",
+					"propertyType": "text",
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "indexType",
+								"value": "HASH"
+							},
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "Fallback",
+					"propertyKeyword": "indexFallback",
+					"propertyType": "checkbox",
+					"defaultValue": "true",
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "indexType",
+								"value": "HASH"
+							},
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "Checksum",
+					"propertyKeyword": "checksum",
+					"propertyType": "select",
+					"propertyTooltip": "A table-specific disk I/O integrity checksum for detection of hardware read errors. The checksum level setting applies to primary data rows, fallback data rows, and all secondary index rows for the table.",
+					"options": [
+						"ON",
+						"OFF",
+						"DEFAULT"
+					],
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "indexType",
+								"value": "HASH"
+							},
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "Block compression",
+					"propertyType": "select",
+					"propertyKeyword": "blockCompression",
+					"propertyTooltip": "Table data is compressed at the block level.",
+					"options": [
+						"",
+						"DEFAULT",
+						"AUTOTEMP",
+						"MANUAL",
+						"NEVER"
+					],
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "indexType",
+								"value": "HASH"
+							},
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "AS SELECT",
+					"propertyKeyword": "asSelect",
+					"propertyType": "details",
+					"template": "textarea",
+					"markdown": false,
+					"dependency": {
+						"key": "indexType",
+						"value": "JOIN"
+					}
+				},
+				{
+					"propertyName": "Keys",
+					"propertyKeyword": "indxKey",
+					"propertyType": "fieldList",
+					"template": "orderedList",
+					"dependency": {
+						"type": "not",
+						"values": [
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "ORDER BY",
+					"propertyKeyword": "orderBy",
+					"propertyType": "select",
+					"propertyTooltip": "Row ordering on each AMP by a single NUSI column: either value-ordered or hash-ordered.",
+					"options": [
+						"",
+						"HASH",
+						"VALUES"
+					],
+					"dependency": {
+						"type": "not",
+						"values": [
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "Order keys",
+					"propertyKeyword": "orderKeys",
+					"propertyType": "fieldList",
+					"template": "orderedList",
+					"defaultValue": "",
+					"templateOptions": {
+						"maxFields": 1
+					},
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "orderBy",
+								"value": "VALUES"
+							},
+							{
+								"key": "orderBy",
+								"value": ""
+							},
+							{
+								"key": "orderBy",
+								"exist": false
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "Order keys",
+					"propertyKeyword": "orderKeys",
+					"propertyType": "fieldList",
+					"template": "orderedList",
+					"defaultValue": "",
+					"dependency": {
+						"key": "orderBy",
+						"value": "HASH"
+					}
+				},
+				{
+					"propertyName": "Load identity",
+					"propertyKeyword": "loadIdentity",
+					"propertyType": "select",
+					"options": [
+						"",
+						"WITH LOAD IDENTITY",
+						"WITH NO LOAD IDENTITY"
+					],
+					"dependency": {
+						"type": "not",
+						"values": [
+							{
+								"key": "indexType",
+								"value": "HASH"
+							},
+							{
+								"key": "indexType",
+								"value": "JOIN"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "Comment",
+					"propertyKeyword": "indexComment",
+					"propertyTooltip": "comment",
+					"addTimestampButton": false,
+					"propertyType": "details",
+					"template": "textarea"
 				}
-			],
-			"structure": [{
-				"propertyName": "Constraint name",
-				"propertyKeyword": "constraintName",
-				"propertyTooltip": "",
-				"propertyType": "text"
-			}, {
-				"propertyName": "Key",
-				"propertyKeyword": "compositePrimaryKey",
-				"propertyType": "primaryKeySetter",
-				"abbr": "pk",
-				"attributeList": []
-			}]
-		}, {
-			"propertyName": "Unique key",
+			]
+		}]
+	},
+	{
+		"lowerTab": "Check Constraints",
+		"structure": [{
+			"propertyName": "Check Constraint",
 			"propertyType": "group",
-			"propertyKeyword": "uniqueKey",
+			"propertyKeyword": "chkConstr",
 			"propertyTooltip": "",
-			"structure": [{
-				"propertyName": "Constraint name",
-				"propertyKeyword": "constraintName",
-				"propertyTooltip": "",
-				"propertyType": "text"
-			}, {
-				"propertyName": "Key",
-				"propertyKeyword": "compositeUniqueKey",
-				"propertyType": "compositeKeySetter",
-				"disabledItemStrategy": "default",
-				"setPrimaryKey": false,
-				"abbr": " ",
-				"attributeList": [],
-				"template": "collectiontree",
-				"isCompositeKey": true
-			},
-			{
-				"propertyName": "Alternate key",
-				"propertyKeyword": "alternateKey",
-				"propertyTooltip": "",
-				"propertyType": "checkbox",
-				"setFieldPropertyBy": "compositeUniqueKey"
-			}]
+			"structure": [
+				{
+					"propertyName": "Name",
+					"propertyKeyword": "chkConstrName",
+					"propertyTooltip": "",
+					"propertyType": "text"
+				},
+				{
+					"propertyName": "Description",
+					"propertyKeyword": "constrDescription",
+					"propertyTooltip": "description",
+					"propertyType": "details",
+					"template": "textarea"
+				},
+				{
+					"propertyName": "Expression",
+					"propertyKeyword": "constrExpression",
+					"propertyTooltip": "Expression",
+					"propertyType": "details",
+					"template": "textarea",
+					"markdown": false
+				},
+				{
+					"propertyName": "Comments",
+					"propertyKeyword": "constrComments",
+					"propertyTooltip": "comments",
+					"addTimestampButton": false,
+					"propertyType": "details",
+					"template": "textarea"
+				}
+			]
 		}]
 	}
 ]

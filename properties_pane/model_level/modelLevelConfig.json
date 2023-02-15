@@ -138,6 +138,7 @@ making sure that you maintain a proper JSON format.
 				"options": [
 					"v17.20"
 				],
+				"defaultValue": "v17.20",
 				"disabledOption": true
 			},
 			{
@@ -147,6 +148,23 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "comments",
 				"propertyType": "details",
 				"template": "textarea"
+			}
+		]
+	},
+	{
+		"lowerTab": "Relationships",
+		"structure": [
+			{
+				"propertyName": "Check option",
+				"propertyKeyword": "checkOption",
+				"propertyTooltip": "Referential integrity is not to be enforced for the specified primary key-foreign key relationship.",
+				"propertyType": "select",
+				"defaultValue": "WITH NO CHECK OPTION",
+				"options": [
+					"",
+					"WITH CHECK OPTION",
+					"WITH NO CHECK OPTION"
+				]
 			}
 		]
 	}

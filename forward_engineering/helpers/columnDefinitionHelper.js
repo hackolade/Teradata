@@ -1,149 +1,74 @@
-const templates = require('../configs/templates');
-const assignTemplates = require('../utils/assignTemplates');
-
 module.exports = (_) => {
-	const isString = type => ['VARCHAR', 'STRING', 'TEXT', 'CHAR', 'CHARACTER'].includes(_.toUpper(type));
-
-	const isTimestamp = type =>
-		[
-			'TIME',
-			'TIMESTAMP_NTZ',
-			'TIMESTAMP_TZ',
-			'TIMESTAMP_LTZ',
-			'TIMESTAMP',
-			'TIMESTAMPNTZ',
-			'TIMESTAMPTZ',
-			'TIMESTAMPLTZ',
-			'DATETIME',
-		].includes(_.toUpper(type));
-
-	const escapeString = str => str.replace(/^\'([\S\s]+)\'$/, '$1');
-
-	const isNumber = type =>
-	[
-		'NUMBER',
-		'DECIMAL',
-		'NUMERIC',
-		'INT',
-		'INTEGER',
-		'BIGINT',
-		'BYTEINT',
-		'TINYINT',
-		'SMALLINT',
-		'REAL',
-		'FLOAT',
-		'FLOAT4',
-		'FLOAT8',
-		'DOUBLE',
-		'DOUBLE PRECISION',
-	].includes(_.toUpper(type));
-
-	const getCollation = (type, collation) => {
-		if (!isString(type)) {
-			return '';
-		}
-
-		if (_.isEmpty(collation)) {
-			return '';
-		}
-
-		return (
-			" COLLATE '" +
-			Object.entries(collation)
-				.map(([key, colaltionValue]) => {
-					return colaltionValue;
-				})
-				.join('-') +
-			"'"
-		);
+	const addLength = (type, length) => {
+		return `${type}(${length})`;
 	};
+
+	const addChildType = (type, childType) => addLength(type, childType);
+
+	const addPrecision = (type, precision) => {
+		return `${type}(${precision})`;
+	};
+
+	const addScalePrecision = (type, precision, scale) => {
+		if (_.isNumber(scale)) {
+			return `${type}(${precision},${scale})`;
+		} else {
+			return addPrecision(type, precision);
+		}
+	};
+
+	const addTimezonePrecision = (type, precision, timezone) => {
+		if (timezone) {
+			return `${addPrecision(type, precision)} WITH TIME ZONE`;
+		} else {
+			return addPrecision(type, precision);
+		}
+	};
+
+	const addPrecisionAndToPrecision = (type, precision, toPrecision, fractSecPrecision) => {
+		let typeStatement = type;
+		typeStatement += precision ? `(${precision})` : '';
+		typeStatement += toPrecision ? ` TO ${toPrecision}` : '';
+		typeStatement += fractSecPrecision ? `(${fractSecPrecision})` : '';
+
+		return typeStatement;
+	};
+
+	const canHaveLength = type => ['VARCHAR', 'CHAR VARYING', 'CHARACTER VARYING', 'VARGRAPHIC', 'CLOB', 'CHARACTER LARGE OBJECT', 'BYTE', 'VARBYTE', 'BLOB', 'ARRAY', 'JSON', 'XML', 'XMLTYPE', 'ST_GEOMETRY'].includes(type);
+
+	const canHavePrecisionAndScale = type =>
+		[ 'DECIMAL', 'DEC', 'NUMERIC', 'NUMBER' ].includes(type);
+
+	const canHavePrecisionAndToPrecision = (type) => ['INTERVAL YEAR', 'INTERVAL DAY', 'INTERVAL HOUR', 'INTERVAL MINUTE'].includes(type);
+
+	const canHavePrecisionAndSecondPrecision = (type) => ['INTERVAL SECOND'].includes(type);
+
+	const canHaveFractionalSecondPrecision = type => ['TIME', 'TIMESTAMP'].includes(type);
+
+	const canHaveChildType = type => ['PERIOD'].includes(type);
 
 	const decorateType = (type, columnDefinition) => {
 		type = _.toUpper(type);
-		let resultType = type;
-	
-		if (isTimestamp(type)) {
-			if (columnDefinition.timePrecision && !_.isNaN(columnDefinition.timePrecision)) {
-				resultType = `${type}(${columnDefinition.timePrecision})`;
-			}
-		}
-	
-		if (['VARCHAR', 'STRING', 'TEXT', 'CHAR', 'CHARACTER'].includes(type)) {
-			if (columnDefinition.length && !_.isNaN(columnDefinition.length)) {
-				resultType = `${type}(${columnDefinition.length})`;
-			}
-		}
-	
-		if (['NUMBER', 'DECIMAL', 'NUMERIC'].includes(type)) {
-			if (!_.isNaN(columnDefinition.scale) && !_.isNaN(columnDefinition.precision)) {
-				resultType = `${type}(${Number(columnDefinition.precision)},${Number(columnDefinition.scale)})`;
-			}
-		}
-	
-		return resultType;
-	};
 
-	const getDefault = (type, defaultValue) => {
-		if (isString(type)) {
-			return `$$${escapeString(String(defaultValue))}$$`;
-		} else if (_.toUpper(type) === 'BOOLEAN') {
-			return _.toUpper(defaultValue);
-		} else {
-			return defaultValue;
+		if (canHaveChildType(type)) {
+			const childValueType = decorateType(columnDefinition.childValueType, columnDefinition);
+			return addChildType(type, childValueType);
+		} else if (canHaveLength(type) && _.isNumber(columnDefinition.length)) {
+			return addLength(type, columnDefinition.length);
+		} else if (canHavePrecisionAndToPrecision(type)) {
+			return addPrecisionAndToPrecision(type, columnDefinition.precision, columnDefinition.toPrecision, columnDefinition.fractSecPrecision);
+		} else if (canHavePrecisionAndSecondPrecision(type)) {
+			return addScalePrecision(type, columnDefinition.precision, columnDefinition.fractSecPrecision);
+		} else if (canHavePrecisionAndScale(type) && _.isNumber(columnDefinition.precision)) {
+			return addScalePrecision(type, columnDefinition.precision, columnDefinition.scale);
+		} else if (canHaveFractionalSecondPrecision(type) && _.isNumber(columnDefinition.fractSecPrecision)) {
+			return addTimezonePrecision(type, columnDefinition.fractSecPrecision, columnDefinition.timezone);
 		}
-	};
 
-	const getAutoIncrement = (type, autoincrement) => {
-		if (!autoincrement) {
-			return '';
-		}
-	
-		if (!isNumber(type)) {
-			return '';
-		}
-		let result = ' AUTOINCREMENT';
-		result +=
-			!_.isNaN(autoincrement.step) && (autoincrement.start || autoincrement.start === 0)
-				? ' START ' + autoincrement.start
-				: '';
-		result += !_.isNaN(autoincrement.step) && autoincrement.step ? ' INCREMENT ' + autoincrement.step : '';
-	
-		return result;
-	};
-
-	const getUnique = columnDefinition => {
-		return columnDefinition.unique && !columnDefinition.compositeUniqueKey ? ' UNIQUE' : '';
-	};
-	
-	const getPrimaryKey = columnDefinition => {
-		if (!columnDefinition.primaryKey || columnDefinition.compositePrimaryKey) {
-			return '';
-		}
-	
-		return ' PRIMARY KEY';
-	};
-	
-	const getInlineConstraint = columnDefinition => {
-		return getPrimaryKey(columnDefinition) + getUnique(columnDefinition);
-	};
-
-	const createExternalColumn = columnDefinition => {
-		const externalColumnStatement = assignTemplates(templates.externalColumnDefinition, {
-			name: columnDefinition.name,
-			type: decorateType(columnDefinition.type, columnDefinition),
-			expression: columnDefinition.expression
-				? `(${columnDefinition.expression})`
-				: `(value:${columnDefinition.name}::${columnDefinition.type})`,
-		});
-		return { statement: externalColumnStatement, isActivated: columnDefinition.isActivated };
+		return type;
 	};
 
 	return {
 		decorateType,
-		getDefault,
-		getAutoIncrement,
-		getCollation,
-		getInlineConstraint,
-		createExternalColumn,
 	}
 }
