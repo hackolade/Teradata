@@ -9,11 +9,9 @@ const connect = async (connectionInfo, sshService) => {
 };
 
 const disconnect = async (connectionInfo, logger, callback, app) => {
-    if (connectionInfo.useSshTunnel) {
-        const sshService = app.require('@hackolade/ssh-service');
-        await sshService.closeConsumer();
-    }
-    connectionHelper.close();
+    const sshService = app.require('@hackolade/ssh-service');
+
+    await connectionHelper.close(sshService);
 
     callback();
 };

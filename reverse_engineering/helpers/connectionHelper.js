@@ -9,6 +9,7 @@ const SYSTEM_DATABASES = ['val', 'tdwm', 'DBC', 'TDStats', 'TD_ANALYTICS_DB', 'T
 const SYSTEM_UDT = ['ArrayVec', 'InternalPeriodDateType', 'InternalPeriodTimeStampType', 'InternalPeriodTimeStampWTZType', 'InternalPeriodTimeType', 'InternalPeriodTimeWTZType', 'MBB', 'MBR', 'ST_Geometry', 'TD_AVRO', 'TD_CSVLATIN', 'TD_CSVUNICODE', 'TD_JSONLATIN_LOB', 'TD_JSONUNICODE_LOB', 'TD_JSON_BSON', 'TD_JSON_UBJSON', 'XML'];
 
 let connection;
+let useSshTunnel;
 
 const isWindows = () => os.platform() === 'win32';
 
@@ -54,8 +55,6 @@ const buildCommand = (javaPath, teradataClientPath, connectionInfo, query) => {
     command += connectionInfo.sslca ? createArgument('sslca', connectionInfo.sslca) : '';
 
     return command;
-
-    // return `${javaPath} -jar ${teradataClientPath} --host=localhost --port=1025 --user=dbc --pass=dbc` + ' --query="' + query + '"';
 }
 
 const createConnection = async (connectionInfo, sshService) => {
@@ -98,6 +97,7 @@ const connect = async (connectionInfo, sshService) => {
         return connection;
     }
 
+    useSshTunnel = connectionInfo.useSshTunnel;
     connection = await createConnection(connectionInfo, sshService);
 
     return connection;
@@ -244,9 +244,14 @@ const createInstance = (connection, _) => {
     };
 };
 
-const close = () => {
+const close = async () => {
     if (connection) {
         connection = null;
+    }
+
+    if (useSshTunnel) {
+        useSshTunnel = false;
+        await sshService.closeConsumer();
     }
 };
 
