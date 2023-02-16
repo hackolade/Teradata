@@ -230,5 +230,17 @@
 				}
 			}
 		]
+	},
+	{
+		"tab": "Advanced",
+		"structure": [
+			{
+				"inputLabel": "Java binary path",
+				"inputKeyword": "javaHomePath",
+				"inputType": "file",
+				"inputPlaceholder": "/opt/openjdk/bin/java",
+				"extensions": ["*"]
+			}
+		]
 	}
 ]
