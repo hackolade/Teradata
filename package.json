@@ -1,17 +1,21 @@
 {
     "name": "Teradata",
-    "version": "0.0.1",
-    "versionDate": "2022-10-07",
+    "version": "0.1.0",
+    "versionDate": "2023-02-17",
     "author": "hackolade",
     "engines": {
-        "hackolade": "6.5.4",
+        "hackolade": "6.9.1",
         "hackoladePlugin": "1.2.0"
     },
     "contributes": {
         "target": {
             "applicationTarget": "Teradata",
             "title": "Teradata",
-            "versions": []
+            "versions": [
+				"v17.00",
+				"v17.10",
+				"v17.20"
+			]
         },
         "features": {
             "views": {
