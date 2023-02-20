@@ -18,10 +18,11 @@ module.exports = (_) => {
 	};
 
 	const addTimezonePrecision = (type, precision, timezone) => {
+		const resultType = precision ? addPrecision(type, precision) : type;
 		if (timezone) {
-			return `${addPrecision(type, precision)} WITH TIME ZONE`;
+			return `${resultType} WITH TIME ZONE`;
 		} else {
-			return addPrecision(type, precision);
+			return resultType;
 		}
 	};
 
@@ -34,7 +35,7 @@ module.exports = (_) => {
 		return typeStatement;
 	};
 
-	const canHaveLength = type => ['VARCHAR', 'CHAR VARYING', 'CHARACTER VARYING', 'VARGRAPHIC', 'CLOB', 'CHARACTER LARGE OBJECT', 'BYTE', 'VARBYTE', 'BLOB', 'ARRAY', 'JSON', 'XML', 'XMLTYPE', 'ST_GEOMETRY'].includes(type);
+	const canHaveLength = type => ['CHAR', 'CHARACTER', 'VARCHAR', 'CHAR VARYING', 'CHARACTER VARYING', 'VARGRAPHIC', 'CLOB', 'CHARACTER LARGE OBJECT', 'BYTE', 'VARBYTE', 'BLOB', 'ARRAY', 'JSON', 'XML', 'XMLTYPE', 'ST_GEOMETRY'].includes(type);
 
 	const canHavePrecisionAndScale = type =>
 		[ 'DECIMAL', 'DEC', 'NUMERIC', 'NUMBER' ].includes(type);
@@ -61,7 +62,7 @@ module.exports = (_) => {
 			return addScalePrecision(type, columnDefinition.precision, columnDefinition.fractSecPrecision);
 		} else if (canHavePrecisionAndScale(type) && _.isNumber(columnDefinition.precision)) {
 			return addScalePrecision(type, columnDefinition.precision, columnDefinition.scale);
-		} else if (canHaveFractionalSecondPrecision(type) && _.isNumber(columnDefinition.fractSecPrecision)) {
+		} else if (canHaveFractionalSecondPrecision(type)) {
 			return addTimezonePrecision(type, columnDefinition.fractSecPrecision, columnDefinition.timezone);
 		}
 

@@ -71,7 +71,7 @@ module.exports = (baseProvider, options, app) => {
 				mergeBlockRatio: detailsTab.tableOptions.MERGE_BLOCK_RATIO,
 				dataBlockSize: detailsTab.tableOptions.DATA_BLOCK_SIZE,
 				blockCompression: detailsTab.tableOptions.BLOCK_COMPRESSION,
-				tablePreservation: detailsTab.tablePreservation,
+				tablePreservation: detailsTab.tableOptions.TABLE_PRESERVATION,
 				partitioning: detailsTab.partitioning,
 				selectStatement: detailsTab.selectStatement,
 				queueTable: detailsTab.tableOptions.QUEUE_TABLE,

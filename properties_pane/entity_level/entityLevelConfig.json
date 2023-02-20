@@ -144,7 +144,7 @@ making sure that you maintain a proper JSON format.
 						"propertyType": "text",
 						"propertyTooltip": "Target data table name for error table",
 						"dependency": {
-							"key": "errorTable",
+							"key": "ERROR_TABLE",
 							"value": true
 						}
 					},
@@ -528,7 +528,7 @@ making sure that you maintain a proper JSON format.
 							"PRESERVE ROWS"
 						],
 						"dependency": {
-							"key": "temporary",
+							"key": "TEMPORARY_VOLATILE",
 							"exist": true
 						}
 					},
