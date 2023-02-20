@@ -8,7 +8,7 @@ const teradataRegexConfig = {
     udtField: /\b(?<name>[`"'][\s\S]+?[`"']|\S+?)\s+(?<type>[\s\S\(\)]+)/i,
 
     //db types
-    numeric: /\b(?<typeName>BYTEINT|SMALLINT|INT|INTEGER|BIGINT|DECIMAL|DEC|NUMRIC|FLOAT|REAL|DOUBLE\s+PRECISION|NUMBER)\s*(?:\((?<precision>-?[0-9]+|\*)+(?:\s*,\s*(?<scale>-?[0-9]+|\*))?\))?/i,
+    numeric: /\b(?<typeName>BYTEINT|SMALLINT|INTEGER|INT|BIGINT|DECIMAL|DEC|NUMERIC|FLOAT|REAL|DOUBLE\s+PRECISION|NUMBER)\s*(?:\((?<precision>-?[0-9]+|\*)+(?:\s*,\s*(?<scale>-?[0-9]+|\*))?\))?/i,
     char: /\b(?<typeName>CHARACTER|CHAR|VARCHAR|CHAR\s+VARYING|CHARACTER\s+VARYING|LONG\s+VARCHAR|VARGRAPHIC|LONG\s+VARGRAPHIC|CLOB|CHARACTER\s+LARGE\s+OBJECT)\s*(?:\((?<length>-?[0-9]+|\*)\))?(?:\s+CHARACTER\s+SET\s+(?<characterSet>LATIN|UNICODE|KANJISJIS|GRAPHIC))?/i,
     byte: /\b(?<typeName>BYTE|VARBYTE|BLOB)\s*(?:\((?<length>-?[0-9]+|\*)\))?/i,
     datetime: /\b(?<typeName>TIMESTAMP|DATE|TIME)\s*(?:\((?<precision>-?[0-9]+|\*)\))?\s*(?<withTimeZone>WITH\s+TIME\s+ZONE)?/i,
