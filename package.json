@@ -24,7 +24,7 @@
             "enableForwardEngineering": {
                 "jsonDocument": true,
                 "jsonSchema": true,
-                "excel": false,
+                "excel": true,
                 "plugin": true
 			},
             "enableReverseEngineering": true,
