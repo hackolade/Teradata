@@ -24,17 +24,5 @@
     "level": "parent",
     "key": "type",
     "value": "definitions"
-  },
-  "subtypes": {
-    "allTypes": {
-      "childValueType": [
-        "char",
-        "byte",
-        "numeric",
-        "datetime",
-        "period",
-        "interval"
-      ]
-    }
   }
 }
