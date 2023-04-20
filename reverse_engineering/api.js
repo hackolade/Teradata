@@ -4,8 +4,8 @@ const connectionHelper = require('./helpers/connectionHelper');
 const indexHelper = require('./helpers/indexHelper');
 const udtHelper = require('./helpers/udtHelper');
 
-const connect = async (connectionInfo, sshService) => {
-    return await connectionHelper.connect(connectionInfo, sshService);
+const connect = async (connectionInfo, sshService, logger) => {
+    return await connectionHelper.connect(connectionInfo, sshService, logger);
 };
 
 const disconnect = async (connectionInfo, logger, callback, app) => {
@@ -31,7 +31,7 @@ const testConnection = async (connectionInfo, logger, callback, app) => {
 
         log.info('Start test connection');
 
-        const connection = await connect(connectionInfo, sshService);
+        const connection = await connect(connectionInfo, sshService, log);
         const instance = connectionHelper.createInstance(connection, _);
 
         await instance.getVersion();
@@ -57,7 +57,7 @@ const getDbCollectionsNames = async (connectionInfo, logger, callback, app) => {
         logger.clear();
         logger.log('info', connectionInfo, 'connectionInfo', connectionInfo.hiddenKeys);
 
-        const connection = await connect(connectionInfo, sshService);
+        const connection = await connect(connectionInfo, sshService, log);
         const instance = connectionHelper.createInstance(connection, _);
 
         log.info('Get table and database names');
@@ -107,7 +107,7 @@ const getDbCollectionsData = async (data, logger, callback, app) => {
 
         const collections = data.collectionData.collections;
         const dataBaseNames = data.collectionData.dataBaseNames;
-        const connection = await connect(data, sshService);
+        const connection = await connect(data, sshService, log);
         const instance = connectionHelper.createInstance(connection, _);
 
         const teradataVersion = await instance.getVersion();

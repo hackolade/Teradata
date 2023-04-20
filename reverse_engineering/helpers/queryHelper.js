@@ -1,13 +1,17 @@
+const cleanUpCommand = (command = '') => command.replaceAll(/\s+/g, ' ');
+
 const getDatabaseAndTableNames = ({ tableType, systemDatabases }) => {
-    return `SELECT DatabaseName, TableName
+    const command = `SELECT DatabaseName, TableName
                 FROM DBC.TablesV
             WHERE TableKind = '${tableType}'
               AND DatabaseName NOT IN (${systemDatabases.map(name => `'${name}'`).join(', ')})
             ORDER BY DatabaseName, TableName;`
+
+    return cleanUpCommand(command);
 };
 
 const getColumns = ({dbName, tableName}) => {
-    return `SELECT col.DatabaseName,
+    const command = `SELECT col.DatabaseName,
                    col.TableName,
                    col.ColumnName,
                    col.ColumnType as DataType
@@ -17,10 +21,12 @@ const getColumns = ({dbName, tableName}) => {
             ORDER BY col.DatabaseName,
                      col.TableName,
                      col.ColumnId;`
+
+    return cleanUpCommand(command);
 };
 
 const describeDatabase = ({dbName}) => {
-    return `SELECT DatabaseName,
+    const command = `SELECT DatabaseName,
                    AccountName,
                    DefaultMapName,
                    ProtectionType,
@@ -31,20 +37,27 @@ const describeDatabase = ({dbName}) => {
                    CommentString
             FROM DBC.DatabasesV
             WHERE DatabaseName = '${dbName}';`
+
+    return cleanUpCommand(command);
 };
 
-const countColumns = ({dbName, tableName}) => `SELECT COUNT(*) FROM <$>${dbName}<$>.<$>${tableName}<$>`;
+const countColumns = ({dbName, tableName}) => {
+    const command = `SELECT COUNT(*) FROM <$>${dbName}<$>.<$>${tableName}<$>`;
+    return cleanUpCommand(command);
+};
 
 const getRecords = ({ dbName, tableName, limit }) => {
-    return `SELECT TOP ${limit} * FROM <$>${dbName}<$>.<$>${tableName}<$>;`
+    const command = `SELECT TOP ${limit} * FROM <$>${dbName}<$>.<$>${tableName}<$>;`
+    return cleanUpCommand(command);
 };
 
 const showCreateEntityStatement = ({ entityType = 'TABLE', dbName, tableName }) => {
-    return `SHOW ${entityType} <$>${dbName}<$>.<$>${tableName}<$>;`
+    const command = `SHOW ${entityType} <$>${dbName}<$>.<$>${tableName}<$>;`
+    return cleanUpCommand(command);
 };
 
 const getIndexesStatement = ({ dbName }) => {
-    return `SELECT IND.TableName,
+    const command = `SELECT IND.TableName,
                    IND.DatabaseName,
                    IND.IndexName,
                    IND.IndexType
@@ -58,6 +71,8 @@ const getIndexesStatement = ({ dbName }) => {
             ORDER BY IND.DatabaseName,
                      IND.TableName,
                      IND.IndexName;`
+
+    return cleanUpCommand(command);
 };
 
 const buildQuery = (queryName, args) => {

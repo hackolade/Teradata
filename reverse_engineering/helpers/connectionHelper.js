@@ -2,11 +2,11 @@ const os = require('os');
 const util = require('util');
 const path = require('path');
 const exec = util.promisify(require('child_process').exec);
-const findJavaHome = util.promisify(require('find-java-home'));
 const {buildQuery, queryType} = require('./queryHelper');
 
 const SYSTEM_DATABASES = ['val', 'tdwm', 'DBC', 'TDStats', 'TD_ANALYTICS_DB', 'TD_SERVER_DB', 'TDQCD', 'TDMaps', 'TDBCMgmt', 'SystemFe', 'Sys_Calendar', 'SYSSPATIAL', 'SYSLIB', 'SYSBAR', 'SysAdmin', 'LockLogShredder', 'dbcmngr', 'SQLJ', 'All', 'Crashdumps', 'Default', 'External_AP', 'EXTUSER', 'PUBLIC', 'SYSJDBC', 'SYSUDTLIB', 'SYSUIF', 'TD_SYSFNLIB', 'TD_SYSGPL', 'TD_SYSXML', 'TDPUSER'];
 const SYSTEM_UDT = ['ArrayVec', 'InternalPeriodDateType', 'InternalPeriodTimeStampType', 'InternalPeriodTimeStampWTZType', 'InternalPeriodTimeType', 'InternalPeriodTimeWTZType', 'MBB', 'MBR', 'ST_Geometry', 'TD_AVRO', 'TD_CSVLATIN', 'TD_CSVUNICODE', 'TD_JSONLATIN_LOB', 'TD_JSONUNICODE_LOB', 'TD_JSON_BSON', 'TD_JSON_UBJSON', 'XML'];
+const MISSING_JAVA_PATH_MESSAGE = 'Path to JAVA binary file is incorrect. Please specify JAVA_HOME variable in your system or put specific path to JAVA binary file in connection settings.';
 
 let connection;
 let useSshTunnel;
@@ -31,7 +31,7 @@ const getConnectionSettings = async (connectionInfo, sshService) => {
         connectionInfo = {
             ...connectionInfo,
             host: options.host,
-            port: options.port.toString(),
+            port: options.port.toString() || '1025',
         };
     }
 
@@ -43,10 +43,9 @@ const getConnectionSettings = async (connectionInfo, sshService) => {
 
 const createArgument = (argKey, argValue) => ` --${argKey}="${argValue}"`;
 
-const buildCommand = (javaPath, teradataClientPath, connectionInfo, query) => {
-    let command = `${javaPath} -jar ${teradataClientPath}`;
+const buildCommand = (javaPath, teradataClientPath, connectionInfo) => {
+    let command = `"${javaPath}" -jar "${teradataClientPath}"`;
 
-    command += query ? createArgument('query', query) : '';
     command += connectionInfo.host ? createArgument('host', connectionInfo.host) : '';
     command += connectionInfo.port ? createArgument('port', connectionInfo.port) : '';
     command += connectionInfo.userName ? createArgument('user', connectionInfo.userName) : '';
@@ -55,26 +54,41 @@ const buildCommand = (javaPath, teradataClientPath, connectionInfo, query) => {
     command += connectionInfo.sslca ? createArgument('sslca', connectionInfo.sslca) : '';
 
     return command;
-}
+};
 
-const createConnection = async (connectionInfo, sshService) => {
+const getDefaultJavaPath = () => {
+    const javaHome = isWindows() ? '%JAVA_HOME%' : '$JAVA_HOME';
+    return javaHome + '/bin/java';
+};
+
+const checkJavaPath = async (javaPath, logger) => {
+    try {
+        const testCommand = `"${javaPath}" --help`;
+        await exec(testCommand);
+        logger.info(`Path to JAVA binary file successfully checked. JAVA path: ${javaPath}`);
+    } catch (error) {
+        logger.error(error);
+        throw new Error(MISSING_JAVA_PATH_MESSAGE);
+    }
+};
+
+const createConnection = async (connectionInfo, sshService, logger) => {
     const connectionSettings = await getConnectionSettings(connectionInfo, sshService)
 
 
-    let javaPath = '';
-    if (connectionSettings.javaHomePath) {
-        javaPath = connectionSettings.javaHomePath;
-    } else {
-        const javaHomePath = await findJavaHome({ allowJre: true });
-        const javaFileName = 'java' + (isWindows() ? '.exe' : '');
-        javaPath = path.resolve(javaHomePath, 'bin', javaFileName);
-    }
+    const javaPath = connectionSettings.javaHomePath
+        ? connectionSettings.javaHomePath
+        : getDefaultJavaPath();
 
-    const teradataClientPath = path.resolve(__dirname, '..', 'addons', 'TeradataClient.jar')
+    await checkJavaPath(javaPath, logger);
+
+    const teradataClientPath = path.resolve(__dirname, '..', 'addons', 'TeradataClient.jar');
+    const teradataClientCommand = buildCommand(javaPath, teradataClientPath, connectionSettings);
 
     return {
         execute: async (query) => {
-            const command = buildCommand(javaPath, teradataClientPath, connectionSettings, query);
+            const queryArgument = createArgument('query', query);
+            const command = teradataClientCommand + ' ' + queryArgument;
             const queryResult = await exec(command);
             const rowJson = queryResult.stdout.match(/<hackolade>(.*?)<\/hackolade>/)?.[1];
 
@@ -92,13 +106,13 @@ const createConnection = async (connectionInfo, sshService) => {
     };
 };
 
-const connect = async (connectionInfo, sshService) => {
+const connect = async (connectionInfo, sshService, logger) => {
     if (connection) {
         return connection;
     }
 
     useSshTunnel = connectionInfo.useSshTunnel;
-    connection = await createConnection(connectionInfo, sshService);
+    connection = await createConnection(connectionInfo, sshService, logger);
 
     return connection;
 };
