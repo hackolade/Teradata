@@ -31,7 +31,7 @@ const getConnectionSettings = async (connectionInfo, sshService) => {
         connectionInfo = {
             ...connectionInfo,
             host: options.host,
-            port: options.port.toString(),
+            port: options.port.toString() || '1025',
         };
     }
 
