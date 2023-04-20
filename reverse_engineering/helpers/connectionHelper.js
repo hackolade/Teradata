@@ -7,7 +7,6 @@ const {buildQuery, queryType} = require('./queryHelper');
 const SYSTEM_DATABASES = ['val', 'tdwm', 'DBC', 'TDStats', 'TD_ANALYTICS_DB', 'TD_SERVER_DB', 'TDQCD', 'TDMaps', 'TDBCMgmt', 'SystemFe', 'Sys_Calendar', 'SYSSPATIAL', 'SYSLIB', 'SYSBAR', 'SysAdmin', 'LockLogShredder', 'dbcmngr', 'SQLJ', 'All', 'Crashdumps', 'Default', 'External_AP', 'EXTUSER', 'PUBLIC', 'SYSJDBC', 'SYSUDTLIB', 'SYSUIF', 'TD_SYSFNLIB', 'TD_SYSGPL', 'TD_SYSXML', 'TDPUSER'];
 const SYSTEM_UDT = ['ArrayVec', 'InternalPeriodDateType', 'InternalPeriodTimeStampType', 'InternalPeriodTimeStampWTZType', 'InternalPeriodTimeType', 'InternalPeriodTimeWTZType', 'MBB', 'MBR', 'ST_Geometry', 'TD_AVRO', 'TD_CSVLATIN', 'TD_CSVUNICODE', 'TD_JSONLATIN_LOB', 'TD_JSONUNICODE_LOB', 'TD_JSON_BSON', 'TD_JSON_UBJSON', 'XML'];
 const MISSING_JAVA_PATH_MESSAGE = 'Path to JAVA binary file is incorrect. Please specify JAVA_HOME variable in your system or put specific path to JAVA binary file in connection settings.';
-const DEFAULT_JAVA_PATH = '$JAVA_HOME/bin/java';
 
 let connection;
 let useSshTunnel;
@@ -57,6 +56,11 @@ const buildCommand = (javaPath, teradataClientPath, connectionInfo) => {
     return command;
 };
 
+const getDefaultJavaPath = () => {
+    const javaHome = isWindows() ? '%JAVA_HOME%' : '$JAVA_HOME';
+    return javaHome + '/bin/java';
+};
+
 const checkJavaPath = async (javaPath, logger) => {
     try {
         const testCommand = `"${javaPath}" --help`;
@@ -74,7 +78,7 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 
     const javaPath = connectionSettings.javaHomePath
         ? connectionSettings.javaHomePath
-        : DEFAULT_JAVA_PATH;
+        : getDefaultJavaPath();
 
     await checkJavaPath(javaPath, logger);
 
