@@ -37,6 +37,7 @@ module.exports = (baseProvider, options, app) => {
 		hydrateDatabase(containerData, data) {
 			return {
 				databaseName: containerData.name,
+				isActivated: containerData.isActivated,
 				db_account: containerData.db_account,
 				db_default_map: containerData.db_default_map,
 				db_permanent_storage_size: containerData.db_permanent_storage_size,
@@ -155,6 +156,7 @@ module.exports = (baseProvider, options, app) => {
 
 		createDatabase({
 			databaseName,
+			isActivated,
 			db_account,
 			db_default_map,
 			db_permanent_storage_size,
@@ -177,10 +179,15 @@ module.exports = (baseProvider, options, app) => {
 				db_default_journal_db
 			});
 
-			const databaseStatement = assignTemplates(templates.createDatabase, {
-				name: databaseName,
-				databaseOptions,
-			});
+			const databaseStatement = commentIfDeactivated(
+				assignTemplates(templates.createDatabase, {
+					name: databaseName,
+					databaseOptions,
+				}),
+				{
+					isActivated,
+				}
+			);
 
 			const createSessionStatement = assignTemplates(templates.createSession, {
 				name: databaseName,
