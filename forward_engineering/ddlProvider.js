@@ -467,7 +467,7 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		convertColumnDefinition(columnDefinition) {
-			const type = this.hasType(columnDefinition.type) ? decorateType(columnDefinition.type, columnDefinition) : columnDefinition.type;
+			const type = this.hasType(columnDefinition.type) ? decorateType(columnDefinition.type, columnDefinition) : `"${columnDefinition.type}"`;
 			const inlineLength = columnDefinition.inlineLength ? ` INLINE LENGTH ${columnDefinition.inlineLength}` : '';
 			const notNull = columnDefinition.required ? ' NOT NULL' : '';
 			const inlineUniqueConstraint = columnDefinition.unique && !columnDefinition.nullable ? ' UNIQUE' : '';
