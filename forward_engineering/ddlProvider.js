@@ -444,25 +444,30 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		createForeignKeyConstraint(
-			{ foreignKey, primaryTable, primaryKey, primaryTableActivated, foreignTableActivated, customProperties },
+			{ foreignKey, primaryTable, primaryKey, primaryTableActivated, foreignTableActivated, customProperties, isActivated },
 			dbData,
 		) {
 			const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated(primaryKey);
 			const isAllForeignKeysDeactivated = checkAllKeysDeactivated(foreignKey);
-			const isActivated =
+			const isRelationshipActivated =
 				!isAllPrimaryKeysDeactivated &&
 				!isAllForeignKeysDeactivated &&
 				primaryTableActivated &&
-				foreignTableActivated;
+				foreignTableActivated &&
+				isActivated !== false; // * It is done so to support old version of the application where there is no isActivated property
 
 			return {
 				statement: assignTemplates(templates.createForeignKeyConstraint, {
 					checkOption: customProperties.checkOption,
 					primaryTable: getTableName(primaryTable, dbData.databaseName),
-					foreignKey: isActivated ? foreignKeysToString(foreignKey) : foreignActiveKeysToString(foreignKey),
-					primaryKey: isActivated ? foreignKeysToString(primaryKey) : foreignActiveKeysToString(primaryKey),
+					foreignKey: isRelationshipActivated
+						? foreignKeysToString(foreignKey)
+						: foreignActiveKeysToString(foreignKey),
+					primaryKey: isRelationshipActivated
+						? foreignKeysToString(primaryKey)
+						: foreignActiveKeysToString(primaryKey),
 				}),
-				isActivated,
+				isActivated: isRelationshipActivated,
 			};
 		},
 
