@@ -17,7 +17,17 @@
 	},
 	"compMode": {
 		"entity": true,
-		"container": true
+		"container": true,
+		"useDdlProvider": true
 	},
-	"applyScriptToInstance": false
+	"applyScriptToInstance": false,
+	"additionalOptions": [
+		{
+			"id": "applyDropStatements",
+			"value": false,
+			"forUpdate": true,
+			"name": "Apply Drop Statements",
+			"isDropInStatements": true
+		}
+	]
 }
