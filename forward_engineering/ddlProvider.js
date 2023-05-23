@@ -1,7 +1,15 @@
 const templates = require('./configs/templates');
 const defaultTypes = require('./configs/defaultTypes');
 const types = require('./configs/types');
+const getAdditionalOptions = require("./helpers/getAdditionalOptions");
+const dropStatementProxy = require("./helpers/dropStatementProxy");
 
+/**
+ * @param {BaseProvider} baseProvider
+ * @param {DdlProviderOptions} options
+ * @param {App} app
+ * @return {Object}
+ */
 module.exports = (baseProvider, options, app) => {
 	const _ = app.require('lodash');
 	const { assignTemplates } = app.require('@hackolade/ddl-fe-utils');
@@ -22,7 +30,7 @@ module.exports = (baseProvider, options, app) => {
 			assignTemplates,
 		});
 	const keyHelper = require('./helpers/keyHelper')(_, clean);
-	const { getTableName, getIndexName, getDatabaseOptions, getViewData, getDefaultJournalTableName, getJournalingStrategy, viewColumnsToString } = require('./helpers/general')(_, tab, commentIfDeactivated);
+	const { getTableName, getIndexName, getDatabaseOptions, getViewData, getJournalingStrategy, viewColumnsToString, shouldDropDefaultJournalTable } = require('./helpers/general')(_, tab, commentIfDeactivated);
 	const { getTableOptions, getUsingOptions, getInlineTableIndexes, getIndexOptions, getIndexKeys } = require('./helpers/tableHelper')({
 		_,
 		tab,
@@ -33,8 +41,10 @@ module.exports = (baseProvider, options, app) => {
 	});
 	const { decorateType } = require('./helpers/columnDefinitionHelper')(_);
 
-	return {
-		hydrateDatabase(containerData, data) {
+	const additionalOptions = getAdditionalOptions(options.additionalOptions);
+
+	return dropStatementProxy({ commentIfDeactivated })(additionalOptions.applyDropStatements, {
+		hydrateDatabase(containerData) {
 			return {
 				databaseName: containerData.name,
 				isActivated: containerData.isActivated,
@@ -516,8 +526,52 @@ module.exports = (baseProvider, options, app) => {
 			);
 		},
 
-		hydrateForDeleteSchema(containerData) {
-			return { };
+		/**
+		 * @param {Array<HydrateDropContainerData>} containerData
+		 * @return {DropContainerData}
+		 */
+		hydrateDropDatabase(containerData) {
+			return {
+				databaseName: containerData[0]?.name || '',
+			};
+		},
+
+		/**
+		 * @param {Array<HydrateModifyContainerData>} containerData
+		 * @param {ContainerCompModeData} compModeData
+		 * @return {ModifyContainerData}
+		 */
+		hydrateAlterDatabase({ containerData, compModeData }) {
+			const data = containerData[0] || {};
+
+			const isDbAccountModified = compModeData.new.db_account !== compModeData.old.db_account;
+			const isDefaultMapModified = compModeData.new.db_default_map !== compModeData.old.db_default_map;
+			const isPermanentStorageSizeModified = compModeData.new.db_permanent_storage_size !== compModeData.old.db_permanent_storage_size;
+			const isSpoolFilesSizeModified = compModeData.new.spool_files_size !== compModeData.old.spool_files_size;
+			const isTemporaryTablesSizeModified = compModeData.new.temporary_tables_size !== compModeData.old.temporary_tables_size;
+			const isFallbackModified = compModeData.new.has_fallback !== compModeData.old.has_fallback;
+			const isBeforeJournalStrategyModified = compModeData.new.db_before_journaling_strategy !== compModeData.old.db_before_journaling_strategy;
+			const isAfterJournalStrategyModified = compModeData.new.db_after_journaling_strategy !== compModeData.old.db_after_journaling_strategy;
+			const isDefaultJournalTableModified = compModeData.new.db_default_journal_db !== compModeData.old.db_default_journal_db
+				|| compModeData.new.db_default_journal_table !== compModeData.old.db_default_journal_table;
+			const dropDefaultJournalTable = shouldDropDefaultJournalTable(compModeData);
+
+			return {
+				name: data.name || '',
+				...(isDbAccountModified && { db_account: data.db_account }),
+				...(isDefaultMapModified && { db_default_map: data.db_default_map }),
+				...(isPermanentStorageSizeModified && { db_permanent_storage_size: data.db_permanent_storage_size }),
+				...(isSpoolFilesSizeModified && { spool_files_size: data.spool_files_size }),
+				...(isTemporaryTablesSizeModified && { temporary_tables_size: data.temporary_tables_size }),
+				...(isFallbackModified && { has_fallback: data.has_fallback }),
+				...(isBeforeJournalStrategyModified && { db_before_journaling_strategy: data.db_before_journaling_strategy }),
+				...(isAfterJournalStrategyModified && { db_after_journaling_strategy: data.db_after_journaling_strategy }),
+				...(isDefaultJournalTableModified && {
+					db_default_journal_db: dropDefaultJournalTable ? compModeData.old.db_default_journal_db : data.db_default_journal_db,
+					db_default_journal_table: dropDefaultJournalTable ? compModeData.old.db_default_journal_table : data.db_default_journal_table,
+					dropDefaultJournalTable
+				}),
+			};
 		},
 
 		hydrateAlertTable(collection) {
@@ -539,5 +593,26 @@ module.exports = (baseProvider, options, app) => {
 		hasType(type) {
 			return hasType(types, type);
 		},
-	};
+
+		/**
+		 * @param {DropContainerData} dropDbData
+		 * @return {string}
+		 */
+		dropDatabase(dropDbData) {
+			return assignTemplates(templates.dropDatabase, dropDbData);
+		},
+
+		/**
+		 * @param {ModifyContainerData} alterDbData
+		 * @return {string}
+		 */
+		alterDatabase(alterDbData) {
+			const databaseOptions = getDatabaseOptions(alterDbData);
+
+			return assignTemplates(templates.modifyDatabase, {
+				databaseName: alterDbData.name,
+				databaseOptions,
+			});
+		},
+	});
 };

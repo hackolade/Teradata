@@ -44,4 +44,7 @@ module.exports = {
 		'NOT FINAL${methodSpecification};\n',
 	createDistinctType: 'CREATE TYPE ${typeName} AS ${baseType} FINAL${methodSpecification};\n',
 	createArrayType: 'CREATE TYPE ${typeName} AS ${baseType}${default};\n',
+
+	dropDatabase: 'DROP DATABASE "${databaseName}";\n',
+	modifyDatabase: 'MODIFY DATABASE "${databaseName}" AS ${databaseOptions};\n',
 };
