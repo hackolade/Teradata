@@ -8,7 +8,7 @@ const dropStatementProxy = ({ commentIfDeactivated }) => (applyDropStatements, d
 			'dropTable',
 			'dropColumn',
 			// 'dropIndex',
-			// 'dropCheckConstraint',
+			'dropCheckConstraint',
 			// 'dropView',
 		].reduce((result, method) => {
 			return {

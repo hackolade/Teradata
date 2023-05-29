@@ -92,6 +92,10 @@ module.exports = (baseProvider, options, app) => {
 			return indexData;
 		},
 
+		/**
+		 * @param {CheckConstraint} checkConstraint
+		 * @return {HydratedCheckConstraint}
+		 */
 		hydrateCheckConstraint(checkConstraint) {
 			const buildExpression = (expr) => {
 				const plainExpr = _.trim(expr).replace(/^\(([\s\S]*)\)$/, '$1');
@@ -99,7 +103,7 @@ module.exports = (baseProvider, options, app) => {
 			}
 
 			return {
-				name: checkConstraint.chkConstrName,
+				name: checkConstraint.chkConstrName || '',
 				expression: buildExpression(checkConstraint.constrExpression),
 			};
 		},
@@ -430,6 +434,79 @@ module.exports = (baseProvider, options, app) => {
 			return assignTemplates(templates.checkConstraint, {
 				name: checkConstraint.name ? `CONSTRAINT "${checkConstraint.name}" ` : '',
 				expression: checkConstraint.expression,
+			});
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {HydratedCheckConstraint} checkConstraint
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		createCheckConstraintStatement(tableName, checkConstraint, dbData) {
+			const table = getTableName(tableName, dbData.databaseName);
+
+			return assignTemplates(templates.alterTable, {
+				tableName: table,
+				tableOptions: '',
+				alterStatement: assignTemplates(templates.addCheckConstraint, {
+					name: wrap(checkConstraint.name, '"', '"'),
+					expression: checkConstraint.expression,
+				}),
+			});
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {HydratedCheckConstraint} checkConstraint
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		dropCheckConstraint(tableName, checkConstraint, dbData) {
+			const table = getTableName(tableName, dbData.databaseName);
+
+			return assignTemplates(templates.alterTable, {
+				tableName: table,
+				tableOptions: '',
+				alterStatement: assignTemplates(templates.dropCheckConstraint, {
+					name: wrap(checkConstraint.name, '"', '"'),
+				}),
+			});
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {CheckConstraint} newCheck
+		 * @param {CheckConstraint} oldCheck
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		alterCheckConstraint(tableName, { new: newCheck, old: oldCheck }, dbData) {
+			const table = getTableName(tableName, dbData.databaseName);
+
+			const alterStatements = [];
+			if (newCheck.chkConstrName !== oldCheck.chkConstrName) {
+				const renameConstraint = assignTemplates(templates.rename, {
+					oldName: wrap(oldCheck.chkConstrName, '"', '"'),
+					newName: wrap(newCheck.chkConstrName, '"', '"'),
+				});
+
+				alterStatements.push(renameConstraint);
+			}
+
+			if (newCheck.constrExpression !== oldCheck.constrExpression) {
+				const modifyConstraint = assignTemplates(templates.modifyCheckConstraint, {
+					name: wrap(oldCheck.chkConstrName, '"', '"'),
+					expression: newCheck.chkConstrName,
+				});
+
+				alterStatements.push(modifyConstraint);
+			}
+
+			return assignTemplates(templates.alterTable, {
+				tableName: table,
+				tableOptions: '',
+				alterStatement: '\n' + tab(alterStatements.join(',\n')),
 			});
 		},
 
@@ -825,12 +902,12 @@ module.exports = (baseProvider, options, app) => {
 
 				alterStatement = '\n' + tab([ dropOldColumnStatement, createNewColumnStatement ].join(',\n'));
 			} else if (columnData.oldName && !columnData.newOptions) {
-				alterStatement = assignTemplates(templates.renameColumn, {
+				alterStatement = assignTemplates(templates.rename, {
 					oldName: wrap(columnData.oldName, '"', '"'),
 					newName: wrap(columnData.name, '"', '"'),
 				});
 			} else if (columnData.oldName && columnData.newOptions) {
-				const renameColumnStatement = assignTemplates(templates.renameColumn, {
+				const renameColumnStatement = assignTemplates(templates.rename, {
 					oldName: wrap(columnData.oldName, '"', '"'),
 					newName: wrap(columnData.name, '"', '"'),
 				});

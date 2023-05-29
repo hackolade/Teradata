@@ -315,3 +315,8 @@ interface ModifyColumnData extends ColumnDefinition {
     oldType?: string,
     newOptions?: ColumnDefinitionOptions,
 }
+
+interface HydratedCheckConstraint {
+    name: string,
+    expression: string,
+}

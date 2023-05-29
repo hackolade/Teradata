@@ -53,5 +53,9 @@ module.exports = {
 
 	addColumn: ' ADD ${columnDefinition}',
 	dropColumn: ' DROP ${name}',
-	renameColumn: ' RENAME ${oldName} TO ${newName}',
+	rename: ' RENAME ${oldName} TO ${newName}',
+
+	dropCheckConstraint: ' DROP CONSTRAINT ${name} CHECK',
+	addCheckConstraint: ' ADD CONSTRAINT ${name} ${expression}',
+	modifyCheckConstraint: ' MODIFY CONSTRAINT ${name} ${expression}',
 };
