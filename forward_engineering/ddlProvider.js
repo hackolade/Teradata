@@ -1,8 +1,8 @@
 const templates = require('./configs/templates');
 const defaultTypes = require('./configs/defaultTypes');
 const types = require('./configs/types');
-const getAdditionalOptions = require("./helpers/getAdditionalOptions");
-const dropStatementProxy = require("./helpers/dropStatementProxy");
+const getAdditionalOptions = require('./helpers/getAdditionalOptions');
+const dropStatementProxy = require('./helpers/dropStatementProxy');
 
 /**
  * @param {BaseProvider} baseProvider
@@ -20,6 +20,8 @@ module.exports = (baseProvider, options, app) => {
 		divideIntoActivatedAndDeactivated,
 		hasType,
 		clean,
+		wrap,
+		getDifferentProperties,
 	} = app.require('@hackolade/ddl-fe-utils').general;
 	const { generateConstraintsString, foreignKeysToString, foreignActiveKeysToString, createKeyConstraint } =
 		require('./helpers/constraintHelper')({
@@ -67,31 +69,9 @@ module.exports = (baseProvider, options, app) => {
 				...tableData,
 				tableIndexes,
 				keyConstraints: keyHelper.getTableKeyConstraints(jsonSchema),
-				tableSet: detailsTab.tableOptions.SET_MULTISET,
-				temporary: detailsTab.tableOptions.TEMPORARY_VOLATILE,
-				tableMap: detailsTab.tableOptions.MAP,
-				colocateUsing: detailsTab.tableOptions.COLOCATE_USING,
-				fallback: detailsTab.tableOptions.FALLBACK,
-				beforeJournaling: detailsTab.tableOptions.BEFORE_JOURNAL,
-				afterJournaling: detailsTab.tableOptions.AFTER_JOURNAL,
-				defaultJournalTable: detailsTab.tableOptions.DEFAULT_JOURNAL_TABLE,
-				freespace: detailsTab.tableOptions.FREESPACE,
-				checksum: detailsTab.tableOptions.TABLE_CHECKSUM,
-				log: detailsTab.tableOptions.LOG,
-				isolatedLoading: detailsTab.tableOptions.ISOLATED_LOADING,
-				mergeBlockRatio: detailsTab.tableOptions.MERGE_BLOCK_RATIO,
-				dataBlockSize: detailsTab.tableOptions.DATA_BLOCK_SIZE,
-				blockCompression: detailsTab.tableOptions.BLOCK_COMPRESSION,
-				tablePreservation: detailsTab.tableOptions.TABLE_PRESERVATION,
+				tableOptions: detailsTab.tableOptions,
 				partitioning: detailsTab.partitioning,
 				selectStatement: detailsTab.selectStatement,
-				queueTable: detailsTab.tableOptions.QUEUE_TABLE,
-				traceTable: detailsTab.tableOptions.TRACE_TABLE,
-				errorTable: detailsTab.tableOptions.ERROR_TABLE,
-				targetDataTable: detailsTab.tableOptions.FOR_TABLE,
-				foreignTable: detailsTab.tableOptions.FOREIGN_TABLE,
-				externalSecurity: detailsTab.tableOptions.EXTERNAL_SECURITY,
-				authorizationName: detailsTab.tableOptions.AUTHORIZATION_NAME,
 				using: detailsTab.tableOptions.USING,
 			};
 		},
@@ -574,12 +554,144 @@ module.exports = (baseProvider, options, app) => {
 			};
 		},
 
-		hydrateAlertTable(collection) {
-			return {};
+		/**
+		 * @param {TableData} tableData
+		 * @param {EntityData} entityData
+		 * @return {DropEntityData}
+		 */
+		hydrateDropTable({ tableData, entityData }) {
+			const detailsTab = entityData[0];
+
+			return {
+				name: tableData.name,
+				dbName: tableData.dbData.databaseName,
+				temporary: detailsTab?.tableOptions?.TEMPORARY_VOLATILE === 'GLOBAL TEMPORARY',
+			};
 		},
 
-		alterTable(data) {
-			return '';
+		/**
+		 * @param {string} name
+		 * @param {EntityData} newEntityData
+		 * @param {EntityData} oldEntityData
+		 * @return {ModifyEntityData}
+		 */
+		hydrateAlterTable({ name, newEntityData, oldEntityData }) {
+			const newTableOptions = newEntityData[0]?.tableOptions || {};
+			const oldTableOptions = oldEntityData[0]?.tableOptions || {};
+
+			const isErrorTableModified = newTableOptions.ERROR_TABLE !== oldTableOptions.ERROR_TABLE;
+			const isForTableModified = newTableOptions.FOR_TABLE !== oldTableOptions.FOR_TABLE;
+			const isForeignTableModified = newTableOptions.FOREIGN_TABLE !== oldTableOptions.FOREIGN_TABLE;
+			const isMultisetModified = newTableOptions.SET_MULTISET !== oldTableOptions.SET_MULTISET;
+			const isTemporaryVolatileModified = newTableOptions.TEMPORARY_VOLATILE !== oldTableOptions.TEMPORARY_VOLATILE;
+			const isQueuedTableModified = newTableOptions.QUEUE_TABLE !== oldTableOptions.QUEUE_TABLE;
+			const isTraceTableModified = newTableOptions.TRACE_TABLE !== oldTableOptions.TRACE_TABLE;
+			const isExternalSecurityModified = newTableOptions.EXTERNAL_SECURITY !== oldTableOptions.EXTERNAL_SECURITY;
+			const isAuthorizationNameModified = newTableOptions.AUTHORIZATION_NAME !== oldTableOptions.AUTHORIZATION_NAME;
+			const isMapModified = newTableOptions.MAP !== oldTableOptions.MAP;
+			const isColocateUsingModified = newTableOptions.COLOCATE_USING !== oldTableOptions.COLOCATE_USING;
+			const isFallbackModified = newTableOptions.FALLBACK !== oldTableOptions.FALLBACK;
+			const isDefaultJournalTableModified = newTableOptions.DEFAULT_JOURNAL_TABLE !== oldTableOptions.DEFAULT_JOURNAL_TABLE;
+			const isLogModified = newTableOptions.LOG !== oldTableOptions.LOG;
+			const isBeforeJournalModified = newTableOptions.BEFORE_JOURNAL !== oldTableOptions.BEFORE_JOURNAL;
+			const isAfterJournalModified = newTableOptions.AFTER_JOURNAL !== oldTableOptions.AFTER_JOURNAL;
+			const isChecksumModified = newTableOptions.TABLE_CHECKSUM !== oldTableOptions.TABLE_CHECKSUM;
+			const isIsolateLoadingModified = newTableOptions.ISOLATED_LOADING !== oldTableOptions.ISOLATED_LOADING;
+			const isTablePreservationModified = newTableOptions.TABLE_PRESERVATION !== oldTableOptions.TABLE_PRESERVATION;
+			const isFreespaceModified = newTableOptions.FREESPACE?.freeSpaceValue !== oldTableOptions.FREESPACE?.freeSpaceValue
+				|| newTableOptions.FREESPACE?.percentUnit !== oldTableOptions.FREESPACE?.percentUnit;
+			const isMergeBlockRatioModified = newTableOptions.MERGE_BLOCK_RATIO?.mergeRatio !== oldTableOptions.MERGE_BLOCK_RATIO?.mergeRatio
+				|| newTableOptions.MERGE_BLOCK_RATIO?.specificRatio !== oldTableOptions.MERGE_BLOCK_RATIO?.specificRatio
+				|| newTableOptions.MERGE_BLOCK_RATIO?.percentUnit !== oldTableOptions.MERGE_BLOCK_RATIO?.percentUnit;
+			const isDataBlockSizeModified = newTableOptions.DATA_BLOCK_SIZE.blockSize !== oldTableOptions.DATA_BLOCK_SIZE?.blockSize
+				|| newTableOptions.DATA_BLOCK_SIZE?.specificSize !== oldTableOptions.DATA_BLOCK_SIZE?.specificSize
+				|| newTableOptions.DATA_BLOCK_SIZE?.units !== oldTableOptions.DATA_BLOCK_SIZE?.units;
+			const isBlockCompressionModified = newTableOptions.BLOCK_COMPRESSION?.blockCompressionType !== oldTableOptions.BLOCK_COMPRESSION?.blockCompressionType
+				|| newTableOptions.BLOCK_COMPRESSION?.blockCompressionAlgorithm !== oldTableOptions.BLOCK_COMPRESSION?.blockCompressionAlgorithm
+				|| newTableOptions.BLOCK_COMPRESSION?.blockCompressionLevel !== oldTableOptions.BLOCK_COMPRESSION?.blockCompressionLevel
+				|| newTableOptions.BLOCK_COMPRESSION?.specificBlockCompressionLevel !== oldTableOptions.BLOCK_COMPRESSION?.specificBlockCompressionLevel;
+			const isUsingModified = newTableOptions.USING?.location !== oldTableOptions.USING?.location
+				|| newTableOptions.USING?.scanPercentage !== oldTableOptions.USING?.scanPercentage
+				|| newTableOptions.USING?.pathPattern !== oldTableOptions.USING?.pathPattern
+				|| newTableOptions.USING?.manifest !== oldTableOptions.USING?.manifest
+				|| newTableOptions.USING?.tableFormat !== oldTableOptions.USING?.tableFormat
+				|| newTableOptions.USING?.rowFormat !== oldTableOptions.USING?.rowFormat
+				|| newTableOptions.USING?.storedAs !== oldTableOptions.USING?.storedAs
+				|| newTableOptions.USING?.header !== oldTableOptions.USING?.header
+				|| newTableOptions.USING?.stripSpaces !== oldTableOptions.USING?.stripSpaces
+				|| newTableOptions.USING?.stripEnclosingChar !== oldTableOptions.USING?.stripEnclosingChar;
+
+			return {
+				name,
+				tableOptions: {
+					...(isErrorTableModified && { ERROR_TABLE: newTableOptions.ERROR_TABLE }),
+					...(isForTableModified && { FOR_TABLE: newTableOptions.FOR_TABLE }),
+					...(isForeignTableModified && { FOREIGN_TABLE: newTableOptions.FOREIGN_TABLE }),
+					...(isMultisetModified && { SET_MULTISET: newTableOptions.SET_MULTISET }),
+					...(isTemporaryVolatileModified && { TEMPORARY_VOLATILE: newTableOptions.TEMPORARY_VOLATILE }),
+					...(isQueuedTableModified && { QUEUE_TABLE: newTableOptions.QUEUE_TABLE }),
+					...(isTraceTableModified && { TRACE_TABLE: newTableOptions.TRACE_TABLE }),
+					...(isExternalSecurityModified && { EXTERNAL_SECURITY: newTableOptions.EXTERNAL_SECURITY }),
+					...(isAuthorizationNameModified && { AUTHORIZATION_NAME: newTableOptions.AUTHORIZATION_NAME }),
+					...(isMapModified && { MAP: newTableOptions.MAP }),
+					...(isColocateUsingModified && { COLOCATE_USING: newTableOptions.COLOCATE_USING }),
+					...(isFallbackModified && { FALLBACK: newTableOptions.FALLBACK }),
+					...(isDefaultJournalTableModified && { DEFAULT_JOURNAL_TABLE: newTableOptions.DEFAULT_JOURNAL_TABLE }),
+					...(isLogModified && { LOG: newTableOptions.LOG }),
+					...(isBeforeJournalModified && { BEFORE_JOURNAL: newTableOptions.BEFORE_JOURNAL }),
+					...(isAfterJournalModified && { AFTER_JOURNAL: newTableOptions.AFTER_JOURNAL }),
+					...(isChecksumModified && { TABLE_CHECKSUM: newTableOptions.TABLE_CHECKSUM }),
+					...(isIsolateLoadingModified && { ISOLATED_LOADING: newTableOptions.ISOLATED_LOADING }),
+					...(isTablePreservationModified && { TABLE_PRESERVATION: newTableOptions.TABLE_PRESERVATION }),
+					...(isFreespaceModified && { FREESPACE: newTableOptions.FREESPACE }),
+					...(isMergeBlockRatioModified && { MERGE_BLOCK_RATIO: newTableOptions.MERGE_BLOCK_RATIO }),
+					...(isDataBlockSizeModified && { DATA_BLOCK_SIZE: newTableOptions.DATA_BLOCK_SIZE }),
+					...(isBlockCompressionModified && { BLOCK_COMPRESSION: newTableOptions.BLOCK_COMPRESSION }),
+					...(isUsingModified && { USING: newTableOptions.USING }),
+				}
+			};
+		},
+
+		/**
+		 * @param {string} name
+		 * @return {DropColumnData}
+		 */
+		hydrateDropColumn({ name }) {
+			return {
+				name,
+			};
+		},
+
+		/**
+		 * @param {ColumnDefinition} newColumn
+		 * @param {ColumnDefinition} oldColumn
+		 * @param oldCompData
+		 * @param newCompData
+		 * @return {ModifyColumnData}
+		 */
+		hydrateAlterColumn({
+		   newColumn,
+		   oldColumn,
+		   oldCompData,
+		   newCompData,
+		}) {
+			const diff = getDifferentProperties(newColumn, oldColumn, ['name', 'type']);
+
+			const result = {...newColumn};
+
+			if (oldCompData.name !== newCompData.name) {
+				result.oldName = oldCompData.name;
+			}
+
+			if (oldCompData.type !== newCompData.type) {
+				result.oldType = oldCompData.type;
+			}
+
+			if (!_.isEmpty(diff)) {
+				result.newOptions = diff;
+			}
+
+			return result;
 		},
 
 		getDefaultType(type) {
@@ -613,6 +725,134 @@ module.exports = (baseProvider, options, app) => {
 				databaseName: alterDbData.name,
 				databaseOptions,
 			});
+		},
+
+		/**
+		 * @param {DropEntityData} dropEntityData
+		 * @return {string}
+		 */
+		dropTable(dropEntityData) {
+			return assignTemplates(templates.dropTable, {
+				name: getTableName(dropEntityData.name, dropEntityData.dbName),
+				temporary: dropEntityData.temporary ? 'TEMPORARY ' : '',
+			});
+		},
+
+		/**
+		 *
+		 * @param {ModifyEntityData} alterTableData
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		alterTable(alterTableData, dbData) {
+			const tableName = getTableName(alterTableData.name, dbData.databaseName);
+			const tableOptions = getTableOptions(alterTableData.tableOptions);
+
+			if (!tableOptions) {
+				return '';
+			}
+
+			return assignTemplates(templates.alterTable, {
+				tableName,
+				tableOptions,
+			});
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {DropColumnData} columnData
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		dropColumn(tableName, columnData, dbData) {
+			const fullTableName = getTableName(tableName, dbData.databaseName);
+
+			return assignTemplates(templates.alterTable, {
+				tableName: fullTableName,
+				tableOptions: '',
+				alterStatement: assignTemplates(templates.dropColumn, {
+					name: wrap(columnData.name, '"', '"'),
+				}),
+			});
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {ColumnDefinition} columnDefinition
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		addColumn(tableName, columnDefinition, dbData) {
+			const table = getTableName(tableName, dbData.databaseName);
+
+			return assignTemplates(templates.alterTable, {
+				tableName: table,
+				tableOptions: '',
+				alterStatement: assignTemplates(templates.addColumn, {
+					columnDefinition: this.convertColumnDefinition(columnDefinition),
+				}),
+			});
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {ModifyColumnData} columnData
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		alterColumn(tableName, columnData, dbData) {
+			const table = getTableName(tableName, dbData.databaseName);
+			let alterStatement = '';
+
+			if (columnData.oldName && columnData.oldType) {
+				const dropOldColumnStatement = assignTemplates(templates.dropColumn, {
+					name: wrap(columnData.oldName, '"', '"'),
+				});
+
+				const createNewColumnStatement = assignTemplates(templates.addColumn, {
+					columnDefinition: this.convertColumnDefinition({ ...columnData, isActivated: true }),
+				});
+
+				alterStatement = '\n' + tab([ dropOldColumnStatement, createNewColumnStatement ].join(',\n'));
+			} else if (columnData.oldType) {
+				const dropOldColumnStatement = assignTemplates(templates.dropColumn, {
+					name: wrap(columnData.name, '"', '"'),
+				});
+
+				const createNewColumnStatement = assignTemplates(templates.addColumn, {
+					columnDefinition: this.convertColumnDefinition({ ...columnData, isActivated: true }),
+				});
+
+				alterStatement = '\n' + tab([ dropOldColumnStatement, createNewColumnStatement ].join(',\n'));
+			} else if (columnData.oldName && !columnData.newOptions) {
+				alterStatement = assignTemplates(templates.renameColumn, {
+					oldName: wrap(columnData.oldName, '"', '"'),
+					newName: wrap(columnData.name, '"', '"'),
+				});
+			} else if (columnData.oldName && columnData.newOptions) {
+				const renameColumnStatement = assignTemplates(templates.renameColumn, {
+					oldName: wrap(columnData.oldName, '"', '"'),
+					newName: wrap(columnData.name, '"', '"'),
+				});
+
+				// ADD "column_name"... statement in Teradata also used for modification column properties
+				const modifyColumnStatement = assignTemplates(templates.addColumn, {
+					columnDefinition: this.convertColumnDefinition({ ...columnData, isActivated: true }),
+				});
+
+				alterStatement = '\n' + tab([ renameColumnStatement, modifyColumnStatement ].join(',\n'));
+			} else {
+				// ADD "column_name"... statement in Teradata also used for modification column properties
+				alterStatement = assignTemplates(templates.addColumn, {
+					columnDefinition: this.convertColumnDefinition({ ...columnData, isActivated: true }),
+				});
+			}
+
+			return commentIfDeactivated(assignTemplates(templates.alterTable, {
+				tableName: table,
+				tableOptions: '',
+				alterStatement,
+			}), { isActivated: columnData.isActivated });
 		},
 	});
 };

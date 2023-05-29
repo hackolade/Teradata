@@ -25,7 +25,7 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		if (databaseName) {
 			return `"${databaseName}"."${tableName}"`;
 		} else {
-			return tableName;
+			return `"${tableName}"`;
 		}
 	};
 

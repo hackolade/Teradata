@@ -47,4 +47,11 @@ module.exports = {
 
 	dropDatabase: 'DROP DATABASE "${databaseName}";\n',
 	modifyDatabase: 'MODIFY DATABASE "${databaseName}" AS ${databaseOptions};\n',
+
+	dropTable: 'DROP ${temporary}TABLE ${name};\n',
+	alterTable: 'ALTER TABLE ${tableName}${tableOptions}${alterStatement};',
+
+	addColumn: ' ADD ${columnDefinition}',
+	dropColumn: ' DROP ${name}',
+	renameColumn: ' RENAME ${oldName} TO ${newName}',
 };

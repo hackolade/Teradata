@@ -6,40 +6,49 @@ module.exports = ({
 	  divideIntoActivatedAndDeactivated
 	}) => {
 
+	/**
+	 * @param {FreespaceTableOption} freespace
+	 * @return {number|string}
+	 */
 	const getFreeSpaceValue = (freespace) => {
-		if (freespace.percentUnit) {
+		if (freespace?.percentUnit) {
 			return `${freespace.freeSpaceValue} PERCENT`;
 		} else {
-			return freespace.freeSpaceValue;
+			return freespace?.freeSpaceValue || '';
 		}
 	};
 
-	const getMergeBlockRatio = ({
-		mergeRatio,
-		specificRatio,
-		percentUnit,
-	}) => {
-		if (mergeRatio === 'SPECIFIC' && specificRatio) {
-			const percentStatement = percentUnit ? 'PERCENT' : '';
-			return `MERGEBLOCKRATIO = ${specificRatio} ${percentStatement}`;
+	/**
+	 * @param {MergeBlockRationTableOption} mergeBlockRatio
+	 * @return {string}
+	 */
+	const getMergeBlockRatio = (mergeBlockRatio = {}) => {
+		if (mergeBlockRatio.mergeRatio === 'SPECIFIC' && mergeBlockRatio.specificRatio) {
+			const percentStatement = mergeBlockRatio.percentUnit ? 'PERCENT' : '';
+			return `MERGEBLOCKRATIO = ${mergeBlockRatio.specificRatio} ${percentStatement}`;
 		}
 
-		return `${mergeRatio} MERGEBLOCKRATIO`;
+		return `${mergeBlockRatio.mergeRatio} MERGEBLOCKRATIO`;
 	};
 
-	const getDataBlockSize = ({
-		blockSize,
-		specificSize,
-		units,
-	}) => {
-		if (blockSize === 'SPECIFIC' && specificSize) {
-			const unitsType = units ? ` ${units}` : '';
-			return blockSize + unitsType;
+	/**
+	 * @param {DataBlockSizeTableOption} dataBlockSize
+	 * @return {string}
+	 */
+	const getDataBlockSize = (dataBlockSize = {}) => {
+		if (dataBlockSize.blockSize === 'SPECIFIC' && dataBlockSize.specificSize) {
+			const unitsType = dataBlockSize.units ? ` ${dataBlockSize.units}` : '';
+			return dataBlockSize.blockSize + unitsType;
 		}
 
-		return `${blockSize} DATABLOCKSIZE`;
+		return `${dataBlockSize.blockSize} DATABLOCKSIZE`;
 	};
 
+	/**
+	 * @param {string} blockCompressionLevel
+	 * @param {number} specificBlockCompressionLevel
+	 * @return {string}
+	 */
 	const getBlockCompressionLevel = (blockCompressionLevel, specificBlockCompressionLevel) => {
 		if (blockCompressionLevel === 'SPECIFIC' && specificBlockCompressionLevel) {
 			return `BLOCKCOMPRESSIONLEVEL = ${specificBlockCompressionLevel}`
@@ -48,17 +57,23 @@ module.exports = ({
 		return `BLOCKCOMPRESSIONLEVEL = ${blockCompressionLevel}`;
 	};
 
-	const getBlockCompression = ({
-		blockCompressionType,
-		blockCompressionAlgorithm,
-		blockCompressionLevel,
-		specificBlockCompressionLevel
-	}) => _.flow([
-			add(blockCompressionType, `BLOCKCOMPRESSION = ${blockCompressionType}`),
-			add(blockCompressionType, `BLOCKCOMPRESSIONALGORITHM = ${blockCompressionAlgorithm}`),
-			add(blockCompressionLevel, getBlockCompressionLevel(blockCompressionLevel, specificBlockCompressionLevel)),
+	/**
+	 * @param {BlockComparisonTableOption} blockComparisonOption
+	 * @return {Array<string>}
+	 */
+	const getBlockCompression = (blockComparisonOption = {}) => _.flow([
+			add(Boolean(blockComparisonOption.blockCompressionType), `BLOCKCOMPRESSION = ${blockComparisonOption.blockCompressionType}`),
+			add(Boolean(blockComparisonOption.blockCompressionType), `BLOCKCOMPRESSIONALGORITHM = ${blockComparisonOption.blockCompressionAlgorithm}`),
+			add(
+				Boolean(blockComparisonOption.blockCompressionLevel),
+				getBlockCompressionLevel(blockComparisonOption.blockCompressionLevel, blockComparisonOption.specificBlockCompressionLevel)
+			),
 		])([]);
 
+	/**
+	 * @param {string} isolatedLoading
+	 * @return {string}
+	 */
 	const getIsolatedLoading = (isolatedLoading) => {
 		if (['NO', 'CONCURRENT'].includes(isolatedLoading)) {
 			return `WITH ${isolatedLoading} ISOLATED LOADING`
@@ -67,6 +82,12 @@ module.exports = ({
 		return `WITH ISOLATED LOADING ${isolatedLoading}`;
 	};
 
+	/**
+	 * @param {boolean} condition
+	 * @param {string|Array<string>} value
+	 * @param {boolean|string} falsyValue
+	 * @return {Array<string>}
+	 */
 	const add = (condition, value, falsyValue = false) => (tableOptions) => {
 		if (condition) {
 			return _.flatten([ ...tableOptions, value ]);
@@ -77,6 +98,10 @@ module.exports = ({
 		return tableOptions;
 	}
 
+	/**
+	 * @param {Array<string>} tableOptions
+	 * @return {string}
+	 */
 	const formatTableOptions = (tableOptions) => {
 		const tableOptionsString = tab(tableOptions.join(',\n'));
 		if (_.isEmpty(tableOptions)) {
@@ -86,38 +111,42 @@ module.exports = ({
 		}
 	};
 
+	/**
+	 * @param {TableOptions} tableOptions
+	 * @return {string}
+	 */
 	const getTableOptions = ({
-		fallback,
-		beforeJournaling,
-		afterJournaling,
-		defaultJournalTable,
-		freespace,
-		checksum,
-		log,
-		tableMap,
-		colocateUsing,
-		isolatedLoading,
-		mergeBlockRatio,
-		dataBlockSize,
-		blockCompression,
-		queueTable,
-		externalSecurity,
-		authorizationName,
+		FALLBACK,
+		BEFORE_JOURNAL,
+		AFTER_JOURNAL,
+		DEFAULT_JOURNAL_TABLE,
+		FREESPACE,
+		TABLE_CHECKSUM,
+		LOG,
+		MAP,
+		USING,
+		ISOLATED_LOADING,
+		MERGE_BLOCK_RATIO,
+		DATA_BLOCK_SIZE,
+		BLOCK_COMPRESSION,
+		QUEUE_TABLE,
+		EXTERNAL_SECURITY,
+		AUTHORIZATION_NAME,
 	}) =>  _.flow([
-			add(queueTable, 'QUEUE'),
-			add(tableMap, `MAP = ${tableMap}${colocateUsing ? ` COLOCATE USING ${colocateUsing}` : ''}`),
-			add(fallback, 'FALLBACK', 'NO FALLBACK'),
-			add(defaultJournalTable, `WITH JOURNAL TABLE = ${defaultJournalTable}`),
-			add(log, 'LOG', 'NO LOG'),
-			add(beforeJournaling, getJournalingStrategy(beforeJournaling, 'BEFORE')),
-			add(afterJournaling, getJournalingStrategy(beforeJournaling, 'AFTER')),
-			add(checksum, `CHECKSUM = ${checksum}`),
-			add(freespace.freeSpaceValue, `FREESPACE = ${getFreeSpaceValue(freespace)}`),
-			add(mergeBlockRatio.mergeRatio, getMergeBlockRatio(mergeBlockRatio)),
-			add(dataBlockSize.blockSize, getDataBlockSize(dataBlockSize)),
-			add(blockCompression.blockCompressionType, getBlockCompression(blockCompression)),
-			add(isolatedLoading, getIsolatedLoading(isolatedLoading)),
-			add(externalSecurity, `EXTERNAL SECURITY ${externalSecurity} TRUSTED${authorizationName ? ' ' + authorizationName : ''}`),
+			add(QUEUE_TABLE, 'QUEUE'),
+			add(Boolean(MAP), `MAP = ${MAP}${USING ? ` COLOCATE USING ${USING}` : ''}`),
+			add(FALLBACK, 'FALLBACK', 'NO FALLBACK'),
+			add(Boolean(DEFAULT_JOURNAL_TABLE), `WITH JOURNAL TABLE = ${DEFAULT_JOURNAL_TABLE}`),
+			add(LOG, 'LOG', 'NO LOG'),
+			add(Boolean(BEFORE_JOURNAL), getJournalingStrategy(BEFORE_JOURNAL, 'BEFORE')),
+			add(Boolean(AFTER_JOURNAL), getJournalingStrategy(BEFORE_JOURNAL, 'AFTER')),
+			add(Boolean(TABLE_CHECKSUM), `CHECKSUM = ${TABLE_CHECKSUM}`),
+			add(Boolean(FREESPACE?.freeSpaceValue), `FREESPACE = ${getFreeSpaceValue(FREESPACE)}`),
+			add(Boolean(MERGE_BLOCK_RATIO?.mergeRatio), getMergeBlockRatio(MERGE_BLOCK_RATIO)),
+			add(Boolean(DATA_BLOCK_SIZE?.blockSize), getDataBlockSize(DATA_BLOCK_SIZE)),
+			add(Boolean(BLOCK_COMPRESSION?.blockCompressionType), getBlockCompression(BLOCK_COMPRESSION)),
+			add(Boolean(ISOLATED_LOADING), getIsolatedLoading(ISOLATED_LOADING)),
+			add(Boolean(EXTERNAL_SECURITY), `EXTERNAL SECURITY ${EXTERNAL_SECURITY} TRUSTED${AUTHORIZATION_NAME ? ' ' + AUTHORIZATION_NAME : ''}`),
 			formatTableOptions,
 		])([]);
 

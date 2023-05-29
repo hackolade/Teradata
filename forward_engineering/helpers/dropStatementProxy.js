@@ -5,8 +5,8 @@ const dropStatementProxy = ({ commentIfDeactivated }) => (applyDropStatements, d
 		...ddlProvider,
 		...[
 			'dropDatabase',
-			// 'dropTable',
-			// 'dropColumn',
+			'dropTable',
+			'dropColumn',
 			// 'dropIndex',
 			// 'dropCheckConstraint',
 			// 'dropView',
