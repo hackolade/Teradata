@@ -58,4 +58,7 @@ module.exports = {
 	dropCheckConstraint: ' DROP CONSTRAINT ${name} CHECK',
 	addCheckConstraint: ' ADD CONSTRAINT ${name} ${expression}',
 	modifyCheckConstraint: ' MODIFY CONSTRAINT ${name} ${expression}',
+
+	dropSecondaryIndex: 'DROP INDEX ${indexName} ON ${tableName};',
+	dropIndex: 'DROP${indexType} INDEX ${indexName};',
 };

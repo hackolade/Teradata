@@ -88,7 +88,11 @@ module.exports = (baseProvider, options, app) => {
 			};
 		},
 
-		hydrateIndex(indexData, tableData) {
+		/**
+		 * @param {Index} indexData
+		 * @return {Index}
+		 */
+		hydrateIndex(indexData) {
 			return indexData;
 		},
 
@@ -930,6 +934,54 @@ module.exports = (baseProvider, options, app) => {
 				tableOptions: '',
 				alterStatement,
 			}), { isActivated: columnData.isActivated });
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {Index} indexData
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		dropIndex(tableName, indexData, dbData) {
+			if (!indexData.indxName) {
+				return '';
+			}
+
+			const table = getTableName(tableName, dbData.databaseName);
+
+			if (['PRIMARY', 'PRIMARY AMP'].includes(indexData.indexType)) {
+				return '';
+			} else if (!indexData.indexType || indexData.indexType === 'SECONDARY') {
+				return assignTemplates(templates.dropSecondaryIndex, {
+					indexName: wrap(indexData.indxName, '"', '"'),
+					tableName: table,
+				});
+			}
+
+			const indexType = indexData.indexType ? ` ${indexData.indexType}` : '';
+			const indexName = getIndexName(indexData.indxName, dbData.databaseName);
+
+			return assignTemplates(templates.dropIndex, {
+				indexName,
+				indexType,
+			});
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {Index} newIndexData
+		 * @param {Index} oldIndexData
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		alterIndex(tableName, { new: newIndexData, old: oldIndexData }, dbData) {
+			return [
+				this.dropIndex(tableName, oldIndexData, dbData),
+				this.createIndex(tableName, {
+					...newIndexData,
+					indxKey: newIndexData.indxKey.filter(key => !(key.isActivated === false))
+				}, dbData),
+			].join('\n');
 		},
 	});
 };
