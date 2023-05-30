@@ -320,3 +320,47 @@ interface HydratedCheckConstraint {
     name: string,
     expression: string,
 }
+
+type DropViewData = {
+    name: string,
+    dbData: CollectionDbData,
+}
+
+type AlterViewData = {
+    name: string,
+    keys: Array<ViewField>,
+    selectStatement: string,
+    recursive: boolean,
+    options: {
+        recursive?: boolean,
+        selectStatement?: string,
+    },
+    oldName?: string,
+}
+
+type ViewDetails = {
+    name?: string,
+    isActivated: boolean,
+    bucketId?: UUID,
+    selectStatement?: string,
+    pipeline?: string,
+    viewOn?: UUID,
+    additionalProperties?: boolean,
+    recursive?: boolean,
+    comments?: string,
+    description?: string,
+}
+
+type ViewEntityData = [ ViewDetails ]
+
+type ViewField = {
+    name: string,
+    tableName: string,
+    alias: string | undefined,
+    isActivated: boolean,
+}
+
+type ViewData = {
+    tableData?: EntityData,
+    keys?: Array<ViewField>
+}

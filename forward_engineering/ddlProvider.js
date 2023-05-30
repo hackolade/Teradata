@@ -775,6 +775,53 @@ module.exports = (baseProvider, options, app) => {
 			return result;
 		},
 
+		/**
+		 * @param {TableData} tableData
+		 * @return {DropViewData}
+		 */
+		hydrateDropView({ tableData }) {
+			return {
+				name: tableData.name,
+				dbData: tableData.dbData,
+			};
+		},
+
+		/**
+		 * @param {string} name
+		 * @param {ViewEntityData} newEntityData
+		 * @param {ViewEntityData} oldEntityData
+		 * @param {ViewData} viewData
+		 * @return {AlterViewData}
+		 */
+		hydrateAlterView({ name, newEntityData, oldEntityData, viewData }) {
+			const newData = this.hydrateView({
+				viewData: {},
+				entityData: newEntityData,
+			});
+
+			const oldData = this.hydrateView({
+				viewData: {},
+				entityData: oldEntityData,
+			});
+
+			const oldDViewData = {};
+
+			if (oldEntityData[0]?.name !== newEntityData[0]?.name) {
+				oldDViewData.oldName = oldEntityData[0]?.name;
+			}
+
+			const options = getDifferentProperties(newData, oldData);
+
+			return {
+				name,
+				keys: viewData.keys,
+				selectStatement: options.selectStatement || newEntityData[0]?.selectStatement,
+				recursive: options.recursive || newEntityData[0]?.recursive,
+				options,
+				...oldDViewData
+			};
+		},
+
 		getDefaultType(type) {
 			return defaultTypes[type];
 		},
@@ -982,6 +1029,44 @@ module.exports = (baseProvider, options, app) => {
 					indxKey: newIndexData.indxKey.filter(key => !(key.isActivated === false))
 				}, dbData),
 			].join('\n');
+		},
+
+		/**
+		 * @param {string} name
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		dropView({ name, dbData }) {
+			const viewName = getTableName(name, dbData.databaseName);
+
+			return assignTemplates(templates.dropView, {
+				viewName,
+			});
+		},
+
+		/**
+		 * @param {AlterViewData} alterData
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		alterView(alterData, dbData) {
+			const isEmptyDiffOptions = _.isEmpty(alterData.options);
+			const viewName = getTableName(alterData.name, dbData.databaseName);
+
+			if (alterData.oldName && isEmptyDiffOptions) {
+				const oldViewName = getTableName(alterData.oldName, dbData.databaseName);
+				return assignTemplates(templates.renameView, {
+					oldViewName: oldViewName,
+					newViewName: viewName,
+				});
+			} else if (isEmptyDiffOptions) {
+				return '';
+			}
+
+			return [
+				this.dropView({ name: alterData.oldName || alterData.name, dbData }),
+				this.createView(alterData, dbData, true),
+			].join('\n\n');
 		},
 	});
 };
