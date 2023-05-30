@@ -1028,7 +1028,7 @@ module.exports = (baseProvider, options, app) => {
 					...newIndexData,
 					indxKey: newIndexData.indxKey.filter(key => !(key.isActivated === false))
 				}, dbData),
-			].join('\n');
+			].join('\n\n');
 		},
 
 		/**
