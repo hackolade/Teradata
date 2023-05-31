@@ -44,4 +44,24 @@ module.exports = {
 		'NOT FINAL${methodSpecification};\n',
 	createDistinctType: 'CREATE TYPE ${typeName} AS ${baseType} FINAL${methodSpecification};\n',
 	createArrayType: 'CREATE TYPE ${typeName} AS ${baseType}${default};\n',
+
+	dropDatabase: 'DROP DATABASE "${databaseName}";\n',
+	modifyDatabase: 'MODIFY DATABASE "${databaseName}" AS ${databaseOptions};\n',
+
+	dropTable: 'DROP ${temporary}TABLE ${name};\n',
+	alterTable: 'ALTER TABLE ${tableName}${tableOptions}${alterStatement};',
+
+	addColumn: ' ADD ${columnDefinition}',
+	dropColumn: ' DROP ${name}',
+	rename: ' RENAME ${oldName} TO ${newName}',
+
+	dropCheckConstraint: ' DROP CONSTRAINT ${name} CHECK',
+	addCheckConstraint: ' ADD CONSTRAINT ${name} ${expression}',
+	modifyCheckConstraint: ' MODIFY CONSTRAINT ${name} ${expression}',
+
+	dropSecondaryIndex: 'DROP INDEX ${indexName} ON ${tableName};',
+	dropIndex: 'DROP${indexType} INDEX ${indexName};',
+
+	dropView: 'DROP VIEW ${viewName};',
+	renameView: 'RENAME VIEW ${oldViewName} TO ${newViewName};',
 };

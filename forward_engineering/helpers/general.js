@@ -25,7 +25,7 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		if (databaseName) {
 			return `"${databaseName}"."${tableName}"`;
 		} else {
-			return tableName;
+			return `"${tableName}"`;
 		}
 	};
 
@@ -46,6 +46,11 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		return `${strategy} ${type} JOURNAL`;
 	};
 
+	/**
+	 *
+	 * @param {ContainerOptions} containerOptions
+	 * @return {string}
+	 */
 	const getDatabaseOptions = ({
 		db_account,
 		db_default_map,
@@ -55,7 +60,8 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		db_before_journaling_strategy,
 		db_after_journaling_strategy,
 		db_default_journal_table,
-		db_default_journal_db
+		db_default_journal_db,
+		dropDefaultJournalTable,
 	}) => {
 		const add = (condition, value, falsyValue = false) => (dbOptions) => {
 			if (condition) {
@@ -67,6 +73,10 @@ module.exports = (_, tab, commentIfDeactivated) => {
 			return dbOptions;
 		}
 
+		const dropDefaultJournalTableStatement = dropDefaultJournalTable ? 'DROP ' : '';
+		const defaultJournalTableStatement =
+			`${dropDefaultJournalTableStatement}DEFAULT JOURNAL TABLE = ${getDefaultJournalTableName(db_default_journal_db, db_default_journal_table)}`;
+
 		return _.flow([
 			add(db_permanent_storage_size, `PERMANENT = ${db_permanent_storage_size}`),
 			add(spool_files_size, `SPOOL = ${spool_files_size}`),
@@ -75,7 +85,7 @@ module.exports = (_, tab, commentIfDeactivated) => {
 			add(has_fallback, 'FALLBACK', 'NO FALLBACK'),
 			add(db_before_journaling_strategy, getJournalingStrategy(db_before_journaling_strategy, 'BEFORE')),
 			add(db_after_journaling_strategy, getJournalingStrategy(db_after_journaling_strategy, 'AFTER')),
-			add(db_default_journal_table, `DEFAULT JOURNAL TABLE = ${getDefaultJournalTableName(db_default_journal_db, db_default_journal_table)}`),
+			add(db_default_journal_table, defaultJournalTableStatement),
 			(dbOptions) => tab('\n ' + dbOptions.join(',\n ')),
 		])([]);
 	};
@@ -125,6 +135,18 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		);
 	};
 
+    /**
+     * @param {ContainerCompModeData} compModeData
+     * @return {boolean}
+     */
+    const shouldDropDefaultJournalTable = (compModeData) => {
+        const shouldDrop = compModeData.old.db_default_journal_db
+            && compModeData.old.db_default_journal_table
+            && !compModeData.new.db_default_journal_db
+            && !compModeData.new.db_default_journal_table;
+        return Boolean(shouldDrop);
+    };
+
 	return {
 		getTableName,
 		getIndexName,
@@ -133,5 +155,6 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		getDatabaseOptions,
 		getViewData,
 		viewColumnsToString,
+        shouldDropDefaultJournalTable,
 	};
 };
