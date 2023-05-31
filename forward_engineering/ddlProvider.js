@@ -874,9 +874,9 @@ module.exports = (baseProvider, options, app) => {
 		 */
 		alterTable(alterTableData, dbData) {
 			const tableName = getTableName(alterTableData.name, dbData.databaseName);
-			const tableOptions = getTableOptions(alterTableData.tableOptions);
+			const tableOptions = getTableOptions(alterTableData.tableOptions, true);
 
-			if (!tableOptions) {
+			if (!_.trim(tableOptions)) {
 				return '';
 			}
 
@@ -928,59 +928,51 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {CollectionDbData} dbData
 		 * @return {string}
 		 */
-		alterColumn(tableName, columnData, dbData) {
+		renameColumn(tableName, columnData, dbData) {
 			const table = getTableName(tableName, dbData.databaseName);
-			let alterStatement = '';
 
-			if (columnData.oldName && columnData.oldType) {
-				const dropOldColumnStatement = assignTemplates(templates.dropColumn, {
-					name: wrap(columnData.oldName, '"', '"'),
-				});
-
-				const createNewColumnStatement = assignTemplates(templates.addColumn, {
-					columnDefinition: this.convertColumnDefinition({ ...columnData, isActivated: true }),
-				});
-
-				alterStatement = '\n' + tab([ dropOldColumnStatement, createNewColumnStatement ].join(',\n'));
-			} else if (columnData.oldType) {
-				const dropOldColumnStatement = assignTemplates(templates.dropColumn, {
-					name: wrap(columnData.name, '"', '"'),
-				});
-
-				const createNewColumnStatement = assignTemplates(templates.addColumn, {
-					columnDefinition: this.convertColumnDefinition({ ...columnData, isActivated: true }),
-				});
-
-				alterStatement = '\n' + tab([ dropOldColumnStatement, createNewColumnStatement ].join(',\n'));
-			} else if (columnData.oldName && !columnData.newOptions) {
-				alterStatement = assignTemplates(templates.rename, {
-					oldName: wrap(columnData.oldName, '"', '"'),
-					newName: wrap(columnData.name, '"', '"'),
-				});
-			} else if (columnData.oldName && columnData.newOptions) {
-				const renameColumnStatement = assignTemplates(templates.rename, {
-					oldName: wrap(columnData.oldName, '"', '"'),
-					newName: wrap(columnData.name, '"', '"'),
-				});
-
-				// ADD "column_name"... statement in Teradata also used for modification column properties
-				const modifyColumnStatement = assignTemplates(templates.addColumn, {
-					columnDefinition: this.convertColumnDefinition({ ...columnData, isActivated: true }),
-				});
-
-				alterStatement = '\n' + tab([ renameColumnStatement, modifyColumnStatement ].join(',\n'));
-			} else {
-				// ADD "column_name"... statement in Teradata also used for modification column properties
-				alterStatement = assignTemplates(templates.addColumn, {
-					columnDefinition: this.convertColumnDefinition({ ...columnData, isActivated: true }),
-				});
-			}
-
-			return commentIfDeactivated(assignTemplates(templates.alterTable, {
+			return assignTemplates(templates.alterTable, {
 				tableName: table,
 				tableOptions: '',
-				alterStatement,
-			}), { isActivated: columnData.isActivated });
+				alterStatement: assignTemplates(templates.rename, {
+					oldName: wrap(columnData.oldName, '"', '"'),
+					newName: wrap(columnData.name, '"', '"'),
+				}),
+			});
+		},
+
+		/**
+		 * @param {string} tableName
+		 * @param {ModifyColumnData} columnData
+		 * @param {CollectionDbData} dbData
+		 * @return {string}
+		 */
+		alterColumn(tableName, columnData, dbData) {
+			const table = getTableName(tableName, dbData.databaseName);
+			let alterStatement = [];
+
+			if ((columnData.oldName && columnData.oldType) || columnData.oldType) {
+				const dropOldColumnStatement = this.dropColumn(tableName, { name: columnData.name }, dbData);
+
+				const createNewColumnStatement = this.addColumn(tableName, { ...columnData, isActivated: true }, dbData);
+
+				alterStatement.push(dropOldColumnStatement, createNewColumnStatement);
+			} else if (columnData.oldName && !columnData.newOptions) {
+				const renameColumnStatement = this.renameColumn(tableName, columnData, dbData);
+				alterStatement.push(renameColumnStatement);
+			} else if (columnData.oldName && columnData.newOptions) {
+				const renameColumnStatement = this.renameColumn(tableName, columnData, dbData);
+
+				// ADD "column_name"... statement in Teradata also used for modification column properties
+				const modifyColumnStatement = this.addColumn(tableName, { ...columnData, isActivated: true }, dbData);
+				alterStatement.push(renameColumnStatement, modifyColumnStatement);
+			} else {
+				// ADD "column_name"... statement in Teradata also used for modification column properties
+				const modifyColumnStatement = this.addColumn(tableName, { ...columnData, isActivated: true }, dbData);
+				alterStatement.push(modifyColumnStatement);
+			}
+
+			return commentIfDeactivated(alterStatement.join('\n\n'), { isActivated: columnData.isActivated });
 		},
 
 		/**

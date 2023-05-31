@@ -113,6 +113,7 @@ module.exports = ({
 
 	/**
 	 * @param {TableOptions} tableOptions
+	 * @param {boolean} ignoreFalsyValue
 	 * @return {string}
 	 */
 	const getTableOptions = ({
@@ -132,12 +133,12 @@ module.exports = ({
 		QUEUE_TABLE,
 		EXTERNAL_SECURITY,
 		AUTHORIZATION_NAME,
-	}) =>  _.flow([
+	}, ignoreFalsyValue = false) =>  _.flow([
 			add(QUEUE_TABLE, 'QUEUE'),
 			add(Boolean(MAP), `MAP = ${MAP}${USING ? ` COLOCATE USING ${USING}` : ''}`),
-			add(FALLBACK, 'FALLBACK', 'NO FALLBACK'),
+			add(FALLBACK, 'FALLBACK', ignoreFalsyValue ? '' : 'NO FALLBACK'),
 			add(Boolean(DEFAULT_JOURNAL_TABLE), `WITH JOURNAL TABLE = ${DEFAULT_JOURNAL_TABLE}`),
-			add(LOG, 'LOG', 'NO LOG'),
+			add(LOG, 'LOG', ignoreFalsyValue ? '' : 'NO LOG'),
 			add(Boolean(BEFORE_JOURNAL), getJournalingStrategy(BEFORE_JOURNAL, 'BEFORE')),
 			add(Boolean(AFTER_JOURNAL), getJournalingStrategy(BEFORE_JOURNAL, 'AFTER')),
 			add(Boolean(TABLE_CHECKSUM), `CHECKSUM = ${TABLE_CHECKSUM}`),
