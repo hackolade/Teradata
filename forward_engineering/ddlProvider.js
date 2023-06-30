@@ -71,8 +71,7 @@ module.exports = (baseProvider, options, app) => {
 				keyConstraints: keyHelper.getTableKeyConstraints(jsonSchema),
 				tableOptions: detailsTab.tableOptions,
 				partitioning: detailsTab.partitioning,
-				selectStatement: detailsTab.selectStatement,
-				using: detailsTab.tableOptions.USING,
+				selectStatement: detailsTab.selectStatement
 			};
 		},
 
@@ -249,11 +248,11 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		createTable(tableData, isActivated) {
-			const { name, dbData, tableSet, temporary, columns, tablePreservation, checkConstraints, foreignKeyConstraints, selectStatement, traceTable, errorTable, targetDataTable, foreignTable, using } = tableData;
-			const tableOptions = getTableOptions(tableData)
+			const { name, dbData, columns, checkConstraints, foreignKeyConstraints, selectStatement, tableOptions } = tableData;
+			const preparedTableOptions = getTableOptions(tableOptions)
 			const tableName = getTableName(name, dbData.databaseName);
 			const tableIndexes = getInlineTableIndexes(tableData);
-			const tablePreservationStatement = tablePreservation ? `\n\tON COMMIT ${tablePreservation}` : '';
+			const tablePreservationStatement = tableOptions.TABLE_PRESERVATION ? `\n\tON COMMIT ${tableOptions.TABLE_PRESERVATION}` : '';
 			const checkConstraintsStatement = !_.isEmpty(checkConstraints) ? ',\n\t\t' + checkConstraints.join(',\n\t\t') : '';
 
 			const dividedKeysConstraints = divideIntoActivatedAndDeactivated(
@@ -265,15 +264,15 @@ module.exports = (baseProvider, options, app) => {
 			const dividedForeignKeys = divideIntoActivatedAndDeactivated(foreignKeyConstraints, key => key.statement);
 			const foreignKeyConstraintsString = generateConstraintsString(dividedForeignKeys, isActivated);
 
-			if (foreignTable && using?.location) {
-				const usingOptions = getUsingOptions(using);
+			if (tableOptions.FOREIGN_TABLE && tableOptions.USING?.location) {
+				const usingOptions = getUsingOptions(tableOptions.USING);
 
 				return commentIfDeactivated(
 					assignTemplates(templates.createForeignTable, {
 						name: tableName,
 						usingOptions,
-						tableOptions,
 						tableIndexes,
+						tableOptions: preparedTableOptions,
 						column_definitions: columns.join(',\n\t\t'),
 						keyConstraints: keyConstraintsString,
 						foreignKeyConstraints: foreignKeyConstraintsString,
@@ -286,11 +285,11 @@ module.exports = (baseProvider, options, app) => {
 				);
 			}
 
-			if (errorTable && targetDataTable) {
+			if (tableOptions.ERROR_TABLE && tableOptions.FOR_TABLE) {
 				return commentIfDeactivated(
 					assignTemplates(templates.createErrorTable, {
 						tableName: tableName,
-						targetDataTable,
+						targetDataTable: tableOptions.FOR_TABLE,
 					}),
 					{
 						isActivated,
@@ -301,10 +300,10 @@ module.exports = (baseProvider, options, app) => {
 			if (!_.isEmpty(selectStatement)) {
 				return commentIfDeactivated(
 					assignTemplates(templates.createAsSelectTable, {
-						tableSet: tableSet ? ` ${tableSet}` : '',
-						temporary: temporary ? ` ${temporary}` : '',
+						tableSet: tableOptions.SET_MULTISET ? ` ${tableOptions.SET_MULTISET}` : '',
+						temporary: tableOptions.TEMPORARY_VOLATILE ? ` ${tableOptions.TEMPORARY_VOLATILE}` : '',
 						name: tableName,
-						tableOptions,
+						tableOptions: preparedTableOptions,
 						column_definitions: columns.join(',\n\t\t'),
 						keyConstraints: keyConstraintsString,
 						foreignKeyConstraints: foreignKeyConstraintsString,
@@ -323,10 +322,10 @@ module.exports = (baseProvider, options, app) => {
 				assignTemplates(templates.createTable, {
 					name: tableName,
 					tableIndexes,
-					tableOptions,
-					tableSet: tableSet ? ` ${tableSet}` : '',
-					temporary: temporary ? ` ${temporary}` : '',
-					traceTable: traceTable ? ` TRACE` : '',
+					tableOptions: preparedTableOptions,
+					tableSet: tableOptions.SET_MULTISET ? ` ${tableOptions.SET_MULTISET}` : '',
+					temporary: tableOptions.TEMPORARY_VOLATILE ? ` ${tableOptions.TEMPORARY_VOLATILE}` : '',
+					traceTable: tableOptions.TRACE_TABLE ? ` TRACE` : '',
 					column_definitions: columns.join(',\n\t\t'),
 					keyConstraints: keyConstraintsString,
 					foreignKeyConstraints: foreignKeyConstraintsString,

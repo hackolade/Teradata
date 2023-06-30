@@ -125,7 +125,7 @@ module.exports = ({
 		TABLE_CHECKSUM,
 		LOG,
 		MAP,
-		USING,
+		COLOCATE_USING,
 		ISOLATED_LOADING,
 		MERGE_BLOCK_RATIO,
 		DATA_BLOCK_SIZE,
@@ -135,7 +135,7 @@ module.exports = ({
 		AUTHORIZATION_NAME,
 	}, ignoreFalsyValue = false) =>  _.flow([
 			add(QUEUE_TABLE, 'QUEUE'),
-			add(Boolean(MAP), `MAP = ${MAP}${USING ? ` COLOCATE USING ${USING}` : ''}`),
+			add(Boolean(MAP), `MAP = ${MAP}${COLOCATE_USING ? ` COLOCATE USING ${COLOCATE_USING}` : ''}`),
 			add(FALLBACK, 'FALLBACK', ignoreFalsyValue ? '' : 'NO FALLBACK'),
 			add(Boolean(DEFAULT_JOURNAL_TABLE), `WITH JOURNAL TABLE = ${DEFAULT_JOURNAL_TABLE}`),
 			add(LOG, 'LOG', ignoreFalsyValue ? '' : 'NO LOG'),
