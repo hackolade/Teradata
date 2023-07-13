@@ -149,7 +149,7 @@ const getDbCollectionsData = async (data, logger, callback, app) => {
                     log.progress(`Sampling table`, dbName, tableName);
 
                     const count = await instance.getCount(dbName, tableName);
-                    records = await instance.getRecords(dbName, tableName, getLimit(count, data.recordSamplingSettings));
+                    records = await instance.getRecords(dbName, tableName, getSampleDocSize(count, data.recordSamplingSettings));
                 }
 
                 log.info(`Get create table statement "${tableName}"`);
@@ -239,12 +239,14 @@ const containsJson = (columns) => {
     return columns.some(column => column.dataType === 'JN');
 }
 
-const getLimit = (count, recordSamplingSettings) => {
-    const per = recordSamplingSettings.relative.value;
-    const size = (recordSamplingSettings.active === 'absolute')
-        ? recordSamplingSettings.absolute.value
-        : Math.round(count / 100 * per);
-    return size;
+const getSampleDocSize = (count, recordSamplingSettings) => {
+	if (recordSamplingSettings.active === 'absolute') {
+		return Number(recordSamplingSettings.absolute.value);
+	}
+
+	const limit = Math.ceil((count * recordSamplingSettings.relative.value) / 100);
+
+	return Math.min(limit, recordSamplingSettings.maxValue);
 };
 
 const createLogger = ({title, logger, hiddenKeys}) => {
