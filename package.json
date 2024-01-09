@@ -1,7 +1,7 @@
 {
     "name": "Teradata",
-    "version": "0.1.11",
-    "versionDate": "2023-09-15",
+    "version": "0.1.12",
+    "versionDate": "2024-01-05",
     "author": "hackolade",
     "engines": {
         "hackolade": "6.9.1",
