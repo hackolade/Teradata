@@ -2,6 +2,7 @@ const os = require('os');
 const util = require('util');
 const path = require('path');
 const exec = util.promisify(require('child_process').exec);
+const { spawn } = require('child_process');
 const {buildQuery, queryType} = require('./queryHelper');
 
 const SYSTEM_DATABASES = ['val', 'tdwm', 'DBC', 'TDStats', 'TD_ANALYTICS_DB', 'TD_SERVER_DB', 'TDQCD', 'TDMaps', 'TDBCMgmt', 'SystemFe', 'Sys_Calendar', 'SYSSPATIAL', 'SYSLIB', 'SYSBAR', 'SysAdmin', 'LockLogShredder', 'dbcmngr', 'SQLJ', 'All', 'Crashdumps', 'Default', 'External_AP', 'EXTUSER', 'PUBLIC', 'SYSJDBC', 'SYSUDTLIB', 'SYSUIF', 'TD_SYSFNLIB', 'TD_SYSGPL', 'TD_SYSXML', 'TDPUSER'];
@@ -43,17 +44,17 @@ const getConnectionSettings = async (connectionInfo, sshService) => {
 
 const createArgument = (argKey, argValue) => ` --${argKey}="${argValue}"`;
 
-const buildCommand = (javaPath, teradataClientPath, connectionInfo) => {
-    let command = `"${javaPath}" -jar "${teradataClientPath}"`;
+const buildCommand = (teradataClientPath, connectionInfo) => {
+    let commandArgs = ['-jar', teradataClientPath];
 
-    command += connectionInfo.host ? createArgument('host', connectionInfo.host) : '';
-    command += connectionInfo.port ? createArgument('port', connectionInfo.port) : '';
-    command += connectionInfo.userName ? createArgument('user', connectionInfo.userName) : '';
-    command += connectionInfo.userPassword ? createArgument('pass', connectionInfo.userPassword) : '';
-    command += connectionInfo.sslmode ? createArgument('sslmode', connectionInfo.sslmode) : '';
-    command += connectionInfo.sslca ? createArgument('sslca', connectionInfo.sslca) : '';
+    connectionInfo.host && commandArgs.push(createArgument('host', connectionInfo.host));
+    connectionInfo.port && commandArgs.push(createArgument('port', connectionInfo.port));
+    connectionInfo.userName && commandArgs.push(createArgument('user', connectionInfo.userName));
+    connectionInfo.userPassword && commandArgs.push(createArgument('pass', connectionInfo.userPassword));
+    connectionInfo.sslmode && commandArgs.push(createArgument('sslmode', connectionInfo.sslmode));
+    connectionInfo.sslca && commandArgs.push(createArgument('sslca', connectionInfo.sslca));
 
-    return command;
+    return commandArgs;
 };
 
 const getDefaultJavaPath = () => {
@@ -83,28 +84,54 @@ const createConnection = async (connectionInfo, sshService, logger) => {
     await checkJavaPath(javaPath, logger);
 
     const teradataClientPath = path.resolve(__dirname, '..', 'addons', 'TeradataClient.jar');
-    const teradataClientCommand = buildCommand(javaPath, teradataClientPath, connectionSettings);
+    const teradataClientCommandArguments = buildCommand(teradataClientPath, connectionSettings);
 
     return {
-        execute: async (query) => {
-            const queryArgument = createArgument('query', query);
-            const command = teradataClientCommand + ' ' + queryArgument;
-            const queryResult = await exec(command);
-            const rowJson = queryResult.stdout.match(/<hackolade>(.*?)<\/hackolade>/)?.[1];
+        execute: (query) => {
+            return new Promise(async (resolve, reject) => {
+                const queryArgument = createArgument('query', query);
+                const queryResult = spawn(javaPath, [...teradataClientCommandArguments, queryArgument], { shell: true });
 
-            if (!rowJson) {
-                return;
-            }
+                queryResult.on('error', (error) => {
+                    reject(error);
+                });
 
-            const parsedResult = JSON.parse(rowJson);
-            if (parsedResult.error) {
-                throw parsedResult.error;
-            }
+                const errorData = [];
+                queryResult.stderr.on('data', (data) => {
+                    errorData.push(data);
+                });
 
-            return parsedResult.data;
-        }
+                const resultData = [];
+                queryResult.stdout.on('data', (data) => {
+                    resultData.push(data);
+                });
+
+                queryResult.on('close', (code) => {
+                    if (code !== 0) {
+                        reject(new Error(Buffer.concat(errorData).toString()));
+                        return;
+                    }
+
+                    const stdoutResult = Buffer.concat(resultData).toString();
+                    const rowJson = stdoutResult.match(/<hackolade>(.*?)<\/hackolade>/)?.[1];
+
+                    if (!rowJson) {
+                        resolve([]);
+                        return;
+                    }
+
+                    const parsedResult = JSON.parse(rowJson);
+                    if (parsedResult.error) {
+                        reject(parsedResult.error);
+                        return;
+                    }
+
+                    resolve(parsedResult.data);
+                });
+            });
+        },
     };
-};
+}
 
 const connect = async (connectionInfo, sshService, logger) => {
     if (connection) {
