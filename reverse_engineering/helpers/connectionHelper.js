@@ -90,7 +90,7 @@ const createConnection = async (connectionInfo, sshService, logger) => {
         execute: (query) => {
             return new Promise(async (resolve, reject) => {
                 const queryArgument = createArgument('query', query);
-                const queryResult = spawn(javaPath, [...teradataClientCommandArguments, queryArgument], { shell: true });
+                const queryResult = spawn(`"${javaPath}"`, [...teradataClientCommandArguments, queryArgument], { shell: true });
 
                 queryResult.on('error', (error) => {
                     reject(error);
