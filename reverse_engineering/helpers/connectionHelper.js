@@ -144,6 +144,10 @@ const connect = async (connectionInfo, sshService, logger) => {
     return connection;
 };
 
+const getConcatenatedQueryResult = (queryResult = []) => {
+	return queryResult.map(queryResultChunk => queryResultChunk?.['Request Text'] || queryResultChunk?.RequestText).join('');
+};
+
 const createInstance = (connection, _) => {
     const getDatabasesWithTableNames = async (tableType) => {
         const query = buildQuery(queryType.GET_DATABASE_AND_TABLE_NAMES, { tableType, systemDatabases: SYSTEM_DATABASES });
@@ -195,7 +199,7 @@ const createInstance = (connection, _) => {
     const showCreateEntity = async (dbName, tableName, entityType) => {
         const result = await connection.execute(buildQuery(queryType.SHOW_CREATE_ENTITY_STATEMENT, {dbName, tableName, entityType}));
 
-        return result[0]?.['Request Text'];
+        return getConcatenatedQueryResult(result);
     };
 
     const getColumns = async (dbName, tableName) => {
@@ -216,7 +220,7 @@ const createInstance = (connection, _) => {
 
         return {
             ...index,
-            createStatement: createStatement[0]?.['Request Text'],
+            createStatement: getConcatenatedQueryResult(createStatement),
         };
     };
 
@@ -250,7 +254,7 @@ const createInstance = (connection, _) => {
 
         return {
             name,
-            createStatement: createStatement[0]?.['Request Text'],
+            createStatement: getConcatenatedQueryResult(createStatement),
         };
     };
 
