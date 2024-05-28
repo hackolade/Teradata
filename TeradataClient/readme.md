@@ -3,14 +3,14 @@
 ### For manual build:
 For building the Teradata client on your system should be installed:
 
-1. Java 11
+1. Java 8
 2. Maven 3 [How install](https://www.baeldung.com/install-maven-on-windows-linux-mac).
 
 For compiling the client execute `build.sh` script.
 
 ### For work in IntelliJ IDEA:
 
-1. Specify JDK 11 in Project Settings -> Project Structure -> Project -> SDK
+1. Specify JDK 8 in Project Settings -> Project Structure -> Project -> SDK
 2. Install all dependencies with Maven plugin
 
 For compiling client Using Maven plugin execute:
