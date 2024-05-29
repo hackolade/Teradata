@@ -8,6 +8,24 @@ const { EXCLUDED_EXTENSIONS, EXCLUDED_FILES, DEFAULT_RELEASE_FOLDER_PATH } = req
 const packageData = JSON.parse(fs.readFileSync('./package.json').toString());
 const RELEASE_FOLDER_PATH = path.join(DEFAULT_RELEASE_FOLDER_PATH, `${packageData.name}-${packageData.version}`);
 
+const copyTeradataClient = () => ({
+	name: 'copyTeradataClient',
+	setup(build) {
+		build.onEnd(async () => {
+			try {
+				await fs.promises.cp(
+					path.resolve(__dirname, 'reverse_engineering', 'addons', 'TeradataClient.jar'),
+					path.join(RELEASE_FOLDER_PATH, 'reverse_engineering', 'addons', 'TeradataClient.jar'),
+					{ force: true },
+				);
+			} catch (err) {
+				// eslint-disable-next-line no-console
+				console.error('Copy TeradataClient.jar failed with:', err);
+			}
+		});
+	},
+});
+
 esbuild
 	.build({
 		entryPoints: [
@@ -30,8 +48,9 @@ esbuild
 				fromPath: __dirname,
 				targetFolderPath: RELEASE_FOLDER_PATH,
 				excludedExtensions: EXCLUDED_EXTENSIONS,
-				excludedFiles: EXCLUDED_FILES,
+				excludedFiles: ['TeradataClient', ...EXCLUDED_FILES],
 			}),
+			copyTeradataClient(),
 			addReleaseFlag(path.resolve(RELEASE_FOLDER_PATH, 'package.json')),
 		],
 	})
