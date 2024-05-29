@@ -123,9 +123,7 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "DB vendor",
 				"propertyType": "select",
-				"options": [
-					"Teradata"
-				],
+				"options": ["Teradata"],
 				"defaultValue": "Teradata",
 				"disabledOption": true
 			},
@@ -135,11 +133,7 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "DB version",
 				"propertyType": "select",
-				"options": [
-					"v17.00",
-					"v17.10",
-					"v17.20"
-				],
+				"options": ["v17.00", "v17.10", "v17.20"],
 				"defaultValue": "v17.20",
 				"disabledOption": true
 			},
@@ -148,11 +142,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "modelingMethodology",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"Relational",
-					"Dimensional",
-					"Vault"
-				]
+				"options": ["Relational", "Dimensional", "Vault"]
 			},
 			{
 				"propertyName": "Comments",
@@ -173,11 +163,7 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Referential integrity is not to be enforced for the specified primary key-foreign key relationship.",
 				"propertyType": "select",
 				"defaultValue": "WITH NO CHECK OPTION",
-				"options": [
-					"",
-					"WITH CHECK OPTION",
-					"WITH NO CHECK OPTION"
-				]
+				"options": ["", "WITH CHECK OPTION", "WITH NO CHECK OPTION"]
 			}
 		]
 	}

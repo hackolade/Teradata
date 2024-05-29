@@ -1,16 +1,9 @@
-module.exports = ({
-	  _,
-	  tab,
-	  getJournalingStrategy,
-	  commentIfDeactivated,
-	  divideIntoActivatedAndDeactivated
-	}) => {
-
+module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideIntoActivatedAndDeactivated }) => {
 	/**
 	 * @param {FreespaceTableOption} freespace
 	 * @return {number|string}
 	 */
-	const getFreeSpaceValue = (freespace) => {
+	const getFreeSpaceValue = freespace => {
 		if (freespace?.percentUnit) {
 			return `${freespace.freeSpaceValue} PERCENT`;
 		} else {
@@ -51,7 +44,7 @@ module.exports = ({
 	 */
 	const getBlockCompressionLevel = (blockCompressionLevel, specificBlockCompressionLevel) => {
 		if (blockCompressionLevel === 'SPECIFIC' && specificBlockCompressionLevel) {
-			return `BLOCKCOMPRESSIONLEVEL = ${specificBlockCompressionLevel}`
+			return `BLOCKCOMPRESSIONLEVEL = ${specificBlockCompressionLevel}`;
 		}
 
 		return `BLOCKCOMPRESSIONLEVEL = ${blockCompressionLevel}`;
@@ -61,12 +54,22 @@ module.exports = ({
 	 * @param {BlockComparisonTableOption} blockComparisonOption
 	 * @return {Array<string>}
 	 */
-	const getBlockCompression = (blockComparisonOption = {}) => _.flow([
-			add(Boolean(blockComparisonOption.blockCompressionType), `BLOCKCOMPRESSION = ${blockComparisonOption.blockCompressionType}`),
-			add(Boolean(blockComparisonOption.blockCompressionType), `BLOCKCOMPRESSIONALGORITHM = ${blockComparisonOption.blockCompressionAlgorithm}`),
+	const getBlockCompression = (blockComparisonOption = {}) =>
+		_.flow([
+			add(
+				Boolean(blockComparisonOption.blockCompressionType),
+				`BLOCKCOMPRESSION = ${blockComparisonOption.blockCompressionType}`,
+			),
+			add(
+				Boolean(blockComparisonOption.blockCompressionType),
+				`BLOCKCOMPRESSIONALGORITHM = ${blockComparisonOption.blockCompressionAlgorithm}`,
+			),
 			add(
 				Boolean(blockComparisonOption.blockCompressionLevel),
-				getBlockCompressionLevel(blockComparisonOption.blockCompressionLevel, blockComparisonOption.specificBlockCompressionLevel)
+				getBlockCompressionLevel(
+					blockComparisonOption.blockCompressionLevel,
+					blockComparisonOption.specificBlockCompressionLevel,
+				),
 			),
 		])([]);
 
@@ -74,9 +77,9 @@ module.exports = ({
 	 * @param {string} isolatedLoading
 	 * @return {string}
 	 */
-	const getIsolatedLoading = (isolatedLoading) => {
+	const getIsolatedLoading = isolatedLoading => {
 		if (['NO', 'CONCURRENT'].includes(isolatedLoading)) {
-			return `WITH ${isolatedLoading} ISOLATED LOADING`
+			return `WITH ${isolatedLoading} ISOLATED LOADING`;
 		}
 
 		return `WITH ISOLATED LOADING ${isolatedLoading}`;
@@ -88,21 +91,23 @@ module.exports = ({
 	 * @param {boolean|string} falsyValue
 	 * @return {Array<string>}
 	 */
-	const add = (condition, value, falsyValue = false) => (tableOptions) => {
-		if (condition) {
-			return _.flatten([ ...tableOptions, value ]);
-		} else if (falsyValue) {
-			return [ ...tableOptions, falsyValue ];
-		}
+	const add =
+		(condition, value, falsyValue = false) =>
+		tableOptions => {
+			if (condition) {
+				return _.flatten([...tableOptions, value]);
+			} else if (falsyValue) {
+				return [...tableOptions, falsyValue];
+			}
 
-		return tableOptions;
-	}
+			return tableOptions;
+		};
 
 	/**
 	 * @param {Array<string>} tableOptions
 	 * @return {string}
 	 */
-	const formatTableOptions = (tableOptions) => {
+	const formatTableOptions = tableOptions => {
 		const tableOptionsString = tab(tableOptions.join(',\n'));
 		if (_.isEmpty(tableOptions)) {
 			return tableOptionsString;
@@ -116,24 +121,28 @@ module.exports = ({
 	 * @param {boolean} ignoreFalsyValue
 	 * @return {string}
 	 */
-	const getTableOptions = ({
-		FALLBACK,
-		BEFORE_JOURNAL,
-		AFTER_JOURNAL,
-		DEFAULT_JOURNAL_TABLE,
-		FREESPACE,
-		TABLE_CHECKSUM,
-		LOG,
-		MAP,
-		COLOCATE_USING,
-		ISOLATED_LOADING,
-		MERGE_BLOCK_RATIO,
-		DATA_BLOCK_SIZE,
-		BLOCK_COMPRESSION,
-		QUEUE_TABLE,
-		EXTERNAL_SECURITY,
-		AUTHORIZATION_NAME,
-	}, ignoreFalsyValue = false) =>  _.flow([
+	const getTableOptions = (
+		{
+			FALLBACK,
+			BEFORE_JOURNAL,
+			AFTER_JOURNAL,
+			DEFAULT_JOURNAL_TABLE,
+			FREESPACE,
+			TABLE_CHECKSUM,
+			LOG,
+			MAP,
+			COLOCATE_USING,
+			ISOLATED_LOADING,
+			MERGE_BLOCK_RATIO,
+			DATA_BLOCK_SIZE,
+			BLOCK_COMPRESSION,
+			QUEUE_TABLE,
+			EXTERNAL_SECURITY,
+			AUTHORIZATION_NAME,
+		},
+		ignoreFalsyValue = false,
+	) =>
+		_.flow([
 			add(QUEUE_TABLE, 'QUEUE'),
 			add(Boolean(MAP), `MAP = ${MAP}${COLOCATE_USING ? ` COLOCATE USING ${COLOCATE_USING}` : ''}`),
 			add(FALLBACK, 'FALLBACK', ignoreFalsyValue ? '' : 'NO FALLBACK'),
@@ -147,12 +156,15 @@ module.exports = ({
 			add(Boolean(DATA_BLOCK_SIZE?.blockSize), getDataBlockSize(DATA_BLOCK_SIZE)),
 			add(Boolean(BLOCK_COMPRESSION?.blockCompressionType), getBlockCompression(BLOCK_COMPRESSION)),
 			add(Boolean(ISOLATED_LOADING), getIsolatedLoading(ISOLATED_LOADING)),
-			add(Boolean(EXTERNAL_SECURITY), `EXTERNAL SECURITY ${EXTERNAL_SECURITY} TRUSTED${AUTHORIZATION_NAME ? ' ' + AUTHORIZATION_NAME : ''}`),
+			add(
+				Boolean(EXTERNAL_SECURITY),
+				`EXTERNAL SECURITY ${EXTERNAL_SECURITY} TRUSTED${AUTHORIZATION_NAME ? ' ' + AUTHORIZATION_NAME : ''}`,
+			),
 			formatTableOptions,
 		])([]);
 
 	const getIndexType = (indexType, unique) => {
-		let indexTypeSt = ''
+		let indexTypeSt = '';
 		indexTypeSt += unique ? ' ' : '';
 		indexTypeSt += !indexType || indexType === 'SECONDARY' ? 'INDEX' : `${indexType} INDEX`;
 
@@ -164,10 +176,7 @@ module.exports = ({
 			return '';
 		}
 
-		const dividedKeys = divideIntoActivatedAndDeactivated(
-			indexKeys,
-			key => `"${key.name}"`,
-		);
+		const dividedKeys = divideIntoActivatedAndDeactivated(indexKeys, key => `"${key.name}"`);
 
 		if (_.isEmpty(dividedKeys.activatedItems)) {
 			return dividedKeys.deactivatedItems.join(', ');
@@ -175,21 +184,16 @@ module.exports = ({
 
 		const commentedKeys = dividedKeys.deactivatedItems.length
 			? commentIfDeactivated(dividedKeys.deactivatedItems.join(', '), {
-				isActivated: false,
-				isPartOfLine: true,
-			})
+					isActivated: false,
+					isPartOfLine: true,
+				})
 			: '';
 
 		return dividedKeys.activatedItems.join(', ') + commentedKeys;
 	};
 
-	const getIndexOptions = ({
-		indexMap,
-		colocateUsing,
-		indexFallback,
-		checksum,
-		blockCompression,
-	}) => _.flow([
+	const getIndexOptions = ({ indexMap, colocateUsing, indexFallback, checksum, blockCompression }) =>
+		_.flow([
 			add(indexMap, `MAP = ${indexMap}${colocateUsing ? ` COLOCATE USING ${colocateUsing}` : ''}`),
 			add(indexFallback, 'FALLBACK', 'NO FALLBACK'),
 			add(checksum, `CHECKSUM = ${checksum}`),
@@ -217,7 +221,7 @@ module.exports = ({
 		indexStatement += getIndexType(indexType, unique);
 		indexStatement += indxName ? ` "${indxName}"` : '';
 		indexStatement += all ? ' ALL' : '';
-		indexStatement += !_.isEmpty(indxKey) ?` ( ${getIndexKeys(indxKey)} )` : '';
+		indexStatement += !_.isEmpty(indxKey) ? ` ( ${getIndexKeys(indxKey)} )` : '';
 		indexStatement += orderBy ? ` ORDER BY ${orderBy}` : '';
 		indexStatement += !_.isEmpty(orderKeys) ? ` ( ${getIndexKeys(orderKeys)} )` : '';
 		indexStatement += loadIdentity ? ` ${loadIdentity}` : '';
@@ -225,34 +229,28 @@ module.exports = ({
 		return commentIfDeactivated(indexStatement, { isActivated });
 	};
 
-	const getTableInlineIndexStatements = (tableIndexes) => tableIndexes.map(getTableInlineIndexStatement);
+	const getTableInlineIndexStatements = tableIndexes => tableIndexes.map(getTableInlineIndexStatement);
 
 	const findPrimaryIndex = indexes => {
-		const primaryIndex = indexes.find(index => ['PRIMARY', 'PRIMARY AMP'].includes(index.indexType) && !_.isEmpty(index.indxKey));
+		const primaryIndex = indexes.find(
+			index => ['PRIMARY', 'PRIMARY AMP'].includes(index.indexType) && !_.isEmpty(index.indxKey),
+		);
 		if (primaryIndex) {
 			return primaryIndex;
 		}
 		return {};
 	};
 
-	const filterSecondaryIndexes = indexes => indexes.filter(index =>
-		(!index.indexType || index.indexType === 'SECONDARY') && !_.isEmpty(index.indxKey)
-	);
+	const filterSecondaryIndexes = indexes =>
+		indexes.filter(index => (!index.indexType || index.indexType === 'SECONDARY') && !_.isEmpty(index.indxKey));
 
-	const getPrimaryIndex = _.flow([
-			findPrimaryIndex,
-			getTableInlineIndexStatement,
-		]);
+	const getPrimaryIndex = _.flow([findPrimaryIndex, getTableInlineIndexStatement]);
 
-	const getSecondaryIndexes = _.flow([
-			filterSecondaryIndexes,
-			getTableInlineIndexStatements,
-			_.compact,
-		]);
+	const getSecondaryIndexes = _.flow([filterSecondaryIndexes, getTableInlineIndexStatements, _.compact]);
 
-	const getPartitionKeys = (compositePartitionKeys) => {
+	const getPartitionKeys = compositePartitionKeys => {
 		return compositePartitionKeys.map(key => {
-			let keyStatement = ''
+			let keyStatement = '';
 
 			keyStatement += key.columnFormat ? key.columnFormat : '';
 			keyStatement += key.name && key.columnFormat ? ` "${key.name}"` : `"${key.name}"`;
@@ -266,16 +264,20 @@ module.exports = ({
 		let partitionStatement = 'PARTITION BY';
 		partitionStatement += partitioning.partitionBy === 'column' ? ' COLUMN' : '';
 		partitionStatement += partitioning.partitioningExpression ? ` ${partitioning.partitioningExpression}` : '';
-		partitionStatement += partitioning.compositePartitionKey ? ` (\n\t${getPartitionKeys(partitioning.compositePartitionKey).join(',\n\t')}\n)` : '';
+		partitionStatement += partitioning.compositePartitionKey
+			? ` (\n\t${getPartitionKeys(partitioning.compositePartitionKey).join(',\n\t')}\n)`
+			: '';
 
 		return partitionStatement;
 	};
 
-	const getInlineTableIndexes = (tableData) => {
+	const getInlineTableIndexes = tableData => {
 		const primaryIndex = getPrimaryIndex(tableData.tableIndexes || []);
-		const partitions = _.isEmpty(tableData.partitioning.partitioningExpression) && _.isEmpty(tableData.partitioning.compositePartitionKey)
-			? ''
-			: getPartitions(tableData.partitioning)
+		const partitions =
+			_.isEmpty(tableData.partitioning.partitioningExpression) &&
+			_.isEmpty(tableData.partitioning.compositePartitionKey)
+				? ''
+				: getPartitions(tableData.partitioning);
 		const secondaryIndexes = getSecondaryIndexes(tableData.tableIndexes || []);
 
 		if (!primaryIndex && !partitions && _.isEmpty(secondaryIndexes)) {
@@ -286,7 +288,7 @@ module.exports = ({
 		primaryIndexStatement += primaryIndex ? primaryIndex : '';
 		primaryIndexStatement += partitions ? '\n' + partitions : '';
 
-		return '\n' + tab([ primaryIndexStatement, ...secondaryIndexes ].filter(Boolean).join(',\n'));
+		return '\n' + tab([primaryIndexStatement, ...secondaryIndexes].filter(Boolean).join(',\n'));
 	};
 
 	const getUsingOptions = ({
@@ -305,16 +307,16 @@ module.exports = ({
 			add(location, `LOCATION ( '${location}' )`),
 			add(scanPercentage, `SCANPCT = '${scanPercentage}'`),
 			add(pathPattern, `PATHPATTERN ( '${pathPattern}' )`),
-			add(manifest, 'MANIFEST ( \'TRUE\' )', 'MANIFEST ( \'FALSE\' )'),
+			add(manifest, "MANIFEST ( 'TRUE' )", "MANIFEST ( 'FALSE' )"),
 			add(tableFormat, `TABLE_FORMAT ( '${tableFormat}' )`),
 			add(rowFormat, `ROWFORMAT ( '${rowFormat}' )`),
 			add(storedAs, `STOREDAS ( '${storedAs}' )`),
-			add(header, 'HEADER ( \'TRUE\' )', 'STRIP_EXTERIOR_SPACES ( \'FALSE\' )'),
-			add(stripSpaces, 'STRIP_EXTERIOR_SPACES ( \'TRUE\' )', 'STRIP_EXTERIOR_SPACES ( \'FALSE\' )'),
+			add(header, "HEADER ( 'TRUE' )", "STRIP_EXTERIOR_SPACES ( 'FALSE' )"),
+			add(stripSpaces, "STRIP_EXTERIOR_SPACES ( 'TRUE' )", "STRIP_EXTERIOR_SPACES ( 'FALSE' )"),
 			add(stripEnclosingChar, `STRIP_ENCLOSING_CHAR ( '${stripEnclosingChar}' )`),
-			(options) => tab(options.join('\n\t'))
+			options => tab(options.join('\n\t')),
 		])([]);
-	}
+	};
 
 	return {
 		getTableOptions,
@@ -323,6 +325,4 @@ module.exports = ({
 		getIndexOptions,
 		getIndexKeys,
 	};
-
-}
-
+};

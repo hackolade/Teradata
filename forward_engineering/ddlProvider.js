@@ -32,15 +32,24 @@ module.exports = (baseProvider, options, app) => {
 			assignTemplates,
 		});
 	const keyHelper = require('./helpers/keyHelper')(_, clean);
-	const { getTableName, getIndexName, getDatabaseOptions, getViewData, getJournalingStrategy, viewColumnsToString, shouldDropDefaultJournalTable } = require('./helpers/general')(_, tab, commentIfDeactivated);
-	const { getTableOptions, getUsingOptions, getInlineTableIndexes, getIndexOptions, getIndexKeys } = require('./helpers/tableHelper')({
-		_,
-		tab,
+	const {
+		getTableName,
+		getIndexName,
+		getDatabaseOptions,
+		getViewData,
 		getJournalingStrategy,
-		commentIfDeactivated,
-		checkAllKeysDeactivated,
-		divideIntoActivatedAndDeactivated,
-	});
+		viewColumnsToString,
+		shouldDropDefaultJournalTable,
+	} = require('./helpers/general')(_, tab, commentIfDeactivated);
+	const { getTableOptions, getUsingOptions, getInlineTableIndexes, getIndexOptions, getIndexKeys } =
+		require('./helpers/tableHelper')({
+			_,
+			tab,
+			getJournalingStrategy,
+			commentIfDeactivated,
+			checkAllKeysDeactivated,
+			divideIntoActivatedAndDeactivated,
+		});
 	const { decorateType } = require('./helpers/columnDefinitionHelper')(_);
 
 	const additionalOptions = getAdditionalOptions(options.additionalOptions);
@@ -71,7 +80,7 @@ module.exports = (baseProvider, options, app) => {
 				keyConstraints: keyHelper.getTableKeyConstraints(jsonSchema),
 				tableOptions: detailsTab.tableOptions,
 				partitioning: detailsTab.partitioning,
-				selectStatement: detailsTab.selectStatement
+				selectStatement: detailsTab.selectStatement,
 			};
 		},
 
@@ -100,10 +109,10 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {HydratedCheckConstraint}
 		 */
 		hydrateCheckConstraint(checkConstraint) {
-			const buildExpression = (expr) => {
+			const buildExpression = expr => {
 				const plainExpr = _.trim(expr).replace(/^\(([\s\S]*)\)$/, '$1');
 				return `CHECK (${plainExpr})`;
-			}
+			};
 
 			return {
 				name: checkConstraint.chkConstrName || '',
@@ -163,7 +172,7 @@ module.exports = (baseProvider, options, app) => {
 			db_before_journaling_strategy,
 			db_after_journaling_strategy,
 			db_default_journal_table,
-			db_default_journal_db
+			db_default_journal_db,
 		}) {
 			const databaseOptions = getDatabaseOptions({
 				db_account,
@@ -174,7 +183,7 @@ module.exports = (baseProvider, options, app) => {
 				db_before_journaling_strategy,
 				db_after_journaling_strategy,
 				db_default_journal_table,
-				db_default_journal_db
+				db_default_journal_db,
 			});
 
 			const databaseStatement = commentIfDeactivated(
@@ -184,7 +193,7 @@ module.exports = (baseProvider, options, app) => {
 				}),
 				{
 					isActivated,
-				}
+				},
 			);
 
 			const createSessionStatement = assignTemplates(templates.createSession, {
@@ -201,11 +210,13 @@ module.exports = (baseProvider, options, app) => {
 					return '';
 				}
 
-				const columnDefinitions = udt.properties.map(field => {
-					let columnDefinition = `"${field.name}" ${decorateType(field.type, field)}`;
-					columnDefinition += field.characterSet ? ` CHARACTER SET ${field.characterSet}` : '';
-					return columnDefinition;
-				}).join(',\n\t')
+				const columnDefinitions = udt.properties
+					.map(field => {
+						let columnDefinition = `"${field.name}" ${decorateType(field.type, field)}`;
+						columnDefinition += field.characterSet ? ` CHARACTER SET ${field.characterSet}` : '';
+						return columnDefinition;
+					})
+					.join(',\n\t');
 
 				return commentIfDeactivated(
 					assignTemplates(templates.createStructuredType, {
@@ -215,7 +226,7 @@ module.exports = (baseProvider, options, app) => {
 					}),
 					{
 						isActivated: udt.isActivated,
-					}
+					},
 				);
 			} else if (udt.type === 'ARRAY') {
 				if (_.isEmpty(udt.items)) {
@@ -232,7 +243,7 @@ module.exports = (baseProvider, options, app) => {
 					}),
 					{
 						isActivated: udt.isActivated,
-					}
+					},
 				);
 			}
 
@@ -244,17 +255,22 @@ module.exports = (baseProvider, options, app) => {
 				}),
 				{
 					isActivated: udt.isActivated,
-				}
+				},
 			);
 		},
 
 		createTable(tableData, isActivated) {
-			const { name, dbData, columns, checkConstraints, foreignKeyConstraints, selectStatement, tableOptions } = tableData;
-			const preparedTableOptions = getTableOptions(tableOptions)
+			const { name, dbData, columns, checkConstraints, foreignKeyConstraints, selectStatement, tableOptions } =
+				tableData;
+			const preparedTableOptions = getTableOptions(tableOptions);
 			const tableName = getTableName(name, dbData.databaseName);
 			const tableIndexes = getInlineTableIndexes(tableData);
-			const tablePreservationStatement = tableOptions.TABLE_PRESERVATION ? `\n\tON COMMIT ${tableOptions.TABLE_PRESERVATION}` : '';
-			const checkConstraintsStatement = !_.isEmpty(checkConstraints) ? ',\n\t\t' + checkConstraints.join(',\n\t\t') : '';
+			const tablePreservationStatement = tableOptions.TABLE_PRESERVATION
+				? `\n\tON COMMIT ${tableOptions.TABLE_PRESERVATION}`
+				: '';
+			const checkConstraintsStatement = !_.isEmpty(checkConstraints)
+				? ',\n\t\t' + checkConstraints.join(',\n\t\t')
+				: '';
 
 			const dividedKeysConstraints = divideIntoActivatedAndDeactivated(
 				tableData.keyConstraints.map(createKeyConstraint(templates, isActivated)),
@@ -282,7 +298,7 @@ module.exports = (baseProvider, options, app) => {
 					}),
 					{
 						isActivated,
-					}
+					},
 				);
 			}
 
@@ -294,7 +310,7 @@ module.exports = (baseProvider, options, app) => {
 					}),
 					{
 						isActivated,
-					}
+					},
 				);
 			}
 
@@ -315,7 +331,7 @@ module.exports = (baseProvider, options, app) => {
 					}),
 					{
 						isActivated,
-					}
+					},
 				);
 			}
 
@@ -335,7 +351,7 @@ module.exports = (baseProvider, options, app) => {
 				}),
 				{
 					isActivated,
-				}
+				},
 			);
 		},
 
@@ -363,9 +379,9 @@ module.exports = (baseProvider, options, app) => {
 				const dividedColumns = divideIntoActivatedAndDeactivated(columns, column => column.statement);
 				const deactivatedColumnsString = dividedColumns.deactivatedItems.length
 					? commentIfDeactivated(dividedColumns.deactivatedItems.join(',\n\t\t'), {
-						isActivated: false,
-						isPartOfLine: true,
-					})
+							isActivated: false,
+							isPartOfLine: true,
+						})
 					: '';
 				columnsAsString = dividedColumns.activatedItems.join(',\n\t\t') + deactivatedColumnsString;
 			}
@@ -373,9 +389,9 @@ module.exports = (baseProvider, options, app) => {
 			const selectStatement = _.trim(viewData.selectStatement)
 				? _.trim(tab(viewData.selectStatement))
 				: assignTemplates(templates.viewSelectStatement, {
-					tableName: tables.join(', '),
-					keys: columnsAsString,
-				});
+						tableName: tables.join(', '),
+						keys: columnsAsString,
+					});
 
 			return { deactivatedWholeStatement, selectStatement };
 		},
@@ -393,9 +409,9 @@ module.exports = (baseProvider, options, app) => {
 					return '';
 				}
 
-				const isOrderByKeys = !_.isEmpty(index.orderKeys) && !checkAllKeysDeactivated(index.orderKeys || [])
+				const isOrderByKeys = !_.isEmpty(index.orderKeys) && !checkAllKeysDeactivated(index.orderKeys || []);
 
-				let orderBy = ''
+				let orderBy = '';
 				orderBy += index.orderBy ? ` ORDER BY ${index.orderBy}` : '';
 				orderBy += !index.orderBy && isOrderByKeys ? ' ORDER BY' : '';
 				orderBy += isOrderByKeys ? ` ( ${getIndexKeys(index.orderKeys)} )` : '';
@@ -411,8 +427,8 @@ module.exports = (baseProvider, options, app) => {
 						indexOptions,
 					}),
 					{
-						isActivated: isParentActivated && index.isActivated && !allKeysDeactivated
-					}
+						isActivated: isParentActivated && index.isActivated && !allKeysDeactivated,
+					},
 				);
 			} else if (index.indexType === 'JOIN') {
 				if (_.isEmpty(index.asSelect)) {
@@ -426,8 +442,8 @@ module.exports = (baseProvider, options, app) => {
 						indexOptions,
 					}),
 					{
-						isActivated: isParentActivated && index.isActivated
-					}
+						isActivated: isParentActivated && index.isActivated,
+					},
 				);
 			}
 
@@ -515,7 +531,15 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		createForeignKeyConstraint(
-			{ foreignKey, primaryTable, primaryKey, primaryTableActivated, foreignTableActivated, customProperties, isActivated },
+			{
+				foreignKey,
+				primaryTable,
+				primaryKey,
+				primaryTableActivated,
+				foreignTableActivated,
+				customProperties,
+				isActivated,
+			},
 			dbData,
 		) {
 			const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated(primaryKey);
@@ -543,13 +567,17 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		convertColumnDefinition(columnDefinition) {
-			const type = this.hasType(columnDefinition.type) ? decorateType(columnDefinition.type, columnDefinition) : `"${columnDefinition.type}"`;
+			const type = this.hasType(columnDefinition.type)
+				? decorateType(columnDefinition.type, columnDefinition)
+				: `"${columnDefinition.type}"`;
 			const inlineLength = columnDefinition.inlineLength ? ` INLINE LENGTH ${columnDefinition.inlineLength}` : '';
 			const notNull = columnDefinition.required ? ' NOT NULL' : '';
 			const inlineUniqueConstraint = columnDefinition.unique && !columnDefinition.nullable ? ' UNIQUE' : '';
 			const inlinePKConstraint = columnDefinition.primaryKey && !columnDefinition.nullable ? ' PRIMARY KEY' : '';
 			const characterSet = columnDefinition.characterSet ? ` CHARACTER SET ${columnDefinition.characterSet}` : '';
-			const storageFormat = columnDefinition.storageFormat ? ` STORAGE FORMAT ${columnDefinition.storageFormat}` : '';
+			const storageFormat = columnDefinition.storageFormat
+				? ` STORAGE FORMAT ${columnDefinition.storageFormat}`
+				: '';
 			const withSchema = columnDefinition.withSchema ? ` WITH SCHEMA ${columnDefinition.withSchema}` : '';
 			const defaultValue = columnDefinition.default ? ` DEFAULT ${columnDefinition.default}` : '';
 			const uppercase = columnDefinition.uppercase ? ' UPPERCASE' : '';
@@ -557,8 +585,12 @@ module.exports = (baseProvider, options, app) => {
 			const format = columnDefinition.format ? ` FORMAT '${columnDefinition.format}'` : '';
 			const autoColumn = columnDefinition.autoColumn ? ' AUTO COLUMN' : '';
 			const compress = columnDefinition.compress ? ` COMPRESS (${columnDefinition.compress})` : '';
-			const compressUsing = columnDefinition.compressUsing ? ` COMPRESS USING ${columnDefinition.compressUsing}` : '';
-			const decompressUsing = columnDefinition.decompressUsing ? ` DECOMPRESS USING ${columnDefinition.decompressUsing}` : '';
+			const compressUsing = columnDefinition.compressUsing
+				? ` COMPRESS USING ${columnDefinition.compressUsing}`
+				: '';
+			const decompressUsing = columnDefinition.decompressUsing
+				? ` DECOMPRESS USING ${columnDefinition.decompressUsing}`
+				: '';
 
 			return commentIfDeactivated(
 				assignTemplates(templates.columnDefinition, {
@@ -579,7 +611,7 @@ module.exports = (baseProvider, options, app) => {
 					characterSet,
 					inlineUniqueConstraint,
 					inlinePKConstraint,
-					inlineCheckConstraint: ''
+					inlineCheckConstraint: '',
 				}),
 				{
 					isActivated: columnDefinition.isActivated,
@@ -607,14 +639,19 @@ module.exports = (baseProvider, options, app) => {
 
 			const isDbAccountModified = compModeData.new.db_account !== compModeData.old.db_account;
 			const isDefaultMapModified = compModeData.new.db_default_map !== compModeData.old.db_default_map;
-			const isPermanentStorageSizeModified = compModeData.new.db_permanent_storage_size !== compModeData.old.db_permanent_storage_size;
+			const isPermanentStorageSizeModified =
+				compModeData.new.db_permanent_storage_size !== compModeData.old.db_permanent_storage_size;
 			const isSpoolFilesSizeModified = compModeData.new.spool_files_size !== compModeData.old.spool_files_size;
-			const isTemporaryTablesSizeModified = compModeData.new.temporary_tables_size !== compModeData.old.temporary_tables_size;
+			const isTemporaryTablesSizeModified =
+				compModeData.new.temporary_tables_size !== compModeData.old.temporary_tables_size;
 			const isFallbackModified = compModeData.new.has_fallback !== compModeData.old.has_fallback;
-			const isBeforeJournalStrategyModified = compModeData.new.db_before_journaling_strategy !== compModeData.old.db_before_journaling_strategy;
-			const isAfterJournalStrategyModified = compModeData.new.db_after_journaling_strategy !== compModeData.old.db_after_journaling_strategy;
-			const isDefaultJournalTableModified = compModeData.new.db_default_journal_db !== compModeData.old.db_default_journal_db
-				|| compModeData.new.db_default_journal_table !== compModeData.old.db_default_journal_table;
+			const isBeforeJournalStrategyModified =
+				compModeData.new.db_before_journaling_strategy !== compModeData.old.db_before_journaling_strategy;
+			const isAfterJournalStrategyModified =
+				compModeData.new.db_after_journaling_strategy !== compModeData.old.db_after_journaling_strategy;
+			const isDefaultJournalTableModified =
+				compModeData.new.db_default_journal_db !== compModeData.old.db_default_journal_db ||
+				compModeData.new.db_default_journal_table !== compModeData.old.db_default_journal_table;
 			const dropDefaultJournalTable = shouldDropDefaultJournalTable(compModeData);
 
 			return {
@@ -625,12 +662,20 @@ module.exports = (baseProvider, options, app) => {
 				...(isSpoolFilesSizeModified && { spool_files_size: data.spool_files_size }),
 				...(isTemporaryTablesSizeModified && { temporary_tables_size: data.temporary_tables_size }),
 				...(isFallbackModified && { has_fallback: data.has_fallback }),
-				...(isBeforeJournalStrategyModified && { db_before_journaling_strategy: data.db_before_journaling_strategy }),
-				...(isAfterJournalStrategyModified && { db_after_journaling_strategy: data.db_after_journaling_strategy }),
+				...(isBeforeJournalStrategyModified && {
+					db_before_journaling_strategy: data.db_before_journaling_strategy,
+				}),
+				...(isAfterJournalStrategyModified && {
+					db_after_journaling_strategy: data.db_after_journaling_strategy,
+				}),
 				...(isDefaultJournalTableModified && {
-					db_default_journal_db: dropDefaultJournalTable ? compModeData.old.db_default_journal_db : data.db_default_journal_db,
-					db_default_journal_table: dropDefaultJournalTable ? compModeData.old.db_default_journal_table : data.db_default_journal_table,
-					dropDefaultJournalTable
+					db_default_journal_db: dropDefaultJournalTable
+						? compModeData.old.db_default_journal_db
+						: data.db_default_journal_db,
+					db_default_journal_table: dropDefaultJournalTable
+						? compModeData.old.db_default_journal_table
+						: data.db_default_journal_table,
+					dropDefaultJournalTable,
 				}),
 			};
 		},
@@ -664,43 +709,56 @@ module.exports = (baseProvider, options, app) => {
 			const isForTableModified = newTableOptions.FOR_TABLE !== oldTableOptions.FOR_TABLE;
 			const isForeignTableModified = newTableOptions.FOREIGN_TABLE !== oldTableOptions.FOREIGN_TABLE;
 			const isMultisetModified = newTableOptions.SET_MULTISET !== oldTableOptions.SET_MULTISET;
-			const isTemporaryVolatileModified = newTableOptions.TEMPORARY_VOLATILE !== oldTableOptions.TEMPORARY_VOLATILE;
+			const isTemporaryVolatileModified =
+				newTableOptions.TEMPORARY_VOLATILE !== oldTableOptions.TEMPORARY_VOLATILE;
 			const isQueuedTableModified = newTableOptions.QUEUE_TABLE !== oldTableOptions.QUEUE_TABLE;
 			const isTraceTableModified = newTableOptions.TRACE_TABLE !== oldTableOptions.TRACE_TABLE;
 			const isExternalSecurityModified = newTableOptions.EXTERNAL_SECURITY !== oldTableOptions.EXTERNAL_SECURITY;
-			const isAuthorizationNameModified = newTableOptions.AUTHORIZATION_NAME !== oldTableOptions.AUTHORIZATION_NAME;
+			const isAuthorizationNameModified =
+				newTableOptions.AUTHORIZATION_NAME !== oldTableOptions.AUTHORIZATION_NAME;
 			const isMapModified = newTableOptions.MAP !== oldTableOptions.MAP;
 			const isColocateUsingModified = newTableOptions.COLOCATE_USING !== oldTableOptions.COLOCATE_USING;
 			const isFallbackModified = newTableOptions.FALLBACK !== oldTableOptions.FALLBACK;
-			const isDefaultJournalTableModified = newTableOptions.DEFAULT_JOURNAL_TABLE !== oldTableOptions.DEFAULT_JOURNAL_TABLE;
+			const isDefaultJournalTableModified =
+				newTableOptions.DEFAULT_JOURNAL_TABLE !== oldTableOptions.DEFAULT_JOURNAL_TABLE;
 			const isLogModified = newTableOptions.LOG !== oldTableOptions.LOG;
 			const isBeforeJournalModified = newTableOptions.BEFORE_JOURNAL !== oldTableOptions.BEFORE_JOURNAL;
 			const isAfterJournalModified = newTableOptions.AFTER_JOURNAL !== oldTableOptions.AFTER_JOURNAL;
 			const isChecksumModified = newTableOptions.TABLE_CHECKSUM !== oldTableOptions.TABLE_CHECKSUM;
 			const isIsolateLoadingModified = newTableOptions.ISOLATED_LOADING !== oldTableOptions.ISOLATED_LOADING;
-			const isTablePreservationModified = newTableOptions.TABLE_PRESERVATION !== oldTableOptions.TABLE_PRESERVATION;
-			const isFreespaceModified = newTableOptions.FREESPACE?.freeSpaceValue !== oldTableOptions.FREESPACE?.freeSpaceValue
-				|| newTableOptions.FREESPACE?.percentUnit !== oldTableOptions.FREESPACE?.percentUnit;
-			const isMergeBlockRatioModified = newTableOptions.MERGE_BLOCK_RATIO?.mergeRatio !== oldTableOptions.MERGE_BLOCK_RATIO?.mergeRatio
-				|| newTableOptions.MERGE_BLOCK_RATIO?.specificRatio !== oldTableOptions.MERGE_BLOCK_RATIO?.specificRatio
-				|| newTableOptions.MERGE_BLOCK_RATIO?.percentUnit !== oldTableOptions.MERGE_BLOCK_RATIO?.percentUnit;
-			const isDataBlockSizeModified = newTableOptions.DATA_BLOCK_SIZE.blockSize !== oldTableOptions.DATA_BLOCK_SIZE?.blockSize
-				|| newTableOptions.DATA_BLOCK_SIZE?.specificSize !== oldTableOptions.DATA_BLOCK_SIZE?.specificSize
-				|| newTableOptions.DATA_BLOCK_SIZE?.units !== oldTableOptions.DATA_BLOCK_SIZE?.units;
-			const isBlockCompressionModified = newTableOptions.BLOCK_COMPRESSION?.blockCompressionType !== oldTableOptions.BLOCK_COMPRESSION?.blockCompressionType
-				|| newTableOptions.BLOCK_COMPRESSION?.blockCompressionAlgorithm !== oldTableOptions.BLOCK_COMPRESSION?.blockCompressionAlgorithm
-				|| newTableOptions.BLOCK_COMPRESSION?.blockCompressionLevel !== oldTableOptions.BLOCK_COMPRESSION?.blockCompressionLevel
-				|| newTableOptions.BLOCK_COMPRESSION?.specificBlockCompressionLevel !== oldTableOptions.BLOCK_COMPRESSION?.specificBlockCompressionLevel;
-			const isUsingModified = newTableOptions.USING?.location !== oldTableOptions.USING?.location
-				|| newTableOptions.USING?.scanPercentage !== oldTableOptions.USING?.scanPercentage
-				|| newTableOptions.USING?.pathPattern !== oldTableOptions.USING?.pathPattern
-				|| newTableOptions.USING?.manifest !== oldTableOptions.USING?.manifest
-				|| newTableOptions.USING?.tableFormat !== oldTableOptions.USING?.tableFormat
-				|| newTableOptions.USING?.rowFormat !== oldTableOptions.USING?.rowFormat
-				|| newTableOptions.USING?.storedAs !== oldTableOptions.USING?.storedAs
-				|| newTableOptions.USING?.header !== oldTableOptions.USING?.header
-				|| newTableOptions.USING?.stripSpaces !== oldTableOptions.USING?.stripSpaces
-				|| newTableOptions.USING?.stripEnclosingChar !== oldTableOptions.USING?.stripEnclosingChar;
+			const isTablePreservationModified =
+				newTableOptions.TABLE_PRESERVATION !== oldTableOptions.TABLE_PRESERVATION;
+			const isFreespaceModified =
+				newTableOptions.FREESPACE?.freeSpaceValue !== oldTableOptions.FREESPACE?.freeSpaceValue ||
+				newTableOptions.FREESPACE?.percentUnit !== oldTableOptions.FREESPACE?.percentUnit;
+			const isMergeBlockRatioModified =
+				newTableOptions.MERGE_BLOCK_RATIO?.mergeRatio !== oldTableOptions.MERGE_BLOCK_RATIO?.mergeRatio ||
+				newTableOptions.MERGE_BLOCK_RATIO?.specificRatio !== oldTableOptions.MERGE_BLOCK_RATIO?.specificRatio ||
+				newTableOptions.MERGE_BLOCK_RATIO?.percentUnit !== oldTableOptions.MERGE_BLOCK_RATIO?.percentUnit;
+			const isDataBlockSizeModified =
+				newTableOptions.DATA_BLOCK_SIZE.blockSize !== oldTableOptions.DATA_BLOCK_SIZE?.blockSize ||
+				newTableOptions.DATA_BLOCK_SIZE?.specificSize !== oldTableOptions.DATA_BLOCK_SIZE?.specificSize ||
+				newTableOptions.DATA_BLOCK_SIZE?.units !== oldTableOptions.DATA_BLOCK_SIZE?.units;
+			const isBlockCompressionModified =
+				newTableOptions.BLOCK_COMPRESSION?.blockCompressionType !==
+					oldTableOptions.BLOCK_COMPRESSION?.blockCompressionType ||
+				newTableOptions.BLOCK_COMPRESSION?.blockCompressionAlgorithm !==
+					oldTableOptions.BLOCK_COMPRESSION?.blockCompressionAlgorithm ||
+				newTableOptions.BLOCK_COMPRESSION?.blockCompressionLevel !==
+					oldTableOptions.BLOCK_COMPRESSION?.blockCompressionLevel ||
+				newTableOptions.BLOCK_COMPRESSION?.specificBlockCompressionLevel !==
+					oldTableOptions.BLOCK_COMPRESSION?.specificBlockCompressionLevel;
+			const isUsingModified =
+				newTableOptions.USING?.location !== oldTableOptions.USING?.location ||
+				newTableOptions.USING?.scanPercentage !== oldTableOptions.USING?.scanPercentage ||
+				newTableOptions.USING?.pathPattern !== oldTableOptions.USING?.pathPattern ||
+				newTableOptions.USING?.manifest !== oldTableOptions.USING?.manifest ||
+				newTableOptions.USING?.tableFormat !== oldTableOptions.USING?.tableFormat ||
+				newTableOptions.USING?.rowFormat !== oldTableOptions.USING?.rowFormat ||
+				newTableOptions.USING?.storedAs !== oldTableOptions.USING?.storedAs ||
+				newTableOptions.USING?.header !== oldTableOptions.USING?.header ||
+				newTableOptions.USING?.stripSpaces !== oldTableOptions.USING?.stripSpaces ||
+				newTableOptions.USING?.stripEnclosingChar !== oldTableOptions.USING?.stripEnclosingChar;
 
 			return {
 				name,
@@ -717,7 +775,9 @@ module.exports = (baseProvider, options, app) => {
 					...(isMapModified && { MAP: newTableOptions.MAP }),
 					...(isColocateUsingModified && { COLOCATE_USING: newTableOptions.COLOCATE_USING }),
 					...(isFallbackModified && { FALLBACK: newTableOptions.FALLBACK }),
-					...(isDefaultJournalTableModified && { DEFAULT_JOURNAL_TABLE: newTableOptions.DEFAULT_JOURNAL_TABLE }),
+					...(isDefaultJournalTableModified && {
+						DEFAULT_JOURNAL_TABLE: newTableOptions.DEFAULT_JOURNAL_TABLE,
+					}),
 					...(isLogModified && { LOG: newTableOptions.LOG }),
 					...(isBeforeJournalModified && { BEFORE_JOURNAL: newTableOptions.BEFORE_JOURNAL }),
 					...(isAfterJournalModified && { AFTER_JOURNAL: newTableOptions.AFTER_JOURNAL }),
@@ -729,7 +789,7 @@ module.exports = (baseProvider, options, app) => {
 					...(isDataBlockSizeModified && { DATA_BLOCK_SIZE: newTableOptions.DATA_BLOCK_SIZE }),
 					...(isBlockCompressionModified && { BLOCK_COMPRESSION: newTableOptions.BLOCK_COMPRESSION }),
 					...(isUsingModified && { USING: newTableOptions.USING }),
-				}
+				},
 			};
 		},
 
@@ -750,15 +810,10 @@ module.exports = (baseProvider, options, app) => {
 		 * @param newCompData
 		 * @return {ModifyColumnData}
 		 */
-		hydrateAlterColumn({
-		   newColumn,
-		   oldColumn,
-		   oldCompData,
-		   newCompData,
-		}) {
+		hydrateAlterColumn({ newColumn, oldColumn, oldCompData, newCompData }) {
 			const diff = getDifferentProperties(newColumn, oldColumn, ['name', 'type']);
 
-			const result = {...newColumn};
+			const result = { ...newColumn };
 
 			if (oldCompData.name !== newCompData.name) {
 				result.oldName = oldCompData.name;
@@ -818,7 +873,7 @@ module.exports = (baseProvider, options, app) => {
 				selectStatement: options.selectStatement || newEntityData[0]?.selectStatement,
 				recursive: options.recursive || newEntityData[0]?.recursive,
 				options,
-				...oldDViewData
+				...oldDViewData,
 			};
 		},
 
@@ -954,7 +1009,11 @@ module.exports = (baseProvider, options, app) => {
 			if ((columnData.oldName && columnData.oldType) || columnData.oldType) {
 				const dropOldColumnStatement = this.dropColumn(tableName, { name: columnData.name }, dbData);
 
-				const createNewColumnStatement = this.addColumn(tableName, { ...columnData, isActivated: true }, dbData);
+				const createNewColumnStatement = this.addColumn(
+					tableName,
+					{ ...columnData, isActivated: true },
+					dbData,
+				);
 
 				alterStatement.push(dropOldColumnStatement, createNewColumnStatement);
 			} else if (columnData.oldName && !columnData.newOptions) {
@@ -1016,10 +1075,14 @@ module.exports = (baseProvider, options, app) => {
 		alterIndex(tableName, { new: newIndexData, old: oldIndexData }, dbData) {
 			return [
 				this.dropIndex(tableName, oldIndexData, dbData),
-				this.createIndex(tableName, {
-					...newIndexData,
-					indxKey: newIndexData.indxKey.filter(key => !(key.isActivated === false))
-				}, dbData),
+				this.createIndex(
+					tableName,
+					{
+						...newIndexData,
+						indxKey: newIndexData.indxKey.filter(key => !(key.isActivated === false)),
+					},
+					dbData,
+				),
 			].join('\n\n');
 		},
 

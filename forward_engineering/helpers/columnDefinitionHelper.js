@@ -1,4 +1,4 @@
-module.exports = (_) => {
+module.exports = _ => {
 	const addLength = (type, length) => {
 		return `${type}(${length})`;
 	};
@@ -35,14 +35,32 @@ module.exports = (_) => {
 		return typeStatement;
 	};
 
-	const canHaveLength = type => ['CHAR', 'CHARACTER', 'VARCHAR', 'CHAR VARYING', 'CHARACTER VARYING', 'VARGRAPHIC', 'CLOB', 'CHARACTER LARGE OBJECT', 'BYTE', 'VARBYTE', 'BLOB', 'ARRAY', 'JSON', 'XML', 'XMLTYPE', 'ST_GEOMETRY'].includes(type);
+	const canHaveLength = type =>
+		[
+			'CHAR',
+			'CHARACTER',
+			'VARCHAR',
+			'CHAR VARYING',
+			'CHARACTER VARYING',
+			'VARGRAPHIC',
+			'CLOB',
+			'CHARACTER LARGE OBJECT',
+			'BYTE',
+			'VARBYTE',
+			'BLOB',
+			'ARRAY',
+			'JSON',
+			'XML',
+			'XMLTYPE',
+			'ST_GEOMETRY',
+		].includes(type);
 
-	const canHavePrecisionAndScale = type =>
-		[ 'DECIMAL', 'DEC', 'NUMERIC', 'NUMBER' ].includes(type);
+	const canHavePrecisionAndScale = type => ['DECIMAL', 'DEC', 'NUMERIC', 'NUMBER'].includes(type);
 
-	const canHavePrecisionAndToPrecision = (type) => ['INTERVAL YEAR', 'INTERVAL DAY', 'INTERVAL HOUR', 'INTERVAL MINUTE'].includes(type);
+	const canHavePrecisionAndToPrecision = type =>
+		['INTERVAL YEAR', 'INTERVAL DAY', 'INTERVAL HOUR', 'INTERVAL MINUTE'].includes(type);
 
-	const canHavePrecisionAndSecondPrecision = (type) => ['INTERVAL SECOND'].includes(type);
+	const canHavePrecisionAndSecondPrecision = type => ['INTERVAL SECOND'].includes(type);
 
 	const canHaveFractionalSecondPrecision = type => ['TIME', 'TIMESTAMP'].includes(type);
 
@@ -57,7 +75,12 @@ module.exports = (_) => {
 		} else if (canHaveLength(type) && _.isNumber(columnDefinition.length)) {
 			return addLength(type, columnDefinition.length);
 		} else if (canHavePrecisionAndToPrecision(type)) {
-			return addPrecisionAndToPrecision(type, columnDefinition.precision, columnDefinition.toPrecision, columnDefinition.fractSecPrecision);
+			return addPrecisionAndToPrecision(
+				type,
+				columnDefinition.precision,
+				columnDefinition.toPrecision,
+				columnDefinition.fractSecPrecision,
+			);
 		} else if (canHavePrecisionAndSecondPrecision(type)) {
 			return addScalePrecision(type, columnDefinition.precision, columnDefinition.fractSecPrecision);
 		} else if (canHavePrecisionAndScale(type) && _.isNumber(columnDefinition.precision)) {
@@ -71,5 +94,5 @@ module.exports = (_) => {
 
 	return {
 		decorateType,
-	}
-}
+	};
+};

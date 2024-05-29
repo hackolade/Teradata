@@ -11,9 +11,9 @@
 		"primaryKey": false,
 		"default": "",
 		"enum": [],
-		"sample":"",
+		"sample": "",
 		"pattern": "",
-		"comments":"",
+		"comments": "",
 		"format": ""
 	},
 	"descriptor": {

@@ -54,21 +54,21 @@
 			"capacity": 8
 		},
 		{
-			"schema":{
+			"schema": {
 				"mode": "decimal"
 			},
 			"capacity": 2,
 			"mode": "decimal"
 		},
 		{
-			"schema":{
+			"schema": {
 				"mode": "decimal"
 			},
 			"capacity": 4,
 			"mode": "decimal"
 		},
 		{
-			"schema":{
+			"schema": {
 				"mode": "decimal"
 			},
 			"capacity": 8,
