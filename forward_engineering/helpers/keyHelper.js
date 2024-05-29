@@ -42,7 +42,7 @@ module.exports = (_, clean) => {
 					name: columnName,
 					isActivated: isActivated,
 				},
-			]
+			],
 		});
 
 	const findName = (keyId, properties) => {
@@ -53,7 +53,7 @@ module.exports = (_, clean) => {
 		return _.get(
 			Object.values(properties).find(prop => prop.GUID === keyId),
 			'isActivated',
-			true
+			true,
 		);
 	};
 
@@ -104,7 +104,13 @@ module.exports = (_, clean) => {
 				return;
 			}
 
-			return hydrateKeyConstraintOptions(schema.primaryKeyConstraintName, 'PRIMARY KEY', name, schema.isActivated, jsonSchema);
+			return hydrateKeyConstraintOptions(
+				schema.primaryKeyConstraintName,
+				'PRIMARY KEY',
+				name,
+				schema.isActivated,
+				jsonSchema,
+			);
 		}).filter(Boolean);
 
 		const uniqueKeyConstraints = _.flatten(
@@ -115,8 +121,14 @@ module.exports = (_, clean) => {
 					return;
 				}
 
-				return hydrateKeyConstraintOptions(schema.uniqueKeyConstraintName, 'UNIQUE', name, schema.isActivated, jsonSchema);
-			})
+				return hydrateKeyConstraintOptions(
+					schema.uniqueKeyConstraintName,
+					'UNIQUE',
+					name,
+					schema.isActivated,
+					jsonSchema,
+				);
+			}),
 		).filter(Boolean);
 
 		return [

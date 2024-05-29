@@ -1,13 +1,15 @@
 module.exports = ({
-		_,
-		commentIfDeactivated,
-		checkAllKeysDeactivated,
-		divideIntoActivatedAndDeactivated,
-		assignTemplates,
-	}) => {
+	_,
+	commentIfDeactivated,
+	checkAllKeysDeactivated,
+	divideIntoActivatedAndDeactivated,
+	assignTemplates,
+}) => {
 	const foreignKeysToString = keys => {
 		if (Array.isArray(keys)) {
-			const activatedKeys = keys.filter(key => _.get(key, 'isActivated', true)).map(key => `"${_.trim(key.name)}"`);
+			const activatedKeys = keys
+				.filter(key => _.get(key, 'isActivated', true))
+				.map(key => `"${_.trim(key.name)}"`);
 			const deactivatedKeys = keys
 				.filter(key => !_.get(key, 'isActivated', true))
 				.map(key => `"${_.trim(key.name)}"`);
@@ -24,10 +26,13 @@ module.exports = ({
 		return keys.map(key => _.trim(key.name)).join(', ');
 	};
 	const generateConstraintsString = (dividedConstraints, isParentActivated) => {
-		const deactivatedItemsAsString = commentIfDeactivated((dividedConstraints?.deactivatedItems || []).join(',\n\t\t'), {
-			isActivated: !isParentActivated,
-			isPartOfLine: true,
-		});
+		const deactivatedItemsAsString = commentIfDeactivated(
+			(dividedConstraints?.deactivatedItems || []).join(',\n\t\t'),
+			{
+				isActivated: !isParentActivated,
+				isPartOfLine: true,
+			},
+		);
 		const activatedConstraints = dividedConstraints?.activatedItems?.length
 			? ',\n\t\t' + dividedConstraints.activatedItems.join(',\n\t\t')
 			: '';
@@ -44,7 +49,10 @@ module.exports = ({
 		const isAllColumnsDeactivated = checkAllKeysDeactivated(keyData.columns);
 		const dividedColumns = divideIntoActivatedAndDeactivated(keyData.columns, columnMapToString);
 		const deactivatedColumnsAsString = dividedColumns?.deactivatedItems?.length
-			? commentIfDeactivated(dividedColumns.deactivatedItems.join(', '), { isActivated: false, isPartOfLine: true })
+			? commentIfDeactivated(dividedColumns.deactivatedItems.join(', '), {
+					isActivated: false,
+					isPartOfLine: true,
+				})
 			: '';
 
 		const columns =
@@ -62,7 +70,7 @@ module.exports = ({
 		};
 	};
 
-    return {
+	return {
 		generateConstraintsString,
 		foreignKeysToString,
 		foreignActiveKeysToString,

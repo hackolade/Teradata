@@ -131,12 +131,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "tableRole",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"Dimension",
-					"Fact",
-					"Outrigger",
-					"Staging"
-				],
+				"options": ["Dimension", "Fact", "Outrigger", "Staging"],
 				"dependency": {
 					"level": "model",
 					"key": "modelingMethodology",
@@ -148,14 +143,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "vaultComponent",
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
-				"options": [
-					"Hub",
-					"Link",
-					"Satellite",
-					"Bridge",
-					"Point in Time",
-					"Reference"
-				],
+				"options": ["Hub", "Link", "Satellite", "Bridge", "Point in Time", "Reference"],
 				"dependency": {
 					"level": "model",
 					"key": "modelingMethodology",
@@ -194,11 +182,7 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "SET/MULTISET",
 						"propertyKeyword": "SET_MULTISET",
 						"propertyType": "select",
-						"options": [
-							"",
-							"SET",
-							"MULTISET"
-						],
+						"options": ["", "SET", "MULTISET"],
 						"dependency": {
 							"type": "or",
 							"values": [
@@ -217,11 +201,7 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Temporary/Volatile",
 						"propertyKeyword": "TEMPORARY_VOLATILE",
 						"propertyType": "select",
-						"options": [
-							"",
-							"GLOBAL TEMPORARY",
-							"VOLATILE"
-						],
+						"options": ["", "GLOBAL TEMPORARY", "VOLATILE"],
 						"dependency": {
 							"type": "or",
 							"values": [
@@ -270,11 +250,7 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "EXTERNAL_SECURITY",
 						"propertyType": "select",
 						"propertyTooltip": "Specifies authorization for accessing remote storage.",
-						"options": [
-							"",
-							"INVOKER",
-							"DEFINER"
-						],
+						"options": ["", "INVOKER", "DEFINER"],
 						"dependency": {
 							"key": "FOREIGN_TABLE",
 							"value": true
@@ -324,11 +300,7 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "BEFORE_JOURNAL",
 						"propertyType": "select",
 						"defaultValue": "NO",
-						"options": [
-							"NO",
-							"BEFORE",
-							"DUAL"
-						]
+						"options": ["NO", "BEFORE", "DUAL"]
 					},
 					{
 						"propertyName": "AFTER Journal",
@@ -336,24 +308,14 @@ making sure that you maintain a proper JSON format.
 						"propertyType": "select",
 						"propertyTooltip": "Type of journal to be maintained by default for data tables created in the new database. The JOURNAL keyword without AFTER implies BEFORE and AFTER images.",
 						"defaultValue": "NO",
-						"options": [
-							"NO",
-							"AFTER",
-							"DUAL",
-							"LOCAL",
-							"NO LOCAL"
-						]
+						"options": ["NO", "AFTER", "DUAL", "LOCAL", "NO LOCAL"]
 					},
 					{
 						"propertyName": "Checksum",
 						"propertyKeyword": "TABLE_CHECKSUM",
 						"propertyType": "select",
 						"propertyTooltip": "A table-specific disk I/O integrity checksum for detection of hardware read errors. The checksum level setting applies to primary data rows, fallback data rows, and all secondary index rows for the table.",
-						"options": [
-							"ON",
-							"OFF",
-							"DEFAULT"
-						]
+						"options": ["ON", "OFF", "DEFAULT"]
 					},
 					{
 						"propertyName": "Freespace",
@@ -385,12 +347,7 @@ making sure that you maintain a proper JSON format.
 								"propertyName": "Ratio",
 								"propertyKeyword": "mergeRatio",
 								"propertyType": "select",
-								"options": [
-									"",
-									"NO",
-									"DEFAULT",
-									"SPECIFIC"
-								]
+								"options": ["", "NO", "DEFAULT", "SPECIFIC"]
 							},
 							{
 								"propertyName": "Specific ratio",
@@ -427,13 +384,7 @@ making sure that you maintain a proper JSON format.
 								"propertyName": "Size",
 								"propertyKeyword": "blockSize",
 								"propertyType": "select",
-								"options": [
-									"",
-									"DEFAULT",
-									"MINIMUM",
-									"MAXIMUM",
-									"SPECIFIC"
-								]
+								"options": ["", "DEFAULT", "MINIMUM", "MAXIMUM", "SPECIFIC"]
 							},
 							{
 								"propertyName": "Specific size",
@@ -448,12 +399,7 @@ making sure that you maintain a proper JSON format.
 								"propertyName": "Units",
 								"propertyKeyword": "units",
 								"propertyType": "select",
-								"options": [
-									"",
-									"BYTES",
-									"KBYTES",
-									"KILOBYTES"
-								],
+								"options": ["", "BYTES", "KBYTES", "KILOBYTES"],
 								"dependency": {
 									"key": "blockSize",
 									"value": "SPECIFIC"
@@ -471,14 +417,7 @@ making sure that you maintain a proper JSON format.
 								"propertyName": "Type",
 								"propertyKeyword": "blockCompressionType",
 								"propertyType": "select",
-								"options": [
-									"",
-									"DEFAULT",
-									"AUTOTEMP",
-									"MANUAL",
-									"ALWAYS",
-									"NEVER"
-								]
+								"options": ["", "DEFAULT", "AUTOTEMP", "MANUAL", "ALWAYS", "NEVER"]
 							},
 							{
 								"propertyName": "Algorithm",
@@ -486,11 +425,7 @@ making sure that you maintain a proper JSON format.
 								"propertyTooltip": "Specifies the algorithm to use for block-level compression (BLC).",
 								"propertyType": "select",
 								"defaultValue": "DEFAULT",
-								"options": [
-									"DEFAULT",
-									"ZLIB",
-									"ELZS_H"
-								],
+								"options": ["DEFAULT", "ZLIB", "ELZS_H"],
 								"dependency": {
 									"type": "or",
 									"values": [
@@ -515,10 +450,7 @@ making sure that you maintain a proper JSON format.
 								"propertyTooltip": "Specifies a value to indicate a preference for compression speed or compression effectiveness.",
 								"propertyType": "select",
 								"defaultValue": "DEFAULT",
-								"options": [
-									"DEFAULT",
-									"SPECIFIC"
-								],
+								"options": ["DEFAULT", "SPECIFIC"],
 								"dependency": {
 									"key": "blockCompressionAlgorithm",
 									"value": "ZLIB"
@@ -545,24 +477,14 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "ISOLATED_LOADING",
 						"propertyType": "select",
 						"propertyTooltip": "Defines the table for load isolation (LDI). Load isolation enables concurrent read operations on committed rows while the table is being loaded.",
-						"options": [
-							"NO",
-							"CONCURRENT",
-							"FOR ALL",
-							"FOR INSERT",
-							"FOR NONE"
-						]
+						"options": ["NO", "CONCURRENT", "FOR ALL", "FOR INSERT", "FOR NONE"]
 					},
 					{
 						"propertyName": "Table Preservation",
 						"propertyKeyword": "TABLE_PRESERVATION",
 						"propertyType": "select",
 						"propertyTooltip": "Action to perform when a transaction completes.",
-						"options": [
-							"",
-							"DELETE ROWS",
-							"PRESERVE ROWS"
-						],
+						"options": ["", "DELETE ROWS", "PRESERVE ROWS"],
 						"dependency": {
 							"key": "TEMPORARY_VOLATILE",
 							"exist": true
@@ -610,10 +532,7 @@ making sure that you maintain a proper JSON format.
 								"propertyKeyword": "tableFormat",
 								"propertyTooltip": "",
 								"propertyType": "select",
-								"options": [
-									"",
-									"DELTALAKE"
-								]
+								"options": ["", "DELTALAKE"]
 							},
 							{
 								"propertyName": "Row format",
@@ -626,11 +545,7 @@ making sure that you maintain a proper JSON format.
 								"propertyKeyword": "storedAs",
 								"propertyTooltip": "",
 								"propertyType": "select",
-								"options": [
-									"",
-									"TEXTFILE",
-									"PARQUET"
-								]
+								"options": ["", "TEXTFILE", "PARQUET"]
 							},
 							{
 								"propertyName": "Header",
@@ -650,12 +565,8 @@ making sure that you maintain a proper JSON format.
 								"propertyKeyword": "stripEnclosingChar",
 								"propertyTooltip": "",
 								"propertyType": "select",
-								"options": [
-									"",
-									"NONE"
-								]
+								"options": ["", "NONE"]
 							}
-
 						]
 					}
 				]
@@ -672,10 +583,7 @@ making sure that you maintain a proper JSON format.
 						"propertyTooltip": "",
 						"propertyType": "select",
 						"defaultValue": "column",
-						"options": [
-							"column",
-							"expression"
-						]
+						"options": ["column", "expression"]
 					},
 					{
 						"propertyName": "Partition key",
@@ -689,20 +597,12 @@ making sure that you maintain a proper JSON format.
 						"attributeList": {
 							"columnFormat": {
 								"propertyType": "select",
-								"options": [
-									"",
-									"COLUMN",
-									"ROW"
-								],
+								"options": ["", "COLUMN", "ROW"],
 								"propertyTooltip": "Select the column partition store format."
 							},
 							"autoCompression": {
 								"propertyType": "select",
-								"options": [
-									"",
-									"AUTO COMPRESS",
-									"NO AUTO COMPRESS"
-								],
+								"options": ["", "AUTO COMPRESS", "NO AUTO COMPRESS"],
 								"propertyTooltip": "Enable auto compression"
 							}
 						},
@@ -850,10 +750,7 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "compositePrimaryKey",
 						"propertyType": "primaryKeySetter",
 						"abbr": "pk",
-						"attributeList": [
-							"ascending",
-							"descending"
-						]
+						"attributeList": ["ascending", "descending"]
 					},
 					{
 						"propertyName": "Comment",
@@ -886,10 +783,7 @@ making sure that you maintain a proper JSON format.
 						"template": "collectiontree",
 						"isCompositeKey": true,
 						"abbr": " ",
-						"attributeList": [
-							"ascending",
-							"descending"
-						]
+						"attributeList": ["ascending", "descending"]
 					},
 					{
 						"propertyName": "Comment",
@@ -905,364 +799,343 @@ making sure that you maintain a proper JSON format.
 	},
 	{
 		"lowerTab": "Indexes",
-		"structure": [{
-			"propertyName": "Index",
-			"propertyType": "group",
-			"propertyKeyword": "Indxs",
-			"propertyTooltip": "In general you should only add indexes to match the queries your application uses. Any extra will waste resources.",
-			"structure": [
-				{
-					"propertyName": "Name",
-					"propertyKeyword": "indxName",
-					"propertyTooltip": "Optional, if not specified an automatic name will be assigned. Index name are needed to drop indexes and appear in error messages when a constraint is violated.",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Activated",
-					"propertyKeyword": "isActivated",
-					"propertyTooltip": "Deactivated item will be not included in FE script",
-					"propertyType": "checkbox",
-					"defaultValue": true
-				},
-				{
-					"propertyName": "Type",
-					"propertyKeyword": "indexType",
-					"propertyTooltip": "",
-					"propertyType": "select",
-					"defaultValue": "",
-					"options": [
-						"",
-						"PRIMARY",
-						"PRIMARY AMP",
-						"SECONDARY",
-						"HASH",
-						"JOIN"
-					]
-				},
-				{
-					"propertyName": "Unique",
-					"propertyKeyword": "unique",
-					"propertyTooltip": "Causes the system to check for duplicate values in the table when the index is created (if data already exist) and each time data is added. Attempts to insert or update data which would result in duplicate entries will generate an error.",
-					"defaultValue": false,
-					"propertyType": "checkbox",
-					"dependency": {
-						"type": "not",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "HASH"
-							},
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "All",
-					"propertyKeyword": "all",
-					"propertyTooltip": "If set TRUE, a NUSI should maintain row ID pointers for each logical row of a join index, not just the compressed physical rows.",
-					"defaultValue": false,
-					"propertyType": "checkbox",
-					"dependency": {
-						"type": "and",
-						"values": [
-							{
-								"type": "or",
-								"values": [
-									{
-										"key": "indexType",
-										"exist": false
-									},
-									{
-										"key": "indexType",
-										"value": ""
-									},
-									{
-										"key": "indexType",
-										"value": "SECONDARY"
-									}
-								]
-							},
-							{
-								"type": "or",
-								"values": [
-									{
-										"key": "unique",
-										"exist": false
-									},
-									{
-										"key": "unique",
-										"value": false
-									}
-								]
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "Map",
-					"propertyKeyword": "indexMap",
-					"propertyType": "text",
-					"propertyTooltip": "Existing contiguous or sparse map for the table",
-					"dependency": {
-						"type": "or",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "HASH"
-							},
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "Colocate using",
-					"propertyKeyword": "colocateUsing",
-					"propertyType": "text",
-					"dependency": {
-						"type": "or",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "HASH"
-							},
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "Fallback",
-					"propertyKeyword": "indexFallback",
-					"propertyType": "checkbox",
-					"defaultValue": "true",
-					"dependency": {
-						"type": "or",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "HASH"
-							},
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "Checksum",
-					"propertyKeyword": "checksum",
-					"propertyType": "select",
-					"propertyTooltip": "A table-specific disk I/O integrity checksum for detection of hardware read errors. The checksum level setting applies to primary data rows, fallback data rows, and all secondary index rows for the table.",
-					"options": [
-						"ON",
-						"OFF",
-						"DEFAULT"
-					],
-					"dependency": {
-						"type": "or",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "HASH"
-							},
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "Block compression",
-					"propertyType": "select",
-					"propertyKeyword": "blockCompression",
-					"propertyTooltip": "Table data is compressed at the block level.",
-					"options": [
-						"",
-						"DEFAULT",
-						"AUTOTEMP",
-						"MANUAL",
-						"NEVER"
-					],
-					"dependency": {
-						"type": "or",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "HASH"
-							},
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "AS SELECT",
-					"propertyKeyword": "asSelect",
-					"propertyType": "details",
-					"template": "textarea",
-					"markdown": false,
-					"dependency": {
-						"key": "indexType",
-						"value": "JOIN"
-					}
-				},
-				{
-					"propertyName": "Keys",
-					"propertyKeyword": "indxKey",
-					"propertyType": "fieldList",
-					"template": "orderedList",
-					"dependency": {
-						"type": "not",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "ORDER BY",
-					"propertyKeyword": "orderBy",
-					"propertyType": "select",
-					"propertyTooltip": "Row ordering on each AMP by a single NUSI column: either value-ordered or hash-ordered.",
-					"options": [
-						"",
-						"HASH",
-						"VALUES"
-					],
-					"dependency": {
-						"type": "not",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "Order keys",
-					"propertyKeyword": "orderKeys",
-					"propertyType": "fieldList",
-					"template": "orderedList",
-					"defaultValue": "",
-					"templateOptions": {
-						"maxFields": 1
+		"structure": [
+			{
+				"propertyName": "Index",
+				"propertyType": "group",
+				"propertyKeyword": "Indxs",
+				"propertyTooltip": "In general you should only add indexes to match the queries your application uses. Any extra will waste resources.",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "indxName",
+						"propertyTooltip": "Optional, if not specified an automatic name will be assigned. Index name are needed to drop indexes and appear in error messages when a constraint is violated.",
+						"propertyType": "text"
 					},
-					"dependency": {
-						"type": "or",
-						"values": [
-							{
-								"key": "orderBy",
-								"value": "VALUES"
-							},
-							{
-								"key": "orderBy",
-								"value": ""
-							},
-							{
-								"key": "orderBy",
-								"exist": false
-							}
-						]
+					{
+						"propertyName": "Activated",
+						"propertyKeyword": "isActivated",
+						"propertyTooltip": "Deactivated item will be not included in FE script",
+						"propertyType": "checkbox",
+						"defaultValue": true
+					},
+					{
+						"propertyName": "Type",
+						"propertyKeyword": "indexType",
+						"propertyTooltip": "",
+						"propertyType": "select",
+						"defaultValue": "",
+						"options": ["", "PRIMARY", "PRIMARY AMP", "SECONDARY", "HASH", "JOIN"]
+					},
+					{
+						"propertyName": "Unique",
+						"propertyKeyword": "unique",
+						"propertyTooltip": "Causes the system to check for duplicate values in the table when the index is created (if data already exist) and each time data is added. Attempts to insert or update data which would result in duplicate entries will generate an error.",
+						"defaultValue": false,
+						"propertyType": "checkbox",
+						"dependency": {
+							"type": "not",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "HASH"
+								},
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "All",
+						"propertyKeyword": "all",
+						"propertyTooltip": "If set TRUE, a NUSI should maintain row ID pointers for each logical row of a join index, not just the compressed physical rows.",
+						"defaultValue": false,
+						"propertyType": "checkbox",
+						"dependency": {
+							"type": "and",
+							"values": [
+								{
+									"type": "or",
+									"values": [
+										{
+											"key": "indexType",
+											"exist": false
+										},
+										{
+											"key": "indexType",
+											"value": ""
+										},
+										{
+											"key": "indexType",
+											"value": "SECONDARY"
+										}
+									]
+								},
+								{
+									"type": "or",
+									"values": [
+										{
+											"key": "unique",
+											"exist": false
+										},
+										{
+											"key": "unique",
+											"value": false
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Map",
+						"propertyKeyword": "indexMap",
+						"propertyType": "text",
+						"propertyTooltip": "Existing contiguous or sparse map for the table",
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "HASH"
+								},
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Colocate using",
+						"propertyKeyword": "colocateUsing",
+						"propertyType": "text",
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "HASH"
+								},
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Fallback",
+						"propertyKeyword": "indexFallback",
+						"propertyType": "checkbox",
+						"defaultValue": "true",
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "HASH"
+								},
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Checksum",
+						"propertyKeyword": "checksum",
+						"propertyType": "select",
+						"propertyTooltip": "A table-specific disk I/O integrity checksum for detection of hardware read errors. The checksum level setting applies to primary data rows, fallback data rows, and all secondary index rows for the table.",
+						"options": ["ON", "OFF", "DEFAULT"],
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "HASH"
+								},
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Block compression",
+						"propertyType": "select",
+						"propertyKeyword": "blockCompression",
+						"propertyTooltip": "Table data is compressed at the block level.",
+						"options": ["", "DEFAULT", "AUTOTEMP", "MANUAL", "NEVER"],
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "HASH"
+								},
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "AS SELECT",
+						"propertyKeyword": "asSelect",
+						"propertyType": "details",
+						"template": "textarea",
+						"markdown": false,
+						"dependency": {
+							"key": "indexType",
+							"value": "JOIN"
+						}
+					},
+					{
+						"propertyName": "Keys",
+						"propertyKeyword": "indxKey",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"dependency": {
+							"type": "not",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "ORDER BY",
+						"propertyKeyword": "orderBy",
+						"propertyType": "select",
+						"propertyTooltip": "Row ordering on each AMP by a single NUSI column: either value-ordered or hash-ordered.",
+						"options": ["", "HASH", "VALUES"],
+						"dependency": {
+							"type": "not",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Order keys",
+						"propertyKeyword": "orderKeys",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"defaultValue": "",
+						"templateOptions": {
+							"maxFields": 1
+						},
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "orderBy",
+									"value": "VALUES"
+								},
+								{
+									"key": "orderBy",
+									"value": ""
+								},
+								{
+									"key": "orderBy",
+									"exist": false
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Order keys",
+						"propertyKeyword": "orderKeys",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"defaultValue": "",
+						"dependency": {
+							"key": "orderBy",
+							"value": "HASH"
+						}
+					},
+					{
+						"propertyName": "Load identity",
+						"propertyKeyword": "loadIdentity",
+						"propertyType": "select",
+						"options": ["", "WITH LOAD IDENTITY", "WITH NO LOAD IDENTITY"],
+						"dependency": {
+							"type": "not",
+							"values": [
+								{
+									"key": "indexType",
+									"value": "HASH"
+								},
+								{
+									"key": "indexType",
+									"value": "JOIN"
+								}
+							]
+						}
+					},
+					{
+						"propertyName": "Comment",
+						"propertyKeyword": "indexComment",
+						"propertyTooltip": "comment",
+						"addTimestampButton": false,
+						"propertyType": "details",
+						"template": "textarea"
 					}
-				},
-				{
-					"propertyName": "Order keys",
-					"propertyKeyword": "orderKeys",
-					"propertyType": "fieldList",
-					"template": "orderedList",
-					"defaultValue": "",
-					"dependency": {
-						"key": "orderBy",
-						"value": "HASH"
-					}
-				},
-				{
-					"propertyName": "Load identity",
-					"propertyKeyword": "loadIdentity",
-					"propertyType": "select",
-					"options": [
-						"",
-						"WITH LOAD IDENTITY",
-						"WITH NO LOAD IDENTITY"
-					],
-					"dependency": {
-						"type": "not",
-						"values": [
-							{
-								"key": "indexType",
-								"value": "HASH"
-							},
-							{
-								"key": "indexType",
-								"value": "JOIN"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "Comment",
-					"propertyKeyword": "indexComment",
-					"propertyTooltip": "comment",
-					"addTimestampButton": false,
-					"propertyType": "details",
-					"template": "textarea"
-				}
-			]
-		}]
+				]
+			}
+		]
 	},
 	{
 		"lowerTab": "Check Constraints",
-		"structure": [{
-			"propertyName": "Check Constraint",
-			"propertyType": "group",
-			"propertyKeyword": "chkConstr",
-			"propertyTooltip": "",
-			"structure": [
-				{
-					"propertyName": "Name",
-					"propertyKeyword": "chkConstrName",
-					"propertyTooltip": "",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Description",
-					"propertyKeyword": "constrDescription",
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea"
-				},
-				{
-					"propertyName": "Expression",
-					"propertyKeyword": "constrExpression",
-					"propertyTooltip": "Expression",
-					"propertyType": "details",
-					"template": "textarea",
-					"markdown": false
-				},
-				{
-					"propertyName": "Comments",
-					"propertyKeyword": "constrComments",
-					"propertyTooltip": "comments",
-					"addTimestampButton": false,
-					"propertyType": "details",
-					"template": "textarea"
-				}
-			]
-		}]
+		"structure": [
+			{
+				"propertyName": "Check Constraint",
+				"propertyType": "group",
+				"propertyKeyword": "chkConstr",
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "chkConstrName",
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "constrDescription",
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea"
+					},
+					{
+						"propertyName": "Expression",
+						"propertyKeyword": "constrExpression",
+						"propertyTooltip": "Expression",
+						"propertyType": "details",
+						"template": "textarea",
+						"markdown": false
+					},
+					{
+						"propertyName": "Comments",
+						"propertyKeyword": "constrComments",
+						"propertyTooltip": "comments",
+						"addTimestampButton": false,
+						"propertyType": "details",
+						"template": "textarea"
+					}
+				]
+			}
+		]
 	}
 ]
