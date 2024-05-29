@@ -15,7 +15,7 @@ const copyTeradataClient = () => ({
 			try {
 				await fs.promises.cp(
 					path.resolve(__dirname, 'reverse_engineering', 'addons', 'TeradataClient.jar'),
-					path.join(RELEASE_FOLDER_PATH, 'reverse_engineering', 'addons', 'TeradataClient.jar'),
+					path.join(RELEASE_FOLDER_PATH, 'addons', 'TeradataClient.jar'),
 					{ force: true },
 				);
 			} catch (err) {
