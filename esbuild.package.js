@@ -19,7 +19,6 @@ const copyTeradataClient = () => ({
 					{ force: true },
 				);
 			} catch (err) {
-				// eslint-disable-next-line no-console
 				console.error('Copy TeradataClient.jar failed with:', err);
 			}
 		});
