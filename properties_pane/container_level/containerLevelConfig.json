@@ -157,11 +157,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "db_before_journaling_strategy",
 				"propertyType": "select",
 				"defaultValue": "NO",
-				"options": [
-					"NO",
-					"BEFORE",
-					"DUAL"
-				]
+				"options": ["NO", "BEFORE", "DUAL"]
 			},
 			{
 				"propertyName": "AFTER Journal",
@@ -169,13 +165,7 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "select",
 				"propertyTooltip": "Type of journal to be maintained by default for data tables created in the new database. The JOURNAL keyword without AFTER implies BEFORE and AFTER images.",
 				"defaultValue": "NO",
-				"options": [
-					"NO",
-					"AFTER",
-					"DUAL",
-					"LOCAL",
-					"NO LOCAL"
-				]
+				"options": ["NO", "AFTER", "DUAL", "LOCAL", "NO LOCAL"]
 			},
 			{
 				"propertyName": "Default Journal table",
@@ -209,4 +199,3 @@ making sure that you maintain a proper JSON format.
 		"containerLevelKeys": []
 	}
 ]
-
