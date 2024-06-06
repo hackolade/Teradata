@@ -59,5 +59,20 @@
 				}
 			}
 		]
+	},
+	"postConvert": {
+		"modify": {
+			"field": [
+				{
+					"from": {
+						"type": "jsonObject"
+					},
+					"to": {
+						"mode": "longtext",
+						"subtype": "object"
+					}
+				}
+			]	
+		}
 	}
 }
