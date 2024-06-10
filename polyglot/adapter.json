@@ -71,8 +71,17 @@
 						"mode": "longtext",
 						"subtype": "object"
 					}
+				},
+				{
+					"from": {
+						"type": "jsonArray"
+					},
+					"to": {
+						"mode": "longtext",
+						"subtype": "array"
+					}
 				}
-			]	
+			]
 		}
 	}
 }
