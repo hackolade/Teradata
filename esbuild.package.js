@@ -19,6 +19,7 @@ const copyTeradataClient = () => ({
 					{ force: true },
 				);
 			} catch (err) {
+				// eslint-disable-next-line no-console
 				console.error('Copy TeradataClient.jar failed with:', err);
 			}
 		});
@@ -35,7 +36,7 @@ esbuild
 		bundle: true,
 		keepNames: true,
 		platform: 'node',
-		target: 'node16',
+		target: 'node18',
 		outdir: RELEASE_FOLDER_PATH,
 		minify: true,
 		logLevel: 'info',
