@@ -45,17 +45,6 @@
 			{
 				"from": {
 					"type": "json",
-					"subtype": "object"
-
-				},
-				"to": {
-					"type": "blob",
-					"mode": "blob"
-				}
-			},
-			{
-				"from": {
-					"type": "json",
 					"subtype": "array"
 
 				},
