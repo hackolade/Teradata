@@ -24,5 +24,23 @@
 		"level": "parent",
 		"key": "type",
 		"value": "definitions"
+	},
+	"subtypes": {
+		"object": {
+			"childValueType": [
+				"char",
+				"numeric",
+				"byte",
+				"datetime",
+				"period",
+				"interval",
+				"geospatial",
+				"json",
+				"xml",
+				"dataset",
+				"object",
+				"array"
+			]
+		}
 	}
 }
