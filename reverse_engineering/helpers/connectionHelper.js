@@ -136,14 +136,14 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 
 	return {
 		execute: query => {
-			return new Promise(async (resolve, reject) => {
+			return new Promise((resolve, reject) => {
 				const queryArgument = createArgument('query', query);
 				const queryResult = spawn(`"${javaPath}"`, [...teradataClientCommandArguments, queryArgument], {
 					shell: true,
 				});
 
 				queryResult.on('error', error => {
-					reject(error);
+					reject(new Error(error));
 				});
 
 				const errorData = [];
@@ -172,7 +172,7 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 
 					const parsedResult = JSON.parse(rowJson);
 					if (parsedResult.error) {
-						reject(parsedResult.error);
+						reject(new Error(parsedResult.error));
 						return;
 					}
 
