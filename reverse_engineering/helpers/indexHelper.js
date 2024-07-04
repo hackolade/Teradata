@@ -1,7 +1,7 @@
 const regexConfig = require('./teradataRegexConfig');
 
 const cleanKeyName = (name = '') => {
-	return name.replace(/^("|,|\s+)+$/gim, '');
+	return name.replace(/^("|,|\s+)+|("|,|\s+)+$/gim, '');
 };
 const parseIndexKeys = statement => {
 	const mathResult = statement.match(regexConfig.indexKeyName);
