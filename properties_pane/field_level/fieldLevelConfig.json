@@ -137,6 +137,7 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": ["", "character"],
+				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
 					"value": "char"
@@ -148,6 +149,7 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": ["", "character varying", "char varying"],
+				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
 					"value": "varchar"
@@ -159,6 +161,7 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": ["", "character large object"],
+				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
 					"value": "clob"
@@ -523,6 +526,7 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": ["", "integer"],
+				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
 					"value": "int"
@@ -534,6 +538,7 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": ["", "dec", "numeric"],
+				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
 					"value": "decimal"
@@ -545,6 +550,7 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": ["", "real", "double precision"],
+				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
 					"value": "float"
@@ -2911,6 +2917,7 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "Select from list of options",
 				"propertyType": "select",
 				"options": ["", "varray"],
+				"defaultValue": "",
 				"dependency": {
 					"key": "mode",
 					"value": "decimal"
