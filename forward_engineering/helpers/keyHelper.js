@@ -98,9 +98,7 @@ module.exports = (_, clean) => {
 		}
 
 		const primaryKeyConstraints = mapProperties(jsonSchema, ([name, schema]) => {
-			if (!isPrimaryKey(schema)) {
-				return;
-			} else if (_.isEmpty(schema.primaryKeyConstraintName)) {
+			if (!isPrimaryKey(schema) || _.isEmpty(schema.primaryKeyConstraintName)) {
 				return;
 			}
 
@@ -109,25 +107,16 @@ module.exports = (_, clean) => {
 				'PRIMARY KEY',
 				name,
 				schema.isActivated,
-				jsonSchema,
 			);
 		}).filter(Boolean);
 
 		const uniqueKeyConstraints = _.flatten(
 			mapProperties(jsonSchema, ([name, schema]) => {
-				if (!isUniqueKey(schema)) {
-					return;
-				} else if (_.isEmpty(schema.uniqueKeyConstraintName)) {
+				if (!isUniqueKey(schema) || _.isEmpty(schema.uniqueKeyConstraintName)) {
 					return;
 				}
 
-				return hydrateKeyConstraintOptions(
-					schema.uniqueKeyConstraintName,
-					'UNIQUE',
-					name,
-					schema.isActivated,
-					jsonSchema,
-				);
+				return hydrateKeyConstraintOptions(schema.uniqueKeyConstraintName, 'UNIQUE', name, schema.isActivated);
 			}),
 		).filter(Boolean);
 

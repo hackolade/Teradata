@@ -5,7 +5,7 @@ const cleanKeyName = (name = '') => {
 };
 const parseIndexKeys = statement => {
 	const mathResult = statement.match(regexConfig.indexKeyName);
-	if (!mathResult || !mathResult.length) {
+	if (!mathResult?.length) {
 		return [];
 	}
 
@@ -14,7 +14,7 @@ const parseIndexKeys = statement => {
 
 const parseHashIndexStatement = statement => {
 	const matchResult = regexConfig.createHashIndex.exec(statement);
-	if (!matchResult || !matchResult.groups) {
+	if (!matchResult?.groups) {
 		return {};
 	}
 
@@ -32,7 +32,7 @@ const parseHashIndexStatement = statement => {
 
 const parseJoinIndexStatement = statement => {
 	const matchResult = regexConfig.createJoinIndex.exec(statement);
-	if (!matchResult || !matchResult.groups) {
+	if (!matchResult?.groups) {
 		return {};
 	}
 
