@@ -3,6 +3,7 @@ const defaultTypes = require('./configs/defaultTypes');
 const types = require('./configs/types');
 const getAdditionalOptions = require('./helpers/getAdditionalOptions');
 const dropStatementProxy = require('./helpers/dropStatementProxy');
+const { joinActivatedAndDeactivatedStatements } = require('./utils/joinActivatedAndDeactivatedStatements');
 
 /**
  * @param {BaseProvider} baseProvider
@@ -280,6 +281,7 @@ module.exports = (baseProvider, options, app) => {
 
 			const dividedForeignKeys = divideIntoActivatedAndDeactivated(foreignKeyConstraints, key => key.statement);
 			const foreignKeyConstraintsString = generateConstraintsString(dividedForeignKeys, isActivated);
+			const columnStatements = joinActivatedAndDeactivatedStatements({ statements: columns, indent: '\n\t\t' });
 
 			if (tableOptions.FOREIGN_TABLE && tableOptions.USING?.location) {
 				const usingOptions = getUsingOptions(tableOptions.USING);
@@ -290,7 +292,7 @@ module.exports = (baseProvider, options, app) => {
 						usingOptions,
 						tableIndexes,
 						tableOptions: preparedTableOptions,
-						column_definitions: columns.join(',\n\t\t'),
+						column_definitions: columnStatements,
 						keyConstraints: keyConstraintsString,
 						foreignKeyConstraints: foreignKeyConstraintsString,
 						checkConstraints: checkConstraintsStatement,
@@ -321,7 +323,7 @@ module.exports = (baseProvider, options, app) => {
 						temporary: tableOptions.TEMPORARY_VOLATILE ? ` ${tableOptions.TEMPORARY_VOLATILE}` : '',
 						name: tableName,
 						tableOptions: preparedTableOptions,
-						column_definitions: columns.join(',\n\t\t'),
+						column_definitions: columnStatements,
 						keyConstraints: keyConstraintsString,
 						foreignKeyConstraints: foreignKeyConstraintsString,
 						checkConstraints: checkConstraintsStatement,
@@ -343,7 +345,7 @@ module.exports = (baseProvider, options, app) => {
 					tableSet: tableOptions.SET_MULTISET ? ` ${tableOptions.SET_MULTISET}` : '',
 					temporary: tableOptions.TEMPORARY_VOLATILE ? ` ${tableOptions.TEMPORARY_VOLATILE}` : '',
 					traceTable: tableOptions.TRACE_TABLE ? ` TRACE` : '',
-					column_definitions: columns.join(',\n\t\t'),
+					column_definitions: columnStatements,
 					keyConstraints: keyConstraintsString,
 					foreignKeyConstraints: foreignKeyConstraintsString,
 					checkConstraints: checkConstraintsStatement,
