@@ -1009,6 +1009,10 @@ making sure that you maintain a proper JSON format.
 									"value": "JOIN"
 								}
 							]
+						},
+						"validation": {
+							"minLength": 1,
+							"required": true
 						}
 					},
 					{
