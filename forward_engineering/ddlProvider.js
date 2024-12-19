@@ -187,21 +187,19 @@ module.exports = (baseProvider, options, app) => {
 				db_default_journal_db,
 			});
 
-			const databaseStatement = commentIfDeactivated(
-				assignTemplates(templates.createDatabase, {
-					name: databaseName,
-					databaseOptions,
-				}),
-				{
-					isActivated,
-				},
-			);
+			const databaseStatement = assignTemplates(templates.createDatabase, {
+				name: databaseName,
+				databaseOptions,
+			});
 
 			const createSessionStatement = assignTemplates(templates.createSession, {
 				name: databaseName,
 			});
 
-			return [databaseStatement, createSessionStatement].join('\n');
+			return commentIfDeactivated(
+				[databaseStatement, createSessionStatement].join('\n'),
+				{ isActivated },
+			);
 		},
 
 		createUdt(udt, dbData) {
