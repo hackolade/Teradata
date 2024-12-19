@@ -164,7 +164,7 @@ module.exports = (baseProvider, options, app) => {
 
 		createDatabase({
 			databaseName,
-			isActivated,
+			isActivated = true,
 			db_account,
 			db_default_map,
 			db_permanent_storage_size,
