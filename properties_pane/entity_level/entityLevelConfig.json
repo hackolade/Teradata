@@ -828,6 +828,7 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "Name",
 						"propertyKeyword": "indxName",
+						"propertyTooltip": "",
 						"propertyType": "text",
 						"dependency": {
 							"type": "or",
