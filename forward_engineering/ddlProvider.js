@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const templates = require('./configs/templates');
 const defaultTypes = require('./configs/defaultTypes');
 const types = require('./configs/types');
@@ -12,7 +13,6 @@ const { joinActivatedAndDeactivatedStatements } = require('./utils/joinActivated
  * @return {Object}
  */
 module.exports = (baseProvider, options, app) => {
-	const _ = app.require('lodash');
 	const { assignTemplates } = app.require('@hackolade/ddl-fe-utils');
 	const {
 		tab,
@@ -32,7 +32,7 @@ module.exports = (baseProvider, options, app) => {
 			divideIntoActivatedAndDeactivated,
 			assignTemplates,
 		});
-	const keyHelper = require('./helpers/keyHelper')(_, clean);
+	const keyHelper = require('./helpers/keyHelper')(clean);
 	const {
 		getTableName,
 		getIndexName,
@@ -51,7 +51,7 @@ module.exports = (baseProvider, options, app) => {
 			checkAllKeysDeactivated,
 			divideIntoActivatedAndDeactivated,
 		});
-	const { decorateType } = require('./helpers/columnDefinitionHelper')(_);
+	const { decorateType } = require('./helpers/columnDefinitionHelper');
 
 	const additionalOptions = getAdditionalOptions(options.additionalOptions);
 
@@ -196,10 +196,7 @@ module.exports = (baseProvider, options, app) => {
 				name: databaseName,
 			});
 
-			return commentIfDeactivated(
-				[databaseStatement, createSessionStatement].join('\n'),
-				{ isActivated },
-			);
+			return commentIfDeactivated([databaseStatement, createSessionStatement].join('\n'), { isActivated });
 		},
 
 		createUdt(udt, dbData) {
