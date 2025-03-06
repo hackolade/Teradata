@@ -1,4 +1,12 @@
-module.exports = (_, clean) => {
+/**
+ * @typedef {import('forward_engineering/types').JsonSchema} JsonSchema
+ * @typedef {import('forward_engineering/types').ColumnDefinition} ColumnDefinition
+ * @typedef {import('forward_engineering/types').ConstraintDto} ConstraintDto
+ */
+
+const _ = require('lodash');
+
+module.exports = clean => {
 	const mapProperties = (jsonSchema, iteratee) => {
 		return Object.entries(jsonSchema.properties).map(iteratee);
 	};
@@ -128,9 +136,57 @@ module.exports = (_, clean) => {
 		];
 	};
 
+	/**
+	 * @param {{ columnDefinition: ColumnDefinition }}
+	 * @returns {ConstraintDto | undefined}
+	 */
+	const getPrimaryKeyConstraint = ({ columnDefinition, jsonSchema }) => {
+		if (!isPrimaryKey(columnDefinition)) {
+			return;
+		}
+
+		return hydrateKeyConstraintOptions(
+			columnDefinition.primaryKeyConstraintName,
+			'PRIMARY KEY',
+			columnDefinition.name,
+			columnDefinition.isActivated,
+		);
+	};
+
+	/**
+	 * @param {{ columnDefinition: ColumnDefinition }}
+	 * @returns {ConstraintDto | undefined}
+	 */
+	const getUniqueKeyConstraint = ({ columnDefinition, jsonSchema }) => {
+		if (!isUniqueKey(columnDefinition)) {
+			return;
+		}
+
+		return hydrateKeyConstraintOptions(
+			columnDefinition.uniqueKeyConstraintName,
+			'UNIQUE',
+			columnDefinition.name,
+			columnDefinition.isActivated,
+		);
+	};
+
+	/**
+	 * @param {{ columnDefinition: ColumnDefinition; jsonSchema: JsonSchema }}
+	 * @returns {ConstraintDto[]}
+	 */
+	const getColumnConstraints = ({ columnDefinition, jsonSchema }) => {
+		const primaryKeyConstraints = getPrimaryKeyConstraint({ columnDefinition, jsonSchema });
+		const uniqueKeyConstraints = getUniqueKeyConstraint({ columnDefinition, jsonSchema });
+
+		return [primaryKeyConstraints, uniqueKeyConstraints].filter(Boolean);
+	};
+
 	return {
 		getTableKeyConstraints,
 		isInlineUnique,
 		isInlinePrimaryKey,
+		getColumnConstraints,
+		getCompositeUniqueKeys,
+		getCompositePrimaryKeys,
 	};
 };
