@@ -38,7 +38,7 @@
 		"field": [
 			{
 				"from": {
-					"mode": "varchar",
+					"childType": "char",
 					"length": 64000
 				},
 				"to": {
