@@ -174,7 +174,7 @@ making sure that you maintain a proper JSON format.
 				"valueType": "number",
 				"allowNegative": false,
 				"typeDecorator": true,
-				"maxLength": 64000,
+				"maxValue": 64000,
 				"dependency": {
 					"type": "or",
 					"values": [
@@ -1007,7 +1007,7 @@ making sure that you maintain a proper JSON format.
 				"valueType": "number",
 				"allowNegative": false,
 				"typeDecorator": true,
-				"maxLength": 64000
+				"maxValue": 64000
 			},
 			{
 				"propertyName": "Format",
