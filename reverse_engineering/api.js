@@ -1,5 +1,3 @@
-'use strict';
-
 const connectionHelper = require('./helpers/connectionHelper');
 const indexHelper = require('./helpers/indexHelper');
 const udtHelper = require('./helpers/udtHelper');
@@ -26,9 +24,6 @@ const testConnection = async (connectionInfo, logger, callback, app) => {
 	});
 
 	try {
-		logger.clear();
-		logger.log('info', connectionInfo, 'connectionInfo', connectionInfo.hiddenKeys);
-
 		log.info('Start test connection');
 
 		const connection = await connect(connectionInfo, sshService, log);
@@ -54,9 +49,6 @@ const getDbCollectionsNames = async (connectionInfo, logger, callback, app) => {
 	});
 
 	try {
-		logger.clear();
-		logger.log('info', connectionInfo, 'connectionInfo', connectionInfo.hiddenKeys);
-
 		const connection = await connect(connectionInfo, sshService, log);
 		const instance = connectionHelper.createInstance(connection, _);
 
@@ -97,8 +89,6 @@ const getDbCollectionsData = async (data, logger, callback, app) => {
 	});
 
 	try {
-		logger.log('info', data, 'data', data.hiddenKeys);
-
 		const collections = data.collectionData.collections;
 		const dataBaseNames = data.collectionData.dataBaseNames;
 		const connection = await connect(data, sshService, log);
