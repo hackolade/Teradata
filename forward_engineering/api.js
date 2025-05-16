@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
 	generateScript(data, logger, callback, app) {
 		try {
