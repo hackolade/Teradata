@@ -116,8 +116,10 @@ const getDefaultJavaPath = () => {
 const checkJavaPath = async (javaPath, logger) => {
 	try {
 		const testCommand = `"${javaPath}" -version`;
-		await exec(testCommand);
-		logger.info(`Path to JAVA binary file successfully checked. JAVA path: ${javaPath}`);
+
+		// printing version to `stderr` is an intentional design decision by the maintainers of the JVM
+		const { stderr: version } = await exec(testCommand);
+		logger.info(`Path to Java binary file successfully checked.\n\nPath: ${javaPath}\n\nVersion: ${version}`);
 	} catch (error) {
 		logger.error(error);
 		throw new Error(MISSING_JAVA_PATH_MESSAGE);
