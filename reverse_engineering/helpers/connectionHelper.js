@@ -126,6 +126,32 @@ const checkJavaPath = async (javaPath, logger) => {
 	}
 };
 
+const formatError = errorLike => {
+	const unknownError = 'Unknown error';
+
+	const error = {
+		message: unknownError,
+		stack: null,
+	};
+
+	if (!errorLike) {
+		return error;
+	}
+
+	if (typeof errorLike === 'string') {
+		error.message = errorLike;
+	}
+
+	if (typeof errorLike === 'object') {
+		const { stack, message } = errorLike;
+
+		error.message = message;
+		error.stack = stack;
+	}
+
+	return error;
+};
+
 const createConnection = async (connectionInfo, sshService, logger) => {
 	const connectionSettings = await getConnectionSettings(connectionInfo, sshService);
 
@@ -177,13 +203,13 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 					const parsedResult = JSON.parse(rowJson);
 
 					if (parsedResult.error) {
-						const parsedError =
-							typeof parsedResult?.error === 'object'
-								? JSON.stringify(parsedResult.error)
-								: parsedResult.error;
+						const parsedError = formatError(parsedResult.error);
 
-						reject(new Error(parsedError));
-						return;
+						if (parsedError.stack) {
+							logger.error(parsedError);
+						}
+
+						return reject(new Error(parsedError.message));
 					}
 
 					resolve(parsedResult.data);
@@ -218,11 +244,11 @@ const createInstance = (connection, _) => {
 		});
 		const queryResult = await connection.execute(query);
 
-		return groupBy(
-			queryResult,
-			item => item.DataBaseName,
-			item => item.TableName,
-		);
+		return groupBy({
+			items: queryResult,
+			getGroupByValue: item => item.DataBaseName,
+			getValue: item => item.TableName,
+		});
 	};
 
 	const getCount = async (dbName, tableName) => {
@@ -365,7 +391,7 @@ const close = async sshService => {
 	}
 };
 
-const groupBy = (items = [], getGroupByValue, getValue) =>
+const groupBy = ({ items = [], getGroupByValue, getValue }) =>
 	items.reduce((result, item) => {
 		const comparisonValue = getGroupByValue(item);
 		return {
