@@ -129,21 +129,27 @@ const checkJavaPath = async (javaPath, logger) => {
 const formatError = errorLike => {
 	const unknownError = 'Unknown error';
 
+	const error = {
+		message: unknownError,
+		stack: null,
+	};
+
 	if (!errorLike) {
-		return unknownError;
+		return error;
 	}
 
 	if (typeof errorLike === 'string') {
-		return errorLike;
+		error.message = errorLike;
 	}
 
 	if (typeof errorLike === 'object') {
 		const { stack, message } = errorLike;
 
-		return message || `Unknown error:\n ${stack}`;
+		error.message = message;
+		error.stack = stack;
 	}
 
-	return errorLike.error;
+	return error;
 };
 
 const createConnection = async (connectionInfo, sshService, logger) => {
@@ -199,8 +205,11 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 					if (parsedResult.error) {
 						const parsedError = formatError(parsedResult.error);
 
-						reject(new Error(parsedError));
-						return;
+						if (parsedError.stack) {
+							logger.error(parsedError);
+						}
+
+						return reject(new Error(parsedError.message));
 					}
 
 					resolve(parsedResult.data);
