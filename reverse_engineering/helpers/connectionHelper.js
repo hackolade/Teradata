@@ -132,7 +132,9 @@ const formatError = errorLike => {
 
 	const error = {
 		message: unknownError,
+		type: null,
 		stack: null,
+		customMsgCode: null,
 	};
 
 	if (!errorLike) {
@@ -148,6 +150,8 @@ const formatError = errorLike => {
 
 		if (message.includes('[Error 8017] [SQLState 28000]')) {
 			message = localization.MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR;
+			error.type = 'error';
+			error.customMsgCode = 'MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR';
 		}
 
 		error.message = message;
@@ -214,7 +218,7 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 							logger.error(parsedError);
 						}
 
-						return reject(new Error(parsedError.message));
+						return reject(parsedError);
 					}
 
 					resolve(parsedResult.data);
