@@ -159,5 +159,5 @@
 	"FE_LEVEL_SELECTOR_TITLE": "Databases",
 	"FE_LEVEL_SELECTOR_CONTAINER": "Individual",
 	"FE_LEVEL_SELECTOR_MODEL": "Combined",
-	"MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR": "Unable to connect to Teradata instance due to one of the following reasons:\n<ul><li>The User ID, Password, or Account is incorrect.</li><li>The authentication method used is not supported (only basic authentication is allowed; LDAP and other methods are not supported).</li>\nPlease double-check your credentials and ensure you are using basic authentication. For more information, please refer to the <a href='https://hackolade.com/help/ConnecttoaTeradatainstance.html'>online documentation</a>."
+	"MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR": "Unable to connect due to one of the following reasons:\n<ul><li>The User ID, Password, or Account is incorrect.</li><li>The authentication method used is not supported (only basic authentication is allowed; LDAP and other methods are not supported).</li>\nPlease double-check your credentials and ensure you are using basic authentication. For more information, please refer to the <a href='https://hackolade.com/help/ConnecttoaTeradatainstance.html'>online documentation</a>."
 }
