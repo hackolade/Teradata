@@ -4,6 +4,7 @@ const path = require('path');
 const exec = util.promisify(require('child_process').exec);
 const { spawn } = require('child_process');
 const { buildQuery, queryType } = require('./queryHelper');
+const localization = require('../../localization/en.json');
 
 const SYSTEM_DATABASES = [
 	'val',
@@ -143,7 +144,11 @@ const formatError = errorLike => {
 	}
 
 	if (typeof errorLike === 'object') {
-		const { stack, message } = errorLike;
+		let { stack, message } = errorLike;
+
+		if (message.includes('[Error 8017] [SQLState 28000]')) {
+			message = localization.MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR;
+		}
 
 		error.message = message;
 		error.stack = stack;
