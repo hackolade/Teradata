@@ -3,6 +3,7 @@
 const connectionHelper = require('./helpers/connectionHelper');
 const indexHelper = require('./helpers/indexHelper');
 const udtHelper = require('./helpers/udtHelper');
+const { prepareError } = require('./helpers/prepareError');
 
 const connect = async (connectionInfo, sshService, logger) => {
 	return await connectionHelper.connect(connectionInfo, sshService, logger);
@@ -40,7 +41,7 @@ const testConnection = async (connectionInfo, logger, callback, app) => {
 		callback(null);
 	} catch (error) {
 		log.error(error);
-		callback({ message: error.message, stack: error.stack });
+		callback(prepareError(error));
 	}
 };
 
@@ -82,7 +83,7 @@ const getDbCollectionsNames = async (connectionInfo, logger, callback, app) => {
 		callback(null, collections);
 	} catch (error) {
 		log.error(error);
-		callback({ message: error.message, stack: error.stack });
+		callback(prepareError(error));
 	}
 };
 
@@ -216,7 +217,7 @@ const getDbCollectionsData = async (data, logger, callback, app) => {
 		callback(null, result.flat());
 	} catch (error) {
 		log.error(error);
-		callback({ message: error.message, stack: error.stack });
+		callback(prepareError(error));
 	}
 };
 

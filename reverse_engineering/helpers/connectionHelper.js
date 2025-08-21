@@ -4,6 +4,7 @@ const path = require('path');
 const exec = util.promisify(require('child_process').exec);
 const { spawn } = require('child_process');
 const { buildQuery, queryType } = require('./queryHelper');
+const localization = require('../../localization/en.json');
 
 const SYSTEM_DATABASES = [
 	'val',
@@ -116,12 +117,48 @@ const getDefaultJavaPath = () => {
 const checkJavaPath = async (javaPath, logger) => {
 	try {
 		const testCommand = `"${javaPath}" -version`;
-		await exec(testCommand);
-		logger.info(`Path to JAVA binary file successfully checked. JAVA path: ${javaPath}`);
+
+		// printing version to `stderr` is an intentional design decision by the maintainers of the JVM
+		const { stderr: version } = await exec(testCommand);
+		logger.info(`Path to Java binary file successfully checked.\n\nPath: ${javaPath}\n\nVersion: ${version}`);
 	} catch (error) {
 		logger.error(error);
 		throw new Error(MISSING_JAVA_PATH_MESSAGE);
 	}
+};
+
+const formatError = errorLike => {
+	const unknownError = 'Unknown error';
+
+	const error = {
+		message: unknownError,
+		type: null,
+		stack: null,
+		customMsgCode: null,
+	};
+
+	if (!errorLike) {
+		return error;
+	}
+
+	if (typeof errorLike === 'string') {
+		error.message = errorLike;
+	}
+
+	if (typeof errorLike === 'object') {
+		let { stack, message } = errorLike;
+
+		if (message.includes('[Error 8017] [SQLState 28000]')) {
+			message = localization.MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR;
+			error.type = 'error';
+			error.customMsgCode = 'MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR';
+		}
+
+		error.message = message;
+		error.stack = stack;
+	}
+
+	return error;
 };
 
 const createConnection = async (connectionInfo, sshService, logger) => {
@@ -138,7 +175,9 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 		execute: query => {
 			return new Promise((resolve, reject) => {
 				const queryArgument = createArgument('query', query);
-				const queryResult = spawn(`"${javaPath}"`, [...teradataClientCommandArguments, queryArgument], {
+				const javaArgs = [...teradataClientCommandArguments, queryArgument];
+
+				const queryResult = spawn(`"${javaPath}"`, javaArgs, {
 					shell: true,
 				});
 
@@ -171,9 +210,15 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 					}
 
 					const parsedResult = JSON.parse(rowJson);
+
 					if (parsedResult.error) {
-						reject(new Error(parsedResult.error));
-						return;
+						const parsedError = formatError(parsedResult.error);
+
+						if (parsedError.stack) {
+							logger.error(parsedError);
+						}
+
+						return reject(parsedError);
 					}
 
 					resolve(parsedResult.data);
@@ -208,11 +253,11 @@ const createInstance = (connection, _) => {
 		});
 		const queryResult = await connection.execute(query);
 
-		return groupBy(
-			queryResult,
-			item => item.DataBaseName,
-			item => item.TableName,
-		);
+		return groupBy({
+			items: queryResult,
+			getGroupByValue: item => item.DataBaseName,
+			getValue: item => item.TableName,
+		});
 	};
 
 	const getCount = async (dbName, tableName) => {
@@ -355,7 +400,7 @@ const close = async sshService => {
 	}
 };
 
-const groupBy = (items = [], getGroupByValue, getValue) =>
+const groupBy = ({ items = [], getGroupByValue, getValue }) =>
 	items.reduce((result, item) => {
 		const comparisonValue = getGroupByValue(item);
 		return {

@@ -792,6 +792,13 @@ making sure that you maintain a proper JSON format.
 						"addTimestampButton": false,
 						"propertyType": "details",
 						"template": "textarea"
+					},
+					{
+						"propertyName": "Alternate key",
+						"propertyKeyword": "alternateKey",
+						"propertyTooltip": "",
+						"propertyType": "checkbox",
+						"setFieldPropertyBy": "compositeUniqueKey"
 					}
 				]
 			}

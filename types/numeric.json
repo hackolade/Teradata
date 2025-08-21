@@ -83,7 +83,8 @@
 		},
 		{
 			"schema": {
-				"mode": "double precision"
+				"mode": "float",
+				"synonym": "double precision"
 			},
 			"capacity": 8,
 			"mode": "floating"
