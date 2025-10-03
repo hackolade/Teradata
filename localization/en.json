@@ -159,5 +159,20 @@
 	"FE_LEVEL_SELECTOR_TITLE": "Databases",
 	"FE_LEVEL_SELECTOR_CONTAINER": "Individual",
 	"FE_LEVEL_SELECTOR_MODEL": "Combined",
-	"MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR": "Unable to connect to Teradata instance due to one of the following reasons:\n<ul><li>The User ID, Password, or Account is incorrect.</li><li>The authentication method used is not supported (only basic authentication is allowed; LDAP and other methods are not supported).</li>\nPlease double-check your credentials and ensure you are using basic authentication. For more information, please refer to the <a href='https://hackolade.com/help/ConnecttoaTeradatainstance.html'>online documentation</a>."
+	"MODAL_WINDOW___CONNECT_INVALID_CREDENTIALS_ERROR": "Unable to connect to Teradata instance due to one of the following reasons:\n<ul><li>The User ID, Password, or Account is incorrect.</li><li>The authentication method used is not supported (only basic authentication is allowed; LDAP and other methods are not supported).</li>\nPlease double-check your credentials and ensure you are using basic authentication. For more information, please refer to the <a href='https://hackolade.com/help/ConnecttoaTeradatainstance.html'>online documentation</a>.",
+
+	"MAIN_MENU___ATTRIBUTES": "Column in Table Boxes",
+	"MAIN_MENU___DESCRIPTIONS": "Description in Table Boxes",
+	"MAIN_MENU___HIDE_ALL_ATTRIBUTES": "Empty Table Boxes",
+	"MAIN_MENU___REQUIRED_ATTRIBUTES": "Required Columns",
+	"MAIN_MENU___NULLABLE_ATTRIBUTES": "Nullable Columns",
+	"TOOLBAR___ATTRIBUTES": "Column in table boxes",
+	"TOOLBAR___DESCRIPTIONS": "Description in table boxes",
+	"TOOLBAR___HIDE_ALL_ATTRIBUTES": "Empty table boxes",
+	"TOOLBAR___REQUIRED_ATTRIBUTES": "Required columns",
+	"TOOLBAR___NULLABLE_ATTRIBUTES": "Nullable columns",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_ERD_V_ENTITY_BOX_CONTENT": "Display of table box content",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_ERD_V_FIELDS": "Columns",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_REQUIRED_ATTRIBUTES": "Required columns",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_NULLABLE_ATTRIBUTES": "Nullable columns"
 }
