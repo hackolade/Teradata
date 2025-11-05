@@ -113,7 +113,7 @@ const buildCommand = (teradataClientPath, connectionInfo) => {
 	return commandArgs;
 };
 
-const getDefaultJavaPath = async () => {
+const getDefaultJavaPath = () => {
 	const javaHome = isWindows() ? '%JAVA_HOME%' : '$JAVA_HOME';
 	return javaHome + '/bin/java';
 };
@@ -168,7 +168,7 @@ const formatError = errorLike => {
 const createConnection = async (connectionInfo, sshService, logger) => {
 	const connectionSettings = await getConnectionSettings(connectionInfo, sshService);
 
-	const javaPath = connectionSettings.javaHomePath ? connectionSettings.javaHomePath : await getDefaultJavaPath();
+	const javaPath = connectionSettings.javaHomePath ? connectionSettings.javaHomePath : getDefaultJavaPath();
 
 	await checkJavaPath(javaPath, logger);
 
@@ -192,7 +192,7 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 				activeQueries.add(queryResult);
 
 				const abortHandler = () => {
-					if (queryResult && !queryResult.killed) {
+					if (!queryResult?.killed) {
 						queryResult.kill('SIGTERM');
 						activeQueries.delete(queryResult);
 					}
