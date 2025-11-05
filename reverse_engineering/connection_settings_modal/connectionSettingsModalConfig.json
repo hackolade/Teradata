@@ -15,7 +15,9 @@
 				"inputType": "text",
 				"inputPlaceholder": "host",
 				"inputTooltip": "Specify host IP address or DNS name of Teradata server",
-				"regex": "([^\\s])"
+				"validation": {
+					"regex": "([^\\s])"
+				}
 			},
 			{
 				"inputLabel": "Port",
