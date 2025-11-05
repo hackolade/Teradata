@@ -114,35 +114,8 @@ const buildCommand = (teradataClientPath, connectionInfo) => {
 };
 
 const getDefaultJavaPath = async () => {
-	if (isWindows()) {
-		const winJavaHome = '%JAVA_HOME%';
-		const { stdout } = await exec(`echo ${winJavaHome}`, { shell: 'cmd.exe' });
-		const expandedPath = stdout.trim();
-
-		if (!expandedPath || expandedPath === winJavaHome) {
-			return winJavaHome;
-		}
-
-		if (expandedPath.endsWith('java.exe')) {
-			return expandedPath;
-		}
-
-		return expandedPath.replaceAll('/', '\\');
-	}
-
-	const unixJavaHome = '$JAVA_HOME';
-	const { stdout } = await exec(`echo ${unixJavaHome}`);
-	const expandedPath = stdout.trim();
-
-	if (!expandedPath) {
-		return unixJavaHome;
-	}
-
-	if (expandedPath.endsWith('java')) {
-		return expandedPath;
-	}
-
-	return expandedPath + '/bin/java';
+	const javaHome = isWindows() ? '%JAVA_HOME%' : '$JAVA_HOME';
+	return javaHome + '/bin/java';
 };
 
 const checkJavaPath = async (javaPath, logger) => {
