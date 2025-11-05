@@ -39,7 +39,8 @@ const SYSTEM_DATABASES = [
 	'TD_SYSXML',
 	'TDPUSER',
 ];
-const SYSTEM_UDT = [
+
+const SYSTEM_UDT = new Set([
 	'ArrayVec',
 	'InternalPeriodDateType',
 	'InternalPeriodTimeStampType',
@@ -57,7 +58,8 @@ const SYSTEM_UDT = [
 	'TD_JSON_BSON',
 	'TD_JSON_UBJSON',
 	'XML',
-];
+]);
+
 const MISSING_JAVA_PATH_MESSAGE =
 	'Path to JAVA binary file is incorrect. Please specify JAVA_HOME variable in your system or put specific path to JAVA binary file in connection settings.';
 
@@ -528,7 +530,7 @@ const getIndexType = index => {
 
 const filterUdt = object => object.Kind === 'U';
 
-const excludeSystemUdt = type => !SYSTEM_UDT.includes(type['Table/View/Macro Dictionary Name']);
+const excludeSystemUdt = type => !SYSTEM_UDT.has(type['Table/View/Macro Dictionary Name']);
 
 module.exports = {
 	connect,
