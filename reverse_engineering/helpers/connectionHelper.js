@@ -5,6 +5,7 @@ const exec = util.promisify(require('child_process').exec);
 const { spawn } = require('child_process');
 const { buildQuery, queryType } = require('./queryHelper');
 const localization = require('../../localization/en.json');
+const { ERROR_MESSAGE } = require('../../constants/constants');
 
 const SYSTEM_DATABASES = [
 	'val',
@@ -175,11 +176,13 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 	const teradataClientPath = path.resolve(__dirname, '..', 'addons', 'TeradataClient.jar');
 	const teradataClientCommandArguments = buildCommand(teradataClientPath, connectionSettings);
 
+	const getAbortedError = () => new Error(ERROR_MESSAGE.aborted);
+
 	return {
 		execute: (query, signal) => {
 			return new Promise((resolve, reject) => {
 				if (signal?.aborted) {
-					return reject(new Error('Query execution was aborted'));
+					return reject(getAbortedError());
 				}
 
 				const queryArgument = createArgument('query', query);
@@ -196,7 +199,7 @@ const createConnection = async (connectionInfo, sshService, logger) => {
 						queryResult.kill('SIGTERM');
 						activeQueries.delete(queryResult);
 					}
-					reject(new Error('Query execution was aborted'));
+					reject(getAbortedError());
 				};
 
 				if (signal) {
