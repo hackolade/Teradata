@@ -37,7 +37,7 @@
 			"enableJsonType": true,
 			"disableDenormalization": true,
 			"enableComplexTypesNormalization": true,
-			"enableManyToManyRelationshipsNormalization": true,
+			"generateAssociativeEntitiesForManyToManyRelationships": true,
 			"relationships": {
 				"compositeRelationships": {
 					"allowRelationshipsByProperties": [
