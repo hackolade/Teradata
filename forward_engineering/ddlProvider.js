@@ -1120,14 +1120,5 @@ module.exports = (baseProvider, options, app) => {
 				this.createView(alterData, dbData, true),
 			].join('\n\n');
 		},
-
-		hydrateJsonSchemaColumn(jsonSchema, definitionJsonSchema) {
-			if (!jsonSchema.$ref || _.isEmpty(definitionJsonSchema)) {
-				return jsonSchema;
-			}
-
-			jsonSchema = _.omit(jsonSchema, '$ref');
-			return { ...definitionJsonSchema, ...jsonSchema };
-		},
 	});
 };
