@@ -20,7 +20,6 @@ export type DdlProviderOptions = {
     additionalOptions: AdditionalDdlOptions,
     origin: string,
     fakerLocalization: string,
-    showIndexStatementsInEndDdl: boolean
 }
 
 export interface App {
