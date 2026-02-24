@@ -56,7 +56,7 @@ module.exports = (baseProvider, options, app) => {
 	const additionalOptions = getAdditionalOptions(options.additionalOptions);
 
 	return dropStatementProxy({ commentIfDeactivated })(additionalOptions.applyDropStatements, {
-		hydrateDatabase(containerData) {
+		hydrateSchema(containerData) {
 			return {
 				databaseName: containerData.name,
 				isActivated: containerData.isActivated,
@@ -162,7 +162,7 @@ module.exports = (baseProvider, options, app) => {
 			};
 		},
 
-		createDatabase({
+		createSchema({
 			databaseName,
 			isActivated = true,
 			db_account,
@@ -1119,6 +1119,14 @@ module.exports = (baseProvider, options, app) => {
 				this.dropView({ name: alterData.oldName || alterData.name, dbData }),
 				this.createView(alterData, dbData, true),
 			].join('\n\n');
+		},
+
+		commentStatement(statement) {
+			return commentIfDeactivated(statement, { isActivated: false });
+		},
+
+		prepareName(name) {
+			return getTableName(name);
 		},
 	});
 };
