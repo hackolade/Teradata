@@ -625,7 +625,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {Array<HydrateDropContainerData>} containerData
 		 * @return {DropContainerData}
 		 */
-		hydrateDropDatabase(containerData) {
+		hydrateDropSchema(containerData) {
 			return {
 				databaseName: containerData[0]?.name || '',
 			};
@@ -636,7 +636,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {ContainerCompModeData} compModeData
 		 * @return {ModifyContainerData}
 		 */
-		hydrateAlterDatabase({ containerData, compModeData }) {
+		hydrateAlterSchema({ containerData, compModeData }) {
 			const data = containerData[0] || {};
 
 			const isDbAccountModified = compModeData.new.db_account !== compModeData.old.db_account;
@@ -895,7 +895,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {DropContainerData} dropDbData
 		 * @return {string}
 		 */
-		dropDatabase(dropDbData) {
+		dropSchema(dropDbData) {
 			return assignTemplates(templates.dropDatabase, dropDbData);
 		},
 
@@ -903,7 +903,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {ModifyContainerData} alterDbData
 		 * @return {string}
 		 */
-		alterDatabase(alterDbData) {
+		alterSchema(alterDbData) {
 			const databaseOptions = getDatabaseOptions(alterDbData);
 
 			return assignTemplates(templates.modifyDatabase, {
