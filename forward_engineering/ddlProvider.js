@@ -1133,19 +1133,5 @@ module.exports = (baseProvider, options, app) => {
 		prepareName(name) {
 			return getTableName(name);
 		},
-
-		// Keep for backward compatibility
-		dropDatabase(data) {
-			return this.dropSchema(data);
-		},
-		alterDatabase(data) {
-			return this.alterSchema(data);
-		},
-		hydrateDropDatabase(data) {
-			return this.hydrateDropSchema(data);
-		},
-		hydrateAlterDatabase(data) {
-			return this.hydrateAlterSchema(data);
-		},
 	});
 };
