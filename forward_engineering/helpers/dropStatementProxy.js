@@ -5,7 +5,7 @@ const dropStatementProxy =
 
 		return {
 			...ddlProvider,
-			...['dropDatabase', 'dropTable', 'dropColumn', 'dropIndex', 'dropCheckConstraint', 'dropView'].reduce(
+			...['dropSchema', 'dropTable', 'dropColumn', 'dropIndex', 'dropCheckConstraint', 'dropView'].reduce(
 				(result, method) => {
 					return {
 						...result,

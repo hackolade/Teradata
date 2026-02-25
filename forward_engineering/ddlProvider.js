@@ -56,7 +56,7 @@ module.exports = (baseProvider, options, app) => {
 	const additionalOptions = getAdditionalOptions(options.additionalOptions);
 
 	return dropStatementProxy({ commentIfDeactivated })(additionalOptions.applyDropStatements, {
-		hydrateDatabase(containerData) {
+		hydrateSchema(containerData) {
 			return {
 				databaseName: containerData.name,
 				isActivated: containerData.isActivated,
@@ -70,6 +70,11 @@ module.exports = (baseProvider, options, app) => {
 				db_default_journal_table: containerData.db_default_journal_table,
 				db_default_journal_db: containerData.db_default_journal_db,
 			};
+		},
+
+		// Keep it because it was used to hydrate `dbData` for the API
+		hydrateDatabase(containerData) {
+			return this.hydrateSchema(containerData);
 		},
 
 		hydrateTable({ tableData, entityData, jsonSchema }) {
@@ -162,7 +167,7 @@ module.exports = (baseProvider, options, app) => {
 			};
 		},
 
-		createDatabase({
+		createSchema({
 			databaseName,
 			isActivated = true,
 			db_account,
@@ -620,7 +625,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {Array<HydrateDropContainerData>} containerData
 		 * @return {DropContainerData}
 		 */
-		hydrateDropDatabase(containerData) {
+		hydrateDropSchema(containerData) {
 			return {
 				databaseName: containerData[0]?.name || '',
 			};
@@ -631,7 +636,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {ContainerCompModeData} compModeData
 		 * @return {ModifyContainerData}
 		 */
-		hydrateAlterDatabase({ containerData, compModeData }) {
+		hydrateAlterSchema({ containerData, compModeData }) {
 			const data = containerData[0] || {};
 
 			const isDbAccountModified = compModeData.new.db_account !== compModeData.old.db_account;
@@ -890,7 +895,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {DropContainerData} dropDbData
 		 * @return {string}
 		 */
-		dropDatabase(dropDbData) {
+		dropSchema(dropDbData) {
 			return assignTemplates(templates.dropDatabase, dropDbData);
 		},
 
@@ -898,7 +903,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {ModifyContainerData} alterDbData
 		 * @return {string}
 		 */
-		alterDatabase(alterDbData) {
+		alterSchema(alterDbData) {
 			const databaseOptions = getDatabaseOptions(alterDbData);
 
 			return assignTemplates(templates.modifyDatabase, {
@@ -1119,6 +1124,14 @@ module.exports = (baseProvider, options, app) => {
 				this.dropView({ name: alterData.oldName || alterData.name, dbData }),
 				this.createView(alterData, dbData, true),
 			].join('\n\n');
+		},
+
+		commentStatement(statement) {
+			return commentIfDeactivated(statement, { isActivated: false });
+		},
+
+		prepareName(name) {
+			return getTableName(name);
 		},
 	});
 };
