@@ -4,6 +4,7 @@ const connectionHelper = require('./helpers/connectionHelper');
 const indexHelper = require('./helpers/indexHelper');
 const udtHelper = require('./helpers/udtHelper');
 const { prepareError } = require('./helpers/prepareError');
+const { TABLE_KIND } = require('../constants/constants');
 
 const connect = async (connectionInfo, sshService, logger) => {
 	return await connectionHelper.connect(connectionInfo, sshService, logger);
@@ -62,10 +63,10 @@ const getDbCollectionsNames = async (connectionInfo, logger, callback, app) => {
 		const instance = connectionHelper.createInstance(connection, _);
 
 		log.info('Get table and database names');
-		const tableNames = await instance.getDatabasesWithTableNames('T');
+		const tableNames = await instance.getDatabasesWithTableNames([TABLE_KIND.regularTable, TABLE_KIND.noPiTable]);
 
 		log.info('Get views and database names');
-		const viewNames = getViewNames(await instance.getDatabasesWithTableNames('V'));
+		const viewNames = getViewNames(await instance.getDatabasesWithTableNames(TABLE_KIND.view));
 
 		const allDatabaseNames = [...Object.keys(tableNames), ...Object.keys(viewNames)];
 
