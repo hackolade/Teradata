@@ -1,9 +1,18 @@
 const cleanUpCommand = (command = '') => command.replaceAll(/\s+/g, ' ');
 
+const getTableKindClause = ({ tableType }) => {
+	if (Array.isArray(tableType)) {
+		const types = tableType.map(type => `'${type}'`).join(',');
+		return `IN (${types})`;
+	}
+
+	return `= '${tableType}'`;
+};
+
 const getDatabaseAndTableNames = ({ tableType, systemDatabases }) => {
 	const command = `SELECT DatabaseName, TableName
                 FROM DBC.TablesV
-            WHERE TableKind = '${tableType}'
+            WHERE TableKind ${getTableKindClause({ tableType })}
               AND DatabaseName NOT IN (${systemDatabases.map(name => `'${name}'`).join(', ')})
             ORDER BY DatabaseName, TableName;`;
 
