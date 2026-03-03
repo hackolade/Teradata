@@ -1,6 +1,6 @@
 {
     "name": "Teradata",
-    "version": "0.2.23",
+    "version": "0.2.25",
     "author": "hackolade",
     "engines": {
         "hackolade": "7.7.10",
@@ -83,6 +83,6 @@
         "lodash": "^4.17.23"
     },
     "overrides": {
-        "minimatch": "10.2.1"
+        "minimatch": "10.2.4"
     }
 }
