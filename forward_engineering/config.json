@@ -13,7 +13,10 @@
 	},
 	"feLevelSelector": {
 		"container": true,
-		"model": true
+		"model": true,
+		"entity": {
+			"separateBucket": true
+		}
 	},
 	"compMode": {
 		"entity": true,

@@ -506,7 +506,10 @@ const getIndexType = index => {
 
 const filterUdt = object => object.Kind === 'U';
 
-const excludeSystemUdt = type => !SYSTEM_UDT.has(type['Table/View/Macro Dictionary Name']);
+const excludeSystemUdt = type => {
+	const creator = type['Creator SQL Name'].trim();
+	return !SYSTEM_UDT.has(type['Table/View/Macro Dictionary Name']) && creator !== 'DBC' && creator !== 'SYSUDTLIB';
+};
 
 module.exports = {
 	connect,
