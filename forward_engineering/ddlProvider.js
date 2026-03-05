@@ -34,13 +34,14 @@ module.exports = (baseProvider, options, app) => {
 		});
 	const keyHelper = require('./helpers/keyHelper')(clean);
 	const {
-		getTableName,
-		getIndexName,
+		prepareName,
 		getDatabaseOptions,
 		getViewData,
 		getJournalingStrategy,
 		viewColumnsToString,
 		shouldDropDefaultJournalTable,
+		prepareComment,
+		getOldName,
 	} = require('./helpers/general')(_, tab, commentIfDeactivated);
 	const { getTableOptions, getUsingOptions, getInlineTableIndexes, getIndexOptions, getIndexKeys } =
 		require('./helpers/tableHelper')({
@@ -64,6 +65,7 @@ module.exports = (baseProvider, options, app) => {
 				db_default_map: containerData.db_default_map,
 				db_permanent_storage_size: containerData.db_permanent_storage_size,
 				spool_files_size: containerData.spool_files_size,
+				temporary_tables_size: containerData.temporary_tables_size,
 				has_fallback: containerData.has_fallback,
 				db_before_journaling_strategy: containerData.db_before_journaling_strategy,
 				db_after_journaling_strategy: containerData.db_after_journaling_strategy,
@@ -164,6 +166,7 @@ module.exports = (baseProvider, options, app) => {
 				compressUsing: jsonSchema.compressUsing,
 				decompressUsing: jsonSchema.decompressUsing,
 				methodSpecification: jsonSchema.methodSpecification,
+				description: jsonSchema.description,
 			};
 		},
 
@@ -174,6 +177,7 @@ module.exports = (baseProvider, options, app) => {
 			db_default_map,
 			db_permanent_storage_size,
 			spool_files_size,
+			temporary_tables_size,
 			has_fallback,
 			db_before_journaling_strategy,
 			db_after_journaling_strategy,
@@ -185,6 +189,7 @@ module.exports = (baseProvider, options, app) => {
 				db_default_map,
 				db_permanent_storage_size,
 				spool_files_size,
+				temporary_tables_size,
 				has_fallback,
 				db_before_journaling_strategy,
 				db_after_journaling_strategy,
@@ -264,7 +269,7 @@ module.exports = (baseProvider, options, app) => {
 			const { name, dbData, columns, checkConstraints, foreignKeyConstraints, selectStatement, tableOptions } =
 				tableData;
 			const preparedTableOptions = getTableOptions(tableOptions);
-			const tableName = getTableName(name, dbData.databaseName);
+			const tableName = prepareName(name, dbData.databaseName);
 			const tableIndexes = getInlineTableIndexes(tableData);
 			const tablePreservationStatement = tableOptions.TABLE_PRESERVATION
 				? `\n\tON COMMIT ${tableOptions.TABLE_PRESERVATION}`
@@ -362,7 +367,7 @@ module.exports = (baseProvider, options, app) => {
 
 			return commentIfDeactivated(
 				assignTemplates(templates.createView, {
-					name: getTableName(viewData.name, dbData.databaseName),
+					name: prepareName(viewData.name, dbData.databaseName),
 					recursive: viewData.recursive ? ' RECURSIVE' : '',
 					selectStatement,
 					columnList: viewColumnsToString(viewData.keys, isActivated),
@@ -422,8 +427,8 @@ module.exports = (baseProvider, options, app) => {
 
 				return commentIfDeactivated(
 					assignTemplates(templates.createHashIndex, {
-						indexName: getIndexName(index.indxName, dbData.databaseName),
-						tableName: getTableName(tableName, dbData.databaseName),
+						indexName: prepareName(index.indxName, dbData.databaseName),
+						tableName: prepareName(tableName, dbData.databaseName),
 						indexKeys: getIndexKeys(index.indxKey),
 						orderBy,
 						indexOptions,
@@ -439,7 +444,7 @@ module.exports = (baseProvider, options, app) => {
 
 				return commentIfDeactivated(
 					assignTemplates(templates.createJoinIndex, {
-						indexName: getIndexName(index.indxName, dbData.databaseName),
+						indexName: prepareName(index.indxName, dbData.databaseName),
 						selectStatement: index.asSelect,
 						indexOptions,
 					}),
@@ -466,13 +471,13 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		createCheckConstraintStatement(tableName, checkConstraint, dbData) {
-			const table = getTableName(tableName, dbData.databaseName);
+			const table = prepareName(tableName, dbData.databaseName);
 
 			return assignTemplates(templates.alterTable, {
 				tableName: table,
 				tableOptions: '',
 				alterStatement: assignTemplates(templates.addCheckConstraint, {
-					name: wrap(checkConstraint.name, '"', '"'),
+					constraintName: checkConstraint.name ? `CONSTRAINT ${prepareName(checkConstraint.name)} ` : '',
 					expression: checkConstraint.expression,
 				}),
 			});
@@ -485,7 +490,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		dropCheckConstraint(tableName, checkConstraint, dbData) {
-			const table = getTableName(tableName, dbData.databaseName);
+			const table = prepareName(tableName, dbData.databaseName);
 
 			return assignTemplates(templates.alterTable, {
 				tableName: table,
@@ -504,46 +509,28 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		alterCheckConstraint(tableName, { new: newCheck, old: oldCheck }, dbData) {
-			const table = getTableName(tableName, dbData.databaseName);
-
-			const alterStatements = [];
-			if (newCheck.chkConstrName !== oldCheck.chkConstrName) {
-				const renameConstraint = assignTemplates(templates.rename, {
-					oldName: wrap(oldCheck.chkConstrName, '"', '"'),
-					newName: wrap(newCheck.chkConstrName, '"', '"'),
-				});
-
-				alterStatements.push(renameConstraint);
+			if (newCheck.name !== oldCheck.name || newCheck.expression !== oldCheck.expression) {
+				return [
+					this.dropCheckConstraint(tableName, oldCheck, dbData),
+					this.createCheckConstraintStatement(tableName, oldCheck, dbData),
+				].join('\n\n');
 			}
 
-			if (newCheck.constrExpression !== oldCheck.constrExpression) {
-				const modifyConstraint = assignTemplates(templates.modifyCheckConstraint, {
-					name: wrap(oldCheck.chkConstrName, '"', '"'),
-					expression: newCheck.chkConstrName,
-				});
-
-				alterStatements.push(modifyConstraint);
-			}
-
-			return assignTemplates(templates.alterTable, {
-				tableName: table,
-				tableOptions: '',
-				alterStatement: '\n' + tab(alterStatements.join(',\n')),
-			});
+			return '';
 		},
 
-		createForeignKeyConstraint(
-			{
+		createForeignKeyConstraint(relationship) {
+			const {
 				foreignKey,
 				primaryTable,
+				primarySchemaName,
 				primaryKey,
 				primaryTableActivated,
 				foreignTableActivated,
 				customProperties,
 				isActivated,
-			},
-			dbData,
-		) {
+				name,
+			} = relationship;
 			const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated(primaryKey);
 			const isAllForeignKeysDeactivated = checkAllKeysDeactivated(foreignKey);
 			const isRelationshipActivated =
@@ -555,8 +542,9 @@ module.exports = (baseProvider, options, app) => {
 
 			return {
 				statement: assignTemplates(templates.createForeignKeyConstraint, {
+					constraintName: name ? `CONSTRAINT ${prepareName(name)} ` : '',
 					checkOption: customProperties.checkOption,
-					primaryTable: getTableName(primaryTable, dbData.databaseName),
+					primaryTable: prepareName(primaryTable, primarySchemaName),
 					foreignKey: isRelationshipActivated
 						? foreignKeysToString(foreignKey)
 						: foreignActiveKeysToString(foreignKey),
@@ -568,10 +556,65 @@ module.exports = (baseProvider, options, app) => {
 			};
 		},
 
+		createForeignKey(relationship) {
+			const { foreignTable, foreignSchemaName } = relationship;
+			const tableName = prepareName(foreignTable, foreignSchemaName);
+
+			const { statement: foreignKeyStatement } = this.createForeignKeyConstraint(relationship);
+
+			return assignTemplates(templates.alterTable, {
+				tableName,
+				alterStatement: ' ADD ' + foreignKeyStatement,
+			});
+		},
+
+		dropForeignKey(relationship) {
+			const {
+				foreignKey,
+				primaryTable,
+				primarySchemaName,
+				primaryKey,
+				primaryTableActivated,
+				foreignTableActivated,
+				isActivated,
+				name,
+				foreignTable,
+				foreignSchemaName,
+			} = relationship;
+			const tableName = prepareName(foreignTable, foreignSchemaName);
+			const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated(primaryKey);
+			const isAllForeignKeysDeactivated = checkAllKeysDeactivated(foreignKey);
+			const isRelationshipActivated =
+				!isAllPrimaryKeysDeactivated &&
+				!isAllForeignKeysDeactivated &&
+				primaryTableActivated &&
+				foreignTableActivated &&
+				isActivated !== false;
+
+			return name
+				? assignTemplates(templates.dropConstraint, {
+						tableName,
+						constraintName: prepareName(name),
+					})
+				: assignTemplates(templates.dropForeignKeyUnnamed, {
+						tableName,
+						primaryTable: prepareName(primaryTable, primarySchemaName),
+						foreignKey: isRelationshipActivated
+							? foreignKeysToString(foreignKey)
+							: foreignActiveKeysToString(foreignKey),
+						primaryKey: isRelationshipActivated
+							? foreignKeysToString(primaryKey)
+							: foreignActiveKeysToString(primaryKey),
+					});
+		},
+
 		convertColumnDefinition(columnDefinition) {
-			const type = this.hasType(columnDefinition.type)
-				? decorateType(columnDefinition.type, columnDefinition)
-				: `"${columnDefinition.type}"`;
+			let type = '';
+			if (columnDefinition.type) {
+				type = this.hasType(columnDefinition.type)
+					? ` ${decorateType(columnDefinition.type, columnDefinition)}`
+					: ` "${columnDefinition.type}"`;
+			}
 			const inlineLength = columnDefinition.inlineLength ? ` INLINE LENGTH ${columnDefinition.inlineLength}` : '';
 			const notNull = columnDefinition.required ? ' NOT NULL' : '';
 			const inlineUniqueConstraint = columnDefinition.unique && !columnDefinition.nullable ? ' UNIQUE' : '';
@@ -596,7 +639,7 @@ module.exports = (baseProvider, options, app) => {
 
 			return commentIfDeactivated(
 				assignTemplates(templates.columnDefinition, {
-					name: columnDefinition.name,
+					name: prepareName(columnDefinition.name),
 					not_null: notNull,
 					default: defaultValue,
 					type,
@@ -658,6 +701,8 @@ module.exports = (baseProvider, options, app) => {
 
 			return {
 				name: data.name || '',
+				oldDescription: compModeData.old.description?.trim() || null,
+				newDescription: compModeData.new.description?.trim() || null,
 				...(isDbAccountModified && { db_account: data.db_account }),
 				...(isDefaultMapModified && { db_default_map: data.db_default_map }),
 				...(isPermanentStorageSizeModified && { db_permanent_storage_size: data.db_permanent_storage_size }),
@@ -703,7 +748,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {EntityData} oldEntityData
 		 * @return {ModifyEntityData}
 		 */
-		hydrateAlterTable({ name, newEntityData, oldEntityData }) {
+		hydrateAlterTable({ name, newEntityData, oldEntityData, jsonSchema }) {
 			const newTableOptions = newEntityData[0]?.tableOptions || {};
 			const oldTableOptions = oldEntityData[0]?.tableOptions || {};
 
@@ -764,6 +809,7 @@ module.exports = (baseProvider, options, app) => {
 
 			return {
 				name,
+				compMod: jsonSchema?.role?.compMod,
 				tableOptions: {
 					...(isErrorTableModified && { ERROR_TABLE: newTableOptions.ERROR_TABLE }),
 					...(isForTableModified && { FOR_TABLE: newTableOptions.FOR_TABLE }),
@@ -813,21 +859,17 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {ModifyColumnData}
 		 */
 		hydrateAlterColumn({ newColumn, oldColumn, oldCompData, newCompData }) {
-			const diff = getDifferentProperties(newColumn, oldColumn, ['name', 'type']);
-
-			const result = { ...newColumn };
-
-			if (oldCompData.name !== newCompData.name) {
-				result.oldName = oldCompData.name;
-			}
-
-			if (oldCompData.type !== newCompData.type) {
-				result.oldType = oldCompData.type;
-			}
-
-			if (!_.isEmpty(diff)) {
-				result.newOptions = diff;
-			}
+			const result = {
+				...newColumn,
+				newProperties: {
+					...newCompData,
+					...newColumn,
+				},
+				oldProperties: {
+					...oldCompData,
+					...oldColumn,
+				},
+			};
 
 			return result;
 		},
@@ -861,10 +903,16 @@ module.exports = (baseProvider, options, app) => {
 				entityData: oldEntityData,
 			});
 
-			const oldDViewData = {};
+			const oldViewData = {};
+			const newViewData = {};
 
 			if (oldEntityData[0]?.name !== newEntityData[0]?.name) {
-				oldDViewData.oldName = oldEntityData[0]?.name;
+				oldViewData.oldName = oldEntityData[0]?.name;
+			}
+
+			if (oldEntityData[0]?.description !== newEntityData[0]?.description) {
+				oldViewData.oldDescription = oldEntityData[0]?.description;
+				newViewData.newDescription = newEntityData[0]?.description;
 			}
 
 			const options = getDifferentProperties(newData, oldData);
@@ -875,7 +923,8 @@ module.exports = (baseProvider, options, app) => {
 				selectStatement: options.selectStatement || newEntityData[0]?.selectStatement,
 				recursive: options.recursive || newEntityData[0]?.recursive,
 				options,
-				...oldDViewData,
+				...oldViewData,
+				...newViewData,
 			};
 		},
 
@@ -906,10 +955,22 @@ module.exports = (baseProvider, options, app) => {
 		alterSchema(alterDbData) {
 			const databaseOptions = getDatabaseOptions(alterDbData);
 
-			return assignTemplates(templates.modifyDatabase, {
-				databaseName: alterDbData.name,
-				databaseOptions,
-			});
+			const databaseOptionScript =
+				databaseOptions &&
+				assignTemplates(templates.modifyDatabase, {
+					databaseName: alterDbData.name,
+					databaseOptions,
+				});
+
+			const commentScript =
+				alterDbData.newDescription === alterDbData.oldDescription
+					? ''
+					: assignTemplates(templates.commentDatabase, {
+							databaseName: prepareName(alterDbData.name),
+							comment: alterDbData.newDescription ? prepareComment(alterDbData.newDescription) : 'NULL',
+						});
+
+			return [databaseOptionScript, commentScript].filter(Boolean).join('\n\n');
 		},
 
 		/**
@@ -918,7 +979,7 @@ module.exports = (baseProvider, options, app) => {
 		 */
 		dropTable(dropEntityData) {
 			return assignTemplates(templates.dropTable, {
-				name: getTableName(dropEntityData.name, dropEntityData.dbName),
+				name: prepareName(dropEntityData.name, dropEntityData.dbName),
 				temporary: dropEntityData.temporary ? 'TEMPORARY ' : '',
 			});
 		},
@@ -930,17 +991,38 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		alterTable(alterTableData, dbData) {
-			const tableName = getTableName(alterTableData.name, dbData.databaseName);
+			const tableName = prepareName(alterTableData.name, dbData.databaseName);
 			const tableOptions = getTableOptions(alterTableData.tableOptions, true);
+			const { compMod } = alterTableData;
 
-			if (!_.trim(tableOptions)) {
-				return '';
-			}
+			const oldName = prepareName(getOldName(alterTableData), dbData.databaseName);
+			const isNameChanged = oldName !== tableName;
 
-			return assignTemplates(templates.alterTable, {
-				tableName,
-				tableOptions,
-			});
+			const renameStatement = isNameChanged
+				? assignTemplates(templates.renameTable, {
+						newName: tableName,
+						oldName,
+					})
+				: '';
+
+			const optionsStatement = _.trim(tableOptions)
+				? assignTemplates(templates.alterTable, {
+						tableName,
+						tableOptions,
+					})
+				: '';
+
+			const newComment = compMod?.description?.new;
+			const isCommentChanged = newComment !== compMod?.description?.old;
+
+			const commentScript = isCommentChanged
+				? assignTemplates(templates.commentTable, {
+						tableName,
+						comment: newComment ? prepareComment(newComment) : 'NULL',
+					})
+				: '';
+
+			return [renameStatement, optionsStatement, commentScript].filter(Boolean).join('\n\n');
 		},
 
 		/**
@@ -950,7 +1032,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		dropColumn(tableName, columnData, dbData) {
-			const fullTableName = getTableName(tableName, dbData.databaseName);
+			const fullTableName = prepareName(tableName, dbData.databaseName);
 
 			return assignTemplates(templates.alterTable, {
 				tableName: fullTableName,
@@ -968,7 +1050,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		addColumn(tableName, columnDefinition, dbData) {
-			const table = getTableName(tableName, dbData.databaseName);
+			const table = prepareName(tableName, dbData.databaseName);
 
 			return assignTemplates(templates.alterTable, {
 				tableName: table,
@@ -986,13 +1068,13 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		renameColumn(tableName, columnData, dbData) {
-			const table = getTableName(tableName, dbData.databaseName);
+			const table = prepareName(tableName, dbData.databaseName);
 
 			return assignTemplates(templates.alterTable, {
 				tableName: table,
 				tableOptions: '',
 				alterStatement: assignTemplates(templates.rename, {
-					oldName: wrap(columnData.oldName, '"', '"'),
+					oldName: wrap(columnData.oldProperties.name, '"', '"'),
 					newName: wrap(columnData.name, '"', '"'),
 				}),
 			});
@@ -1005,35 +1087,59 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		alterColumn(tableName, columnData, dbData) {
-			const table = getTableName(tableName, dbData.databaseName);
-			let alterStatement = [];
+			const fullTableName = prepareName(tableName, dbData.databaseName);
+			const isNameChanged = columnData.newProperties.name !== columnData.oldProperties.name;
+			const isRequiredChanged = columnData.newProperties.required !== columnData.oldProperties.required;
+			const isDefaultChanged = columnData.newProperties.default !== columnData.oldProperties.default;
+			const newComment = columnData.newProperties.description;
+			const isCommentChanged = newComment !== columnData.oldProperties.description;
 
-			if ((columnData.oldName && columnData.oldType) || columnData.oldType) {
-				const dropOldColumnStatement = this.dropColumn(tableName, { name: columnData.name }, dbData);
+			const renameColumnStatement = isNameChanged ? this.renameColumn(tableName, columnData, dbData) : '';
 
-				const createNewColumnStatement = this.addColumn(
-					tableName,
-					{ ...columnData, isActivated: true },
-					dbData,
-				);
+			const commentScript = isCommentChanged
+				? assignTemplates(templates.commentColumn, {
+						columnName: `${fullTableName}.${prepareName(columnData.name)}`,
+						comment: newComment ? prepareComment(newComment) : 'NULL',
+					})
+				: '';
 
-				alterStatement.push(dropOldColumnStatement, createNewColumnStatement);
-			} else if (columnData.oldName && !columnData.newOptions) {
-				const renameColumnStatement = this.renameColumn(tableName, columnData, dbData);
-				alterStatement.push(renameColumnStatement);
-			} else if (columnData.oldName && columnData.newOptions) {
-				const renameColumnStatement = this.renameColumn(tableName, columnData, dbData);
+			let newColumnDefinition = [];
 
-				// ADD "column_name"... statement in Teradata also used for modification column properties
-				const modifyColumnStatement = this.addColumn(tableName, { ...columnData, isActivated: true }, dbData);
-				alterStatement.push(renameColumnStatement, modifyColumnStatement);
-			} else {
-				// ADD "column_name"... statement in Teradata also used for modification column properties
-				const modifyColumnStatement = this.addColumn(tableName, { ...columnData, isActivated: true }, dbData);
-				alterStatement.push(modifyColumnStatement);
+			const newType = this.hasType(columnData.newProperties.type)
+				? decorateType(columnData.newProperties.type, columnData.newProperties)
+				: columnData.newProperties.type;
+
+			const oldType = this.hasType(columnData.oldProperties.type)
+				? decorateType(columnData.oldProperties.type, columnData.oldProperties)
+				: columnData.oldProperties.type;
+
+			if (newType !== oldType) {
+				newColumnDefinition.push(newType);
 			}
 
-			return commentIfDeactivated(alterStatement.join('\n\n'), { isActivated: columnData.isActivated });
+			if (isRequiredChanged) {
+				const nullScript = columnData.newProperties.required ? 'NOT NULL' : 'NULL';
+				newColumnDefinition.push(nullScript);
+			}
+
+			if (isDefaultChanged) {
+				const nullScript = `DEFAULT ${columnData.newProperties.default ?? 'NULL'}`;
+				newColumnDefinition.push(nullScript);
+			}
+
+			// "ADD column_name" can be used to modify column properties
+			const updateColumnScript = newColumnDefinition.length
+				? assignTemplates(templates.alterColumn, {
+						tableName: fullTableName,
+						columnName: prepareName(columnData.newProperties.name),
+						columnDefinition: newColumnDefinition.join(' '),
+					})
+				: '';
+
+			return commentIfDeactivated(
+				[renameColumnStatement, updateColumnScript, commentScript].filter(Boolean).join('\n\n'),
+				{ isActivated: columnData.isActivated },
+			);
 		},
 
 		/**
@@ -1047,7 +1153,7 @@ module.exports = (baseProvider, options, app) => {
 				return '';
 			}
 
-			const table = getTableName(tableName, dbData.databaseName);
+			const table = prepareName(tableName, dbData.databaseName);
 
 			if (['PRIMARY', 'PRIMARY AMP'].includes(indexData.indexType)) {
 				return '';
@@ -1059,7 +1165,7 @@ module.exports = (baseProvider, options, app) => {
 			}
 
 			const indexType = indexData.indexType ? ` ${indexData.indexType}` : '';
-			const indexName = getIndexName(indexData.indxName, dbData.databaseName);
+			const indexName = prepareName(indexData.indxName, dbData.databaseName);
 
 			return assignTemplates(templates.dropIndex, {
 				indexName,
@@ -1094,7 +1200,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		dropView({ name, dbData }) {
-			const viewName = getTableName(name, dbData.databaseName);
+			const viewName = prepareName(name, dbData.databaseName);
 
 			return assignTemplates(templates.dropView, {
 				viewName,
@@ -1108,22 +1214,36 @@ module.exports = (baseProvider, options, app) => {
 		 */
 		alterView(alterData, dbData) {
 			const isEmptyDiffOptions = _.isEmpty(alterData.options);
-			const viewName = getTableName(alterData.name, dbData.databaseName);
+			const viewName = prepareName(alterData.name, dbData.databaseName);
 
-			if (alterData.oldName && isEmptyDiffOptions) {
-				const oldViewName = getTableName(alterData.oldName, dbData.databaseName);
-				return assignTemplates(templates.renameView, {
-					oldViewName: oldViewName,
-					newViewName: viewName,
-				});
-			} else if (isEmptyDiffOptions) {
-				return '';
+			const renameView = alterData.oldName
+				? assignTemplates(templates.renameView, {
+						oldViewName: prepareName(alterData.oldName, dbData.databaseName),
+						newViewName: viewName,
+					})
+				: '';
+
+			const newComment = alterData.newDescription;
+			const isCommentChanged = newComment !== alterData.oldDescription;
+
+			const commentScript = isCommentChanged
+				? assignTemplates(templates.commentView, {
+						viewName,
+						comment: newComment ? prepareComment(newComment) : 'NULL',
+					})
+				: '';
+
+			if (isEmptyDiffOptions) {
+				return [renameView, commentScript].filter(Boolean).join('\n\n');
 			}
 
 			return [
 				this.dropView({ name: alterData.oldName || alterData.name, dbData }),
 				this.createView(alterData, dbData, true),
-			].join('\n\n');
+				commentScript,
+			]
+				.filter(Boolean)
+				.join('\n\n');
 		},
 
 		commentStatement(statement) {
@@ -1131,7 +1251,74 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		prepareName(name) {
-			return getTableName(name);
+			return prepareName(name);
+		},
+
+		alterCompositePrimaryKey({ schemaName, tableName, constraintName, columns, isActivated }) {
+			const fullTableName = prepareName(tableName, schemaName);
+			return commentIfDeactivated(
+				assignTemplates(templates.alterPrimaryKey, {
+					tableName: fullTableName,
+					constraintName: constraintName ? `CONSTRAINT ${prepareName(constraintName)} ` : '',
+					columns: columns.map(col => prepareName(col.name)).join(', '),
+				}),
+				{ isActivated },
+			);
+		},
+
+		dropCompositePrimaryKey({ tableName, schemaName, constraintName, isActivated }) {
+			const fullTableName = prepareName(tableName, schemaName);
+			return commentIfDeactivated(
+				assignTemplates(templates.dropConstraint, {
+					tableName: fullTableName,
+					constraintName: prepareName(constraintName),
+				}),
+				{ isActivated },
+			);
+		},
+
+		alterSinglePrimaryKey(params) {
+			return this.alterCompositePrimaryKey(params);
+		},
+
+		dropSinglePrimaryKey(params) {
+			return this.dropCompositePrimaryKey(params);
+		},
+
+		alterCompositeUniqueKey({ schemaName, tableName, constraintName, columns, isActivated }) {
+			const fullTableName = prepareName(tableName, schemaName);
+			return commentIfDeactivated(
+				assignTemplates(templates.alterUniqueKey, {
+					tableName: fullTableName,
+					constraintName: constraintName ? `CONSTRAINT ${prepareName(constraintName)} ` : '',
+					columns: columns.map(col => prepareName(col.name)).join(', '),
+				}),
+				{ isActivated },
+			);
+		},
+
+		dropCompositeUniqueKey({ tableName, schemaName, constraintName, columns, isActivated }) {
+			const fullTableName = prepareName(tableName, schemaName);
+
+			const script = constraintName
+				? assignTemplates(templates.dropConstraint, {
+						tableName: fullTableName,
+						constraintName: prepareName(constraintName),
+					})
+				: assignTemplates(templates.dropUnnamedIndex, {
+						tableName: fullTableName,
+						columns: columns.map(col => prepareName(col.name)).join(', '),
+					});
+
+			return commentIfDeactivated(script, { isActivated });
+		},
+
+		alterSingleUniqueKey(params) {
+			return this.alterCompositeUniqueKey(params);
+		},
+
+		dropSingleUniqueKey(params) {
+			return this.dropCompositeUniqueKey(params);
 		},
 	});
 };

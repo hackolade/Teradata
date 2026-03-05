@@ -57,12 +57,12 @@ module.exports = ({
 
 		const columns =
 			!isAllColumnsDeactivated && isParentActivated
-				? ' (' + dividedColumns.activatedItems.join(', ') + deactivatedColumnsAsString + ')'
-				: ' (' + keyData.columns.map(columnMapToString).join(', ') + ')';
+				? dividedColumns.activatedItems.join(', ') + deactivatedColumnsAsString
+				: keyData.columns.map(columnMapToString).join(', ');
 
 		return {
 			statement: assignTemplates(templates.createKeyConstraint, {
-				constraintName: keyData.name ? `"${_.trim(keyData.name)}" ` : '',
+				constraintName: keyData.name ? `CONSTRAINT "${_.trim(keyData.name)}" ` : '',
 				constraintType: keyData.keyType,
 				columns,
 			}),
