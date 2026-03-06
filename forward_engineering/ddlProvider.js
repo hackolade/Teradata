@@ -878,14 +878,8 @@ module.exports = (baseProvider, options, app) => {
 		hydrateAlterColumn({ newColumn, oldColumn, oldCompData, newCompData }) {
 			const result = {
 				...newColumn,
-				newProperties: {
-					...newCompData,
-					...newColumn,
-				},
-				oldProperties: {
-					...oldCompData,
-					...oldColumn,
-				},
+				newProperties: newColumn,
+				oldProperties: oldColumn,
 			};
 
 			return result;
