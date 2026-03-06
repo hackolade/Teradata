@@ -97,18 +97,6 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		])([]);
 	};
 
-	const getKeyWithAlias = key => {
-		if (!key) {
-			return '';
-		}
-
-		if (key.alias) {
-			return `"${key.name}" AS "${key.alias}"`;
-		} else {
-			return `"${key.name}"`;
-		}
-	};
-
 	const getViewData = keys => {
 		if (!Array.isArray(keys)) {
 			return { tables: [], columns: [] };
