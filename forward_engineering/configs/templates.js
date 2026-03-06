@@ -62,6 +62,7 @@ module.exports = {
 	addCheckConstraint: ' ADD ${constraintName}${expression}',
 	alterCheckConstraint: ' ADD ${constraintName}${expression}',
 
+	createSecondaryIndex: 'CREATE ${indexStatement} ON ${tableName};',
 	dropSecondaryIndex: 'DROP INDEX ${indexName} ON ${tableName};',
 	dropIndex: 'DROP${indexType} INDEX ${indexName};',
 
@@ -74,6 +75,5 @@ module.exports = {
 	alterPrimaryKey: 'ALTER TABLE ${tableName} ADD ${constraintName}PRIMARY KEY (${columns});',
 	alterUniqueKey: 'ALTER TABLE ${tableName} ADD ${constraintName}UNIQUE (${columns});',
 
-	dropNamedIndex: 'DROP INDEX ${indexName} ON ${tableName};',
 	dropUnnamedIndex: 'DROP INDEX (${columns}) ON ${tableName};',
 };

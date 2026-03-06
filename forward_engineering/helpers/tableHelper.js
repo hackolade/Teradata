@@ -278,17 +278,16 @@ module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideI
 			_.isEmpty(tableData.partitioning.compositePartitionKey)
 				? ''
 				: getPartitions(tableData.partitioning);
-		const secondaryIndexes = getSecondaryIndexes(tableData.tableIndexes || []);
 
-		if (!primaryIndex && !partitions && _.isEmpty(secondaryIndexes)) {
+		if (!primaryIndex && !partitions) {
 			return '';
 		}
 
 		let primaryIndexStatement = '';
-		primaryIndexStatement += primaryIndex ? primaryIndex : '';
+		primaryIndexStatement += primaryIndex || '';
 		primaryIndexStatement += partitions ? '\n' + partitions : '';
 
-		return '\n' + tab([primaryIndexStatement, ...secondaryIndexes].filter(Boolean).join(',\n'));
+		return '\n' + tab([primaryIndexStatement].filter(Boolean).join(',\n'));
 	};
 
 	const getUsingOptions = ({
@@ -324,5 +323,6 @@ module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideI
 		getInlineTableIndexes,
 		getIndexOptions,
 		getIndexKeys,
+		getTableInlineIndexStatement,
 	};
 };

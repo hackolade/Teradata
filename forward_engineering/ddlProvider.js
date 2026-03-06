@@ -43,15 +43,21 @@ module.exports = (baseProvider, options, app) => {
 		prepareComment,
 		getOldName,
 	} = require('./helpers/general')(_, tab, commentIfDeactivated);
-	const { getTableOptions, getUsingOptions, getInlineTableIndexes, getIndexOptions, getIndexKeys } =
-		require('./helpers/tableHelper')({
-			_,
-			tab,
-			getJournalingStrategy,
-			commentIfDeactivated,
-			checkAllKeysDeactivated,
-			divideIntoActivatedAndDeactivated,
-		});
+	const {
+		getTableOptions,
+		getUsingOptions,
+		getInlineTableIndexes,
+		getIndexOptions,
+		getIndexKeys,
+		getTableInlineIndexStatement,
+	} = require('./helpers/tableHelper')({
+		_,
+		tab,
+		getJournalingStrategy,
+		commentIfDeactivated,
+		checkAllKeysDeactivated,
+		divideIntoActivatedAndDeactivated,
+	});
 	const { decorateType } = require('./helpers/columnDefinitionHelper');
 
 	const additionalOptions = getAdditionalOptions(options.additionalOptions);
@@ -404,7 +410,7 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		createIndex(tableName, index, dbData, isParentActivated = true) {
-			const inlineIndex = !['HASH', 'JOIN'].includes(index.indexType);
+			const inlineIndex = !['HASH', 'JOIN', 'SECONDARY'].includes(index.indexType);
 			if (inlineIndex || !index.indxName) {
 				return '';
 			}
@@ -447,6 +453,17 @@ module.exports = (baseProvider, options, app) => {
 						indexName: prepareName(index.indxName, dbData.databaseName),
 						selectStatement: index.asSelect,
 						indexOptions,
+					}),
+					{
+						isActivated: isParentActivated && index.isActivated,
+					},
+				);
+			} else if (index.indexType === 'SECONDARY') {
+				const indexStatement = getTableInlineIndexStatement(index);
+				return commentIfDeactivated(
+					assignTemplates(templates.createSecondaryIndex, {
+						indexStatement,
+						tableName: prepareName(tableName, dbData.databaseName),
 					}),
 					{
 						isActivated: isParentActivated && index.isActivated,
