@@ -160,7 +160,20 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Error table",
 						"propertyKeyword": "ERROR_TABLE",
 						"propertyType": "checkbox",
-						"defaultValue": false
+						"defaultValue": false,
+						"dependency": {
+							"type": "or",
+							"values": [
+								{
+									"key": "FOREIGN_TABLE",
+									"exist": false
+								},
+								{
+									"key": "FOREIGN_TABLE",
+									"value": false
+								}
+							]
+						}
 					},
 					{
 						"propertyName": "For",
@@ -293,13 +306,12 @@ making sure that you maintain a proper JSON format.
 						"propertyName": "Log",
 						"propertyKeyword": "LOG",
 						"propertyType": "checkbox",
-						"defaultValue": "false"
+						"defaultValue": true
 					},
 					{
 						"propertyName": "BEFORE Journal",
 						"propertyKeyword": "BEFORE_JOURNAL",
 						"propertyType": "select",
-						"defaultValue": "NO",
 						"options": ["NO", "BEFORE", "DUAL"]
 					},
 					{
@@ -307,7 +319,6 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "AFTER_JOURNAL",
 						"propertyType": "select",
 						"propertyTooltip": "Type of journal to be maintained by default for data tables created in the new database. The JOURNAL keyword without AFTER implies BEFORE and AFTER images.",
-						"defaultValue": "NO",
 						"options": ["NO", "AFTER", "DUAL", "LOCAL", "NO LOCAL"]
 					},
 					{
