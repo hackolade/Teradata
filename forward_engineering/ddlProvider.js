@@ -410,7 +410,7 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		createIndex(tableName, index, dbData, isParentActivated = true) {
-			const inlineIndex = !['HASH', 'JOIN', 'SECONDARY'].includes(index.indexType);
+			const inlineIndex = !['HASH', 'JOIN', 'SECONDARY', ''].includes(index.indexType);
 			if (inlineIndex || !index.indxName) {
 				return '';
 			}
@@ -458,7 +458,7 @@ module.exports = (baseProvider, options, app) => {
 						isActivated: isParentActivated && index.isActivated,
 					},
 				);
-			} else if (index.indexType === 'SECONDARY') {
+			} else if (!index.indexType || index.indexType === 'SECONDARY') {
 				const indexStatement = getTableInlineIndexStatement(index);
 				return commentIfDeactivated(
 					assignTemplates(templates.createSecondaryIndex, {
