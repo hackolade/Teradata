@@ -9,13 +9,21 @@ const ESCAPE_MAP = {
 };
 
 module.exports = (_, tab, commentIfDeactivated) => {
+	const prepareName = (entityName, databaseName) => {
+		if (databaseName) {
+			return `"${databaseName}"."${entityName}"`;
+		} else {
+			return `"${entityName}"`;
+		}
+	};
+
 	const viewColumnsToString = (keys, isParentActivated) => {
 		if (!isParentActivated) {
-			return keys.map(key => `"${key.name}"`).join(',\n\t');
+			return keys.map(key => prepareName(key.alias || key.name)).join(',\n\t');
 		}
 
-		let activatedKeys = keys.filter(key => key.isActivated).map(key => `"${key.name}"`);
-		let deactivatedKeys = keys.filter(key => !key.isActivated).map(key => `"${key.name}"`);
+		let activatedKeys = keys.filter(key => key.isActivated).map(key => prepareName(key.alias || key.name));
+		let deactivatedKeys = keys.filter(key => !key.isActivated).map(key => prepareName(key.alias || key.name));
 
 		if (activatedKeys.length === 0) {
 			return commentIfDeactivated(deactivatedKeys.join(',\n\t'), { isActivated: false }, true);
@@ -29,14 +37,6 @@ module.exports = (_, tab, commentIfDeactivated) => {
 			'\n\t' +
 			commentIfDeactivated(deactivatedKeys.join(',\n\t'), { isActivated: false }, true)
 		);
-	};
-
-	const prepareName = (entityName, databaseName) => {
-		if (databaseName) {
-			return `"${databaseName}"."${entityName}"`;
-		} else {
-			return `"${entityName}"`;
-		}
 	};
 
 	const getDefaultJournalTableName = (dbName, tableName) => {
@@ -116,20 +116,14 @@ module.exports = (_, tab, commentIfDeactivated) => {
 
 		return keys.reduce(
 			(result, key) => {
-				if (!key.tableName) {
-					result.columns.push(getKeyWithAlias(key));
-
-					return result;
-				}
-
-				const tableName = `"${key.dbName}"."${key.tableName}"`;
+				const tableName = prepareName(key.tableName, key.dbName);
 
 				if (!result.tables.includes(tableName)) {
 					result.tables.push(tableName);
 				}
 
 				result.columns.push({
-					statement: `${tableName}.${getKeyWithAlias(key)}`,
+					statement: `${tableName}.${prepareName(key.name)}`,
 					isActivated: key.isActivated,
 				});
 
