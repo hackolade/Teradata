@@ -229,8 +229,6 @@ module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideI
 		return commentIfDeactivated(indexStatement, { isActivated });
 	};
 
-	const getTableInlineIndexStatements = tableIndexes => tableIndexes.map(getTableInlineIndexStatement);
-
 	const findPrimaryIndex = indexes => {
 		const primaryIndex = indexes.find(
 			index => ['PRIMARY', 'PRIMARY AMP'].includes(index.indexType) && !_.isEmpty(index.indxKey),
@@ -241,12 +239,7 @@ module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideI
 		return {};
 	};
 
-	const filterSecondaryIndexes = indexes =>
-		indexes.filter(index => (!index.indexType || index.indexType === 'SECONDARY') && !_.isEmpty(index.indxKey));
-
 	const getPrimaryIndex = _.flow([findPrimaryIndex, getTableInlineIndexStatement]);
-
-	const getSecondaryIndexes = _.flow([filterSecondaryIndexes, getTableInlineIndexStatements, _.compact]);
 
 	const getPartitionKeys = compositePartitionKeys => {
 		return compositePartitionKeys.map(key => {
