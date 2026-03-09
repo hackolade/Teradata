@@ -229,8 +229,6 @@ module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideI
 		return commentIfDeactivated(indexStatement, { isActivated });
 	};
 
-	const getTableInlineIndexStatements = tableIndexes => tableIndexes.map(getTableInlineIndexStatement);
-
 	const findPrimaryIndex = indexes => {
 		const primaryIndex = indexes.find(
 			index => ['PRIMARY', 'PRIMARY AMP'].includes(index.indexType) && !_.isEmpty(index.indxKey),
@@ -241,12 +239,7 @@ module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideI
 		return {};
 	};
 
-	const filterSecondaryIndexes = indexes =>
-		indexes.filter(index => (!index.indexType || index.indexType === 'SECONDARY') && !_.isEmpty(index.indxKey));
-
 	const getPrimaryIndex = _.flow([findPrimaryIndex, getTableInlineIndexStatement]);
-
-	const getSecondaryIndexes = _.flow([filterSecondaryIndexes, getTableInlineIndexStatements, _.compact]);
 
 	const getPartitionKeys = compositePartitionKeys => {
 		return compositePartitionKeys.map(key => {
@@ -278,17 +271,16 @@ module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideI
 			_.isEmpty(tableData.partitioning.compositePartitionKey)
 				? ''
 				: getPartitions(tableData.partitioning);
-		const secondaryIndexes = getSecondaryIndexes(tableData.tableIndexes || []);
 
-		if (!primaryIndex && !partitions && _.isEmpty(secondaryIndexes)) {
+		if (!primaryIndex && !partitions) {
 			return '';
 		}
 
 		let primaryIndexStatement = '';
-		primaryIndexStatement += primaryIndex ? primaryIndex : '';
+		primaryIndexStatement += primaryIndex || '';
 		primaryIndexStatement += partitions ? '\n' + partitions : '';
 
-		return '\n' + tab([primaryIndexStatement, ...secondaryIndexes].filter(Boolean).join(',\n'));
+		return '\n' + tab([primaryIndexStatement].filter(Boolean).join(',\n'));
 	};
 
 	const getUsingOptions = ({
@@ -324,5 +316,6 @@ module.exports = ({ _, tab, getJournalingStrategy, commentIfDeactivated, divideI
 		getInlineTableIndexes,
 		getIndexOptions,
 		getIndexKeys,
+		getTableInlineIndexStatement,
 	};
 };
