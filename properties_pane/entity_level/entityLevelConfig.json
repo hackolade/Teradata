@@ -1122,7 +1122,6 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "orderKeys",
 						"propertyType": "fieldList",
 						"template": "orderedList",
-						"defaultValue": "",
 						"templateOptions": {
 							"maxFields": 1
 						},
@@ -1149,7 +1148,6 @@ making sure that you maintain a proper JSON format.
 						"propertyKeyword": "orderKeys",
 						"propertyType": "fieldList",
 						"template": "orderedList",
-						"defaultValue": "",
 						"dependency": {
 							"key": "orderBy",
 							"value": "HASH"
