@@ -125,6 +125,10 @@ module.exports = (baseProvider, options, app) => {
 		hydrateCheckConstraint(checkConstraint) {
 			const buildExpression = expr => {
 				const plainExpr = _.trim(expr).replace(/^\(([\s\S]*)\)$/, '$1');
+				if (!plainExpr) {
+					return '';
+				}
+
 				return `CHECK (${plainExpr})`;
 			};
 
@@ -494,6 +498,10 @@ module.exports = (baseProvider, options, app) => {
 		 * @return {string}
 		 */
 		createCheckConstraintStatement(tableName, checkConstraint, dbData) {
+			if (!checkConstraint.expression?.trim?.()) {
+				return '';
+			}
+
 			const table = prepareName(tableName, dbData.databaseName);
 
 			return assignTemplates(templates.alterTable, {
