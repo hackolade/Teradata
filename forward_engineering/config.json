@@ -6,6 +6,7 @@
 	"ddlType": "plugin",
 	"namePrefix": "Teradata",
 	"resolvedDefinitions": false,
+	"combinedContainers": true,
 	"level": {
 		"container": true,
 		"entity": true,
