@@ -841,6 +841,7 @@ module.exports = (baseProvider, options, app) => {
 			return {
 				name,
 				compMod: jsonSchema?.role?.compMod,
+				isActivated: jsonSchema?.role?.isActivated !== false,
 				tableOptions: {
 					...(isErrorTableModified && { ERROR_TABLE: newTableOptions.ERROR_TABLE }),
 					...(isForTableModified && { FOR_TABLE: newTableOptions.FOR_TABLE }),
@@ -887,11 +888,13 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {ColumnDefinition} oldColumn
 		 * @param oldCompData
 		 * @param newCompData
+		 * @param {boolean} isParentActivated
 		 * @return {ModifyColumnData}
 		 */
-		hydrateAlterColumn({ newColumn, oldColumn, oldCompData, newCompData }) {
+		hydrateAlterColumn({ newColumn, oldColumn, oldCompData, newCompData, isParentActivated }) {
 			const result = {
 				...newColumn,
+				isActivated: newColumn.isActivated !== false && isParentActivated !== false,
 				newProperties: newColumn,
 				oldProperties: oldColumn,
 			};
@@ -1047,7 +1050,12 @@ module.exports = (baseProvider, options, app) => {
 					})
 				: '';
 
-			return [renameStatement, optionsStatement, commentScript].filter(Boolean).join('\n\n');
+			return commentIfDeactivated(
+				[renameStatement, optionsStatement, commentScript].filter(Boolean).join('\n\n'),
+				{
+					isActivated: alterTableData.isActivated,
+				},
+			);
 		},
 
 		/**
