@@ -504,14 +504,17 @@ module.exports = (baseProvider, options, app) => {
 
 			const table = prepareName(tableName, dbData.databaseName);
 
-			return assignTemplates(templates.alterTable, {
-				tableName: table,
-				tableOptions: '',
-				alterStatement: assignTemplates(templates.addCheckConstraint, {
-					constraintName: checkConstraint.name ? `CONSTRAINT ${prepareName(checkConstraint.name)} ` : '',
-					expression: checkConstraint.expression,
+			return commentIfDeactivated(
+				assignTemplates(templates.alterTable, {
+					tableName: table,
+					tableOptions: '',
+					alterStatement: assignTemplates(templates.addCheckConstraint, {
+						constraintName: checkConstraint.name ? `CONSTRAINT ${prepareName(checkConstraint.name)} ` : '',
+						expression: checkConstraint.expression,
+					}),
 				}),
-			});
+				{ isActivated: checkConstraint.isActivated !== false },
+			);
 		},
 
 		/**
@@ -523,13 +526,16 @@ module.exports = (baseProvider, options, app) => {
 		dropCheckConstraint(tableName, checkConstraint, dbData) {
 			const table = prepareName(tableName, dbData.databaseName);
 
-			return assignTemplates(templates.alterTable, {
-				tableName: table,
-				tableOptions: '',
-				alterStatement: assignTemplates(templates.dropCheckConstraint, {
-					name: wrap(checkConstraint.name, '"', '"'),
+			return commentIfDeactivated(
+				assignTemplates(templates.alterTable, {
+					tableName: table,
+					tableOptions: '',
+					alterStatement: assignTemplates(templates.dropCheckConstraint, {
+						name: wrap(checkConstraint.name, '"', '"'),
+					}),
 				}),
-			});
+				{ isActivated: checkConstraint.isActivated !== false },
+			);
 		},
 
 		/**
@@ -920,7 +926,7 @@ module.exports = (baseProvider, options, app) => {
 		 * @param {ViewData} viewData
 		 * @return {AlterViewData}
 		 */
-		hydrateAlterView({ name, newEntityData, oldEntityData, viewData }) {
+		hydrateAlterView({ name, newEntityData, oldEntityData, viewData, jsonSchema }) {
 			const newData = this.hydrateView({
 				viewData: {},
 				entityData: newEntityData,
@@ -951,6 +957,7 @@ module.exports = (baseProvider, options, app) => {
 				selectStatement: options.selectStatement || newEntityData[0]?.selectStatement,
 				recursive: options.recursive || newEntityData[0]?.recursive,
 				options,
+				isActivated: jsonSchema?.isActivated !== false,
 				...oldViewData,
 				...newViewData,
 			};
@@ -1266,17 +1273,24 @@ module.exports = (baseProvider, options, app) => {
 					})
 				: '';
 
+			const isActivated = alterData.isActivated !== false;
+
 			if (isEmptyDiffOptions) {
-				return [renameView, commentScript].filter(Boolean).join('\n\n');
+				return commentIfDeactivated([renameView, commentScript].filter(Boolean).join('\n\n'), {
+					isActivated,
+				});
 			}
 
-			return [
-				this.dropView({ name: alterData.oldName || alterData.name, dbData }),
-				this.createView(alterData, dbData, true),
-				commentScript,
-			]
-				.filter(Boolean)
-				.join('\n\n');
+			return commentIfDeactivated(
+				[
+					this.dropView({ name: alterData.oldName || alterData.name, dbData }),
+					this.createView(alterData, dbData, isActivated),
+					commentScript,
+				]
+					.filter(Boolean)
+					.join('\n\n'),
+				{ isActivated },
+			);
 		},
 
 		commentStatement(statement) {
