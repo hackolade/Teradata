@@ -105,9 +105,12 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		return keys.reduce(
 			(result, key) => {
 				const tableName = prepareName(key.tableName, key.dbName);
+				const addedTable = result.tables.find(table => table.statement === tableName);
 
-				if (!result.tables.includes(tableName)) {
-					result.tables.push(tableName);
+				if (addedTable) {
+					addedTable.isActivated = addedTable.isActivated || key.isActivated !== false;
+				} else {
+					result.tables.push({ statement: tableName, isActivated: key.isActivated !== false });
 				}
 
 				result.columns.push({
@@ -135,6 +138,16 @@ module.exports = (_, tab, commentIfDeactivated) => {
 			!compModeData.new.db_default_journal_db &&
 			!compModeData.new.db_default_journal_table;
 		return Boolean(shouldDrop);
+	};
+
+	const isCommented = statement => /^\s*(--|\/\*)/.test(statement);
+
+	const commentIfNotCommented = (statement, { isActivated }) => {
+		if (!statement || isCommented(statement)) {
+			return statement;
+		}
+
+		return commentIfDeactivated(statement, { isActivated });
 	};
 
 	const prepareComment = (comment = '') => `'${comment.replaceAll(MUST_BE_ESCAPED, ch => ESCAPE_MAP[ch])}'`;
@@ -165,6 +178,7 @@ module.exports = (_, tab, commentIfDeactivated) => {
 		getViewData,
 		viewColumnsToString,
 		shouldDropDefaultJournalTable,
+		commentIfNotCommented,
 		prepareComment,
 		getName,
 		getOldName,

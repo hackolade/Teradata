@@ -1,5 +1,5 @@
 const dropStatementProxy =
-	({ commentIfDeactivated }) =>
+	({ commentIfNotCommented }) =>
 	(applyDropStatements, ddlProvider) => {
 		let hasDropStatements = false;
 
@@ -17,11 +17,7 @@ const dropStatementProxy =
 								return script;
 							}
 
-							if (!script) {
-								return script;
-							}
-
-							return commentIfDeactivated(script, { isActivated: false });
+							return commentIfNotCommented(script, { isActivated: false });
 						},
 					};
 				},
