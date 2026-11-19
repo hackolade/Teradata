@@ -588,16 +588,7 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		createForeignKeyConstraint(relationship) {
-			const {
-				foreignKey,
-				primaryTable,
-				primarySchemaName,
-				primaryKey,
-				primaryTableActivated,
-				foreignTableActivated,
-				customProperties,
-				name,
-			} = relationship;
+			const { foreignKey, primaryTable, primarySchemaName, primaryKey, customProperties, name } = relationship;
 			const isRelationshipActivated = getIsRelationshipActivated(relationship);
 
 			return {
