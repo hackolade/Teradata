@@ -40,6 +40,7 @@ module.exports = (baseProvider, options, app) => {
 		getJournalingStrategy,
 		viewColumnsToString,
 		shouldDropDefaultJournalTable,
+		commentIfNotCommented,
 		prepareComment,
 		getOldName,
 	} = require('./helpers/general')(_, tab, commentIfDeactivated);
@@ -62,7 +63,20 @@ module.exports = (baseProvider, options, app) => {
 
 	const additionalOptions = getAdditionalOptions(options.additionalOptions);
 
-	return dropStatementProxy({ commentIfDeactivated })(additionalOptions.applyDropStatements, {
+	const getIsRelationshipActivated = ({
+		foreignKey,
+		primaryKey,
+		primaryTableActivated,
+		foreignTableActivated,
+		isActivated,
+	}) =>
+		!checkAllKeysDeactivated(primaryKey || []) &&
+		!checkAllKeysDeactivated(foreignKey || []) &&
+		primaryTableActivated !== false &&
+		foreignTableActivated !== false &&
+		isActivated !== false; // * It is done so to support old version of the application where there is no isActivated property
+
+	return dropStatementProxy({ commentIfNotCommented })(additionalOptions.applyDropStatements, {
 		hydrateSchema(containerData) {
 			return {
 				databaseName: containerData.name,
@@ -107,6 +121,7 @@ module.exports = (baseProvider, options, app) => {
 				keys: viewData.keys,
 				recursive: detailsTab.recursive,
 				selectStatement: detailsTab.selectStatement,
+				isActivated: detailsTab.isActivated,
 			};
 		},
 
@@ -139,11 +154,14 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		hydrateViewColumn(data) {
+			const isSourceTableActivated = _.first(data.entityData)?.isActivated !== false;
+			const isSourceDatabaseActivated = _.first(data.containerData)?.isActivated !== false;
+
 			return {
 				name: data.name,
 				tableName: data.entityName,
 				alias: data.alias,
-				isActivated: data.isActivated,
+				isActivated: data.isActivated !== false && isSourceTableActivated && isSourceDatabaseActivated,
 				dbName: data.dbName,
 			};
 		},
@@ -373,14 +391,16 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		createView(viewData, dbData, isActivated) {
-			const { deactivatedWholeStatement, selectStatement } = this.viewSelectStatement(viewData, isActivated);
+			const isViewActivated =
+				isActivated !== false && viewData.isActivated !== false && dbData?.isActivated !== false;
+			const { deactivatedWholeStatement, selectStatement } = this.viewSelectStatement(viewData, isViewActivated);
 
 			return commentIfDeactivated(
 				assignTemplates(templates.createView, {
 					name: prepareName(viewData.name, dbData.databaseName),
 					recursive: viewData.recursive ? ' RECURSIVE' : '',
 					selectStatement,
-					columnList: viewColumnsToString(viewData.keys, isActivated),
+					columnList: viewColumnsToString(viewData.keys || [], !deactivatedWholeStatement),
 				}),
 				{ isActivated: !deactivatedWholeStatement },
 			);
@@ -391,6 +411,7 @@ module.exports = (baseProvider, options, app) => {
 			const deactivatedWholeStatement = allDeactivated || !isActivated;
 			const { columns, tables } = getViewData(viewData.keys);
 			let columnsAsString = columns.map(column => column.statement).join(',\n\t\t');
+			let tablesAsString = tables.map(table => table.statement).join(', ');
 
 			if (!deactivatedWholeStatement) {
 				const dividedColumns = divideIntoActivatedAndDeactivated(columns, column => column.statement);
@@ -401,12 +422,22 @@ module.exports = (baseProvider, options, app) => {
 						})
 					: '';
 				columnsAsString = dividedColumns.activatedItems.join(',\n\t\t') + deactivatedColumnsString;
+
+				const dividedTables = divideIntoActivatedAndDeactivated(tables, table => table.statement);
+				const deactivatedTablesString = dividedTables.deactivatedItems.length
+					? ' ' +
+						commentIfDeactivated(', ' + dividedTables.deactivatedItems.join(', '), {
+							isActivated: false,
+							isPartOfLine: true,
+						})
+					: '';
+				tablesAsString = dividedTables.activatedItems.join(', ') + deactivatedTablesString;
 			}
 
 			const selectStatement = _.trim(viewData.selectStatement)
 				? _.trim(tab(viewData.selectStatement))
 				: assignTemplates(templates.viewSelectStatement, {
-						tableName: tables.join(', '),
+						tableName: tablesAsString,
 						keys: columnsAsString,
 					});
 
@@ -513,7 +544,7 @@ module.exports = (baseProvider, options, app) => {
 						expression: checkConstraint.expression,
 					}),
 				}),
-				{ isActivated: checkConstraint.isActivated !== false },
+				{ isActivated: checkConstraint.isActivated !== false && dbData.isActivated !== false },
 			);
 		},
 
@@ -534,7 +565,7 @@ module.exports = (baseProvider, options, app) => {
 						name: wrap(checkConstraint.name, '"', '"'),
 					}),
 				}),
-				{ isActivated: checkConstraint.isActivated !== false },
+				{ isActivated: checkConstraint.isActivated !== false && dbData.isActivated !== false },
 			);
 		},
 
@@ -557,25 +588,8 @@ module.exports = (baseProvider, options, app) => {
 		},
 
 		createForeignKeyConstraint(relationship) {
-			const {
-				foreignKey,
-				primaryTable,
-				primarySchemaName,
-				primaryKey,
-				primaryTableActivated,
-				foreignTableActivated,
-				customProperties,
-				isActivated,
-				name,
-			} = relationship;
-			const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated(primaryKey);
-			const isAllForeignKeysDeactivated = checkAllKeysDeactivated(foreignKey);
-			const isRelationshipActivated =
-				!isAllPrimaryKeysDeactivated &&
-				!isAllForeignKeysDeactivated &&
-				primaryTableActivated &&
-				foreignTableActivated &&
-				isActivated !== false; // * It is done so to support old version of the application where there is no isActivated property
+			const { foreignKey, primaryTable, primarySchemaName, primaryKey, customProperties, name } = relationship;
+			const isRelationshipActivated = getIsRelationshipActivated(relationship);
 
 			return {
 				statement: assignTemplates(templates.createForeignKeyConstraint, {
@@ -597,38 +611,24 @@ module.exports = (baseProvider, options, app) => {
 			const { foreignTable, foreignSchemaName } = relationship;
 			const tableName = prepareName(foreignTable, foreignSchemaName);
 
-			const { statement: foreignKeyStatement } = this.createForeignKeyConstraint(relationship);
+			const { statement: foreignKeyStatement, isActivated } = this.createForeignKeyConstraint(relationship);
 
-			return assignTemplates(templates.alterTable, {
-				tableName,
-				alterStatement: ' ADD ' + foreignKeyStatement,
-			});
+			return commentIfDeactivated(
+				assignTemplates(templates.alterTable, {
+					tableName,
+					alterStatement: ' ADD ' + foreignKeyStatement,
+				}),
+				{ isActivated },
+			);
 		},
 
 		dropForeignKey(relationship) {
-			const {
-				foreignKey,
-				primaryTable,
-				primarySchemaName,
-				primaryKey,
-				primaryTableActivated,
-				foreignTableActivated,
-				isActivated,
-				name,
-				foreignTable,
-				foreignSchemaName,
-			} = relationship;
+			const { foreignKey, primaryTable, primarySchemaName, primaryKey, name, foreignTable, foreignSchemaName } =
+				relationship;
 			const tableName = prepareName(foreignTable, foreignSchemaName);
-			const isAllPrimaryKeysDeactivated = checkAllKeysDeactivated(primaryKey);
-			const isAllForeignKeysDeactivated = checkAllKeysDeactivated(foreignKey);
-			const isRelationshipActivated =
-				!isAllPrimaryKeysDeactivated &&
-				!isAllForeignKeysDeactivated &&
-				primaryTableActivated &&
-				foreignTableActivated &&
-				isActivated !== false;
+			const isRelationshipActivated = getIsRelationshipActivated(relationship);
 
-			return name
+			const script = name
 				? assignTemplates(templates.dropConstraint, {
 						tableName,
 						constraintName: prepareName(name),
@@ -643,6 +643,8 @@ module.exports = (baseProvider, options, app) => {
 							? foreignKeysToString(primaryKey)
 							: foreignActiveKeysToString(primaryKey),
 					});
+
+			return commentIfDeactivated(script, { isActivated: isRelationshipActivated });
 		},
 
 		convertColumnDefinition(columnDefinition) {
@@ -738,6 +740,7 @@ module.exports = (baseProvider, options, app) => {
 
 			return {
 				name: data.name || '',
+				isActivated: (data.compMod?.isActivated?.new ?? data.isActivated) !== false,
 				oldDescription: compModeData.old.description?.trim() || null,
 				newDescription: compModeData.new.description?.trim() || null,
 				...(isDbAccountModified && { db_account: data.db_account }),
@@ -847,7 +850,7 @@ module.exports = (baseProvider, options, app) => {
 			return {
 				name,
 				compMod: jsonSchema?.role?.compMod,
-				isActivated: jsonSchema?.role?.isActivated !== false,
+				isActivated: (jsonSchema?.compMod?.isActivated?.new ?? jsonSchema?.role?.isActivated) !== false,
 				tableOptions: {
 					...(isErrorTableModified && { ERROR_TABLE: newTableOptions.ERROR_TABLE }),
 					...(isForTableModified && { FOR_TABLE: newTableOptions.FOR_TABLE }),
@@ -949,7 +952,7 @@ module.exports = (baseProvider, options, app) => {
 				newViewData.newDescription = newEntityData[0]?.description;
 			}
 
-			const options = getDifferentProperties(newData, oldData);
+			const options = getDifferentProperties(newData, oldData, ['isActivated']);
 
 			return {
 				name,
@@ -1005,7 +1008,9 @@ module.exports = (baseProvider, options, app) => {
 							comment: alterDbData.newDescription ? prepareComment(alterDbData.newDescription) : 'NULL',
 						});
 
-			return [databaseOptionScript, commentScript].filter(Boolean).join('\n\n');
+			return commentIfNotCommented([databaseOptionScript, commentScript].filter(Boolean).join('\n\n'), {
+				isActivated: alterDbData.isActivated,
+			});
 		},
 
 		/**
@@ -1057,10 +1062,10 @@ module.exports = (baseProvider, options, app) => {
 					})
 				: '';
 
-			return commentIfDeactivated(
+			return commentIfNotCommented(
 				[renameStatement, optionsStatement, commentScript].filter(Boolean).join('\n\n'),
 				{
-					isActivated: alterTableData.isActivated,
+					isActivated: alterTableData.isActivated && dbData.isActivated !== false,
 				},
 			);
 		},
@@ -1092,13 +1097,16 @@ module.exports = (baseProvider, options, app) => {
 		addColumn(tableName, columnDefinition, dbData) {
 			const table = prepareName(tableName, dbData.databaseName);
 
-			return assignTemplates(templates.alterTable, {
-				tableName: table,
-				tableOptions: '',
-				alterStatement: assignTemplates(templates.addColumn, {
-					columnDefinition: this.convertColumnDefinition(columnDefinition),
+			return commentIfDeactivated(
+				assignTemplates(templates.alterTable, {
+					tableName: table,
+					tableOptions: '',
+					alterStatement: assignTemplates(templates.addColumn, {
+						columnDefinition: this.convertColumnDefinition({ ...columnDefinition, isActivated: true }),
+					}),
 				}),
-			});
+				{ isActivated: columnDefinition.isActivated !== false && dbData.isActivated !== false },
+			);
 		},
 
 		/**
@@ -1176,9 +1184,9 @@ module.exports = (baseProvider, options, app) => {
 					})
 				: '';
 
-			return commentIfDeactivated(
+			return commentIfNotCommented(
 				[renameColumnStatement, updateColumnScript, commentScript].filter(Boolean).join('\n\n'),
-				{ isActivated: columnData.isActivated },
+				{ isActivated: columnData.isActivated && dbData.isActivated !== false },
 			);
 		},
 
@@ -1273,24 +1281,23 @@ module.exports = (baseProvider, options, app) => {
 					})
 				: '';
 
-			const isActivated = alterData.isActivated !== false;
+			const isActivated = alterData.isActivated !== false && dbData?.isActivated !== false;
 
 			if (isEmptyDiffOptions) {
-				return commentIfDeactivated([renameView, commentScript].filter(Boolean).join('\n\n'), {
+				return commentIfNotCommented([renameView, commentScript].filter(Boolean).join('\n\n'), {
 					isActivated,
 				});
 			}
 
-			return commentIfDeactivated(
-				[
-					this.dropView({ name: alterData.oldName || alterData.name, dbData }),
-					this.createView(alterData, dbData, isActivated),
-					commentScript,
-				]
-					.filter(Boolean)
-					.join('\n\n'),
-				{ isActivated },
-			);
+			return [
+				commentIfNotCommented(this.dropView({ name: alterData.oldName || alterData.name, dbData }), {
+					isActivated,
+				}),
+				this.createView(alterData, dbData, isActivated),
+				commentScript && commentIfDeactivated(commentScript, { isActivated }),
+			]
+				.filter(Boolean)
+				.join('\n\n');
 		},
 
 		commentStatement(statement) {
