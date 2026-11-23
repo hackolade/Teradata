@@ -156,12 +156,17 @@ module.exports = (baseProvider, options, app) => {
 		hydrateViewColumn(data) {
 			const isSourceTableActivated = _.first(data.entityData)?.isActivated !== false;
 			const isSourceDatabaseActivated = _.first(data.containerData)?.isActivated !== false;
+			const isSourceColumnActivated = data.definition?.isActivated !== false;
 
 			return {
 				name: data.name,
 				tableName: data.entityName,
 				alias: data.alias,
-				isActivated: data.isActivated !== false && isSourceTableActivated && isSourceDatabaseActivated,
+				isActivated:
+					data.isActivated !== false &&
+					isSourceTableActivated &&
+					isSourceDatabaseActivated &&
+					isSourceColumnActivated,
 				dbName: data.dbName,
 			};
 		},
@@ -1281,7 +1286,9 @@ module.exports = (baseProvider, options, app) => {
 					})
 				: '';
 
-			const isActivated = alterData.isActivated !== false && dbData?.isActivated !== false;
+			const isViewActivated = alterData.isActivated !== false && dbData?.isActivated !== false;
+			const allKeysDeactivated = checkAllKeysDeactivated(alterData.keys || []);
+			const isActivated = isViewActivated && !allKeysDeactivated;
 
 			if (isEmptyDiffOptions) {
 				return commentIfNotCommented([renameView, commentScript].filter(Boolean).join('\n\n'), {
@@ -1293,7 +1300,7 @@ module.exports = (baseProvider, options, app) => {
 				commentIfNotCommented(this.dropView({ name: alterData.oldName || alterData.name, dbData }), {
 					isActivated,
 				}),
-				this.createView(alterData, dbData, isActivated),
+				this.createView(alterData, dbData, isViewActivated),
 				commentScript && commentIfDeactivated(commentScript, { isActivated }),
 			]
 				.filter(Boolean)
